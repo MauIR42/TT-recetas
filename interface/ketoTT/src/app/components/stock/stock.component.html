@@ -1,1 +1,100 @@
-<p>stock works!</p>
+<app-header></app-header>
+
+
+<div class="container pt-3">
+	<div class="row">
+		<!-- <div > -->
+			<h3 class="col-12">{{type_info[user_type]['name']}}</h3>
+		<!-- </div> -->
+		<div class="col-12" *ngIf="type_info[user_type]['text'] == 1">
+			<p><b>Agrega una báscula.</b></p>
+			<p class="text-sm-justify">Introduce en el siguiente campo el código de validación de la bascula a la que desea asociarte.</p>
+			<p class="text-justify">Toma en cuenta que si eres el primer usuario en introducir el código serás el administrador de esa báscula, de lo contrario deberás esperar a que el adminsitrador acepte o rechace tu petición.</p>
+		</div>
+		<div class="col-12" *ngIf="type_info[user_type]['text'] == 2">
+			<p class="text-sm-justify"><b>Actualmente estás asociado a la báscula con identificador:</b></p>
+			<h4 class="text-center">{{associated_scale}}</h4>
+		</div>
+		<div class="col-12 text-center pt-2" *ngIf="user_type == 2">
+			<button type="button" class="btn btn-normal-blue">Ya no usaré esta báscula</button>
+		</div>
+		<div class="col-12 text-center pt-2 table-responsive" *ngIf="user_type == 3">
+			<p class="text-center" class="most-strong-blue-color"><b>Usuarios administrados</b></p>
+			<table class="table table-striped">
+				<tr class="blue-main-background">
+					<th><p>Usuario</p></th>
+					<th><p>Estado</p></th>
+					<th><p>Acciones</p></th>
+				</tr>
+				<tr *ngFor="let user of scale_users">
+					<td>
+						{{user.name}}
+					</td>
+					<td>
+						<p *ngIf="user.pending">Pendiente</p>
+						<p *ngIf="!user.pending">Aceptado</p>
+					</td>
+					<td>
+						<a href="#" *ngIf="user.pending" (click)="accept_user($event, user.id)"><img src="assets/images/check-circle-fill-green.svg" class="img-fluid mr-3 table-icon"></a>
+						<a href="#" (click)="delete_user($event, user.id)"><img src="assets/images/x-circle-fill-orange.svg" class="img-fluid table-icon"></a>
+					</td>
+				</tr>
+			</table>
+			<p class="text-left">¿Quieres asignar el rol de administrador a otro usuario?</p>
+			<p class="text-left">A continuación selecciona a que usuario se le dará el rol de administrador: </p>
+		</div>
+		<div class="col-6 mx-auto">
+			<form class="form-inline  text-center d-none d-md-block" (submit)="check()">
+			  <label class="sr-only" for="admin_sel">Usuario</label>
+			  <select id="admin_sel" class="custom-select mb-2 mr-sm-2">
+			    <option value="-1" selected disabled>Selecciona una opción...</option>
+			    <option *ngFor="let user of current_users" [value]="user.id">{{user.name}}</option>
+			  </select>
+			  <button type="submit" class="btn btn-normal-orange mb-2">Cambiar administrador</button>
+			</form>
+			<form class="form-inline text-center d-block d-md-none pb-2" (submit)="check()">
+			  <div class="form-group">
+			    <label for="code_scale" class="strong_blue_clor">Usuario</label>
+			    <select id="admin_sel" class="custom-select mb-2 mr-sm-2">
+				    <option value="-1" selected disabled>Selecciona una opción...</option>
+				    <option *ngFor="let user of current_users" [value]="user.id">{{user.name}}</option>
+				</select>
+			  </div>
+			  <button type="submit" class="btn btn-normal-orange">Cambiar administrador</button>
+			</form>
+		</div>
+	</div>
+	<div class="row justify-content-center" *ngIf="type_info[user_type]['form_use']">
+		<div class="col-6">
+			<form class="form-inline text-center d-none d-md-block" (submit)="check()">
+			  <label class="sr-only" for="code_scale">Código de báscula</label>
+			  <input type="text" class="form-control mb-2 mr-sm-2 holder-blue" id="code_scale" placeholder="xxx-xxx" [attr.readonly]="(user_type == 4)?true:null" required>
+			  <button type="submit" class="btn btn-normal-orange mb-2" [attr.disabled]="(user_type == 4)?true:null">Validar</button>
+			</form>
+
+			<form class="form-inline text-center d-block d-md-none pb-2" (submit)="check()">
+			  <div class="form-group">
+			    <label for="code_scale" class="strong_blue_clor">Código de báscula</label>
+			    <input type="text" class="form-control holder-blue" placeholder="xxx-xxx" id="code_scale" [attr.readonly]="(user_type == 4)?true:null" required>
+			  </div>
+			  <button type="submit" class="btn btn-normal-orange" [attr.disabled]="(user_type == 4)?true:null">Validar</button>
+			</form>
+		</div>
+		<div class="col-12" [class.d-none] ="!(user_type == 4)" >
+			<div class="alert alert-info alert-dismissible fade show" role="alert">
+			  <strong>Por validarse</strong> Aún no se te ha aceptado en la báscula con el código que ingresaste, puedes esperar o <a class="most-strong-blue-color" (click)="change_user_type($event)" href="#">Cancelar el uso de esta báscula e ingresar otro código valido.</a>
+			  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+			    <span aria-hidden="true">&times;</span>
+			  </button>
+			</div>
+		</div>
+		<div class="col-12" [class.d-none] ="!(user_type == 5)">
+			<div class="alert alert-danger alert-dismissible fade show" role="alert">
+			  <strong>No aceptado</strong> No fuiste aceptado por el administrador de la báscula, por lo que debes ingresar un nuevo código de báscula.
+			  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+			    <span aria-hidden="true">&times;</span>
+			  </button>
+			</div>
+		</div>
+	</div>
+</div>

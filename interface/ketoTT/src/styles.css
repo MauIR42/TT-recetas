@@ -71,6 +71,58 @@ a {
   
 }
 
+.btn-normal-orange {
+  color: #ffffff;
+  background-color: var(--orange-light);
+  border-color: var(--orange-light);
+  font-weight: bold;
+  letter-spacing: 0.05em;
+}
+
+.btn-normal-orange {
+  color: #ffffff ;
+  background-color: var(--orange-light);
+  border-color: var(--orange-light);
+  font-weight: bold;
+  border-radius: 10px;
+}
+
+.btn-normal-orange:hover,
+.btn-normal-orange:active,
+.btn-normal-orange:focus,
+.btn-normal-orange.active {
+  background: #ffffff;
+  color: var(--orange-light);
+  border-color: var(--orange-light);
+  
+}
+
+.btn-normal-blue {
+  color: #ffffff;
+  background-color: var(--main-blue);
+  border-color: var(--main-blue);
+  font-weight: bold;
+  letter-spacing: 0.05em;
+}
+
+.btn-normal-blue {
+  color: #ffffff;
+  background-color: var(--main-blue);
+  border-color: var(--main-blue);
+  font-weight: bold;
+  border-radius: 10px;
+}
+
+.btn-normal-blue:hover,
+.btn-normal-blue:active,
+.btn-normal-blue:focus,
+.btn-normal-blue.active {
+  background: #ffffff;
+  color: var(--main-blue);
+  border-color: var(--main-blue);
+  
+}
+
 
 .blue_text_color {
   /*font-family: Lucida Console;*/
@@ -92,6 +144,15 @@ a {
 
 .orange-background {
 	background-color: var(--orange-background);
+}
+
+.blue-main-background {
+  background-color: var(--main-blue);
+}
+
+.blue-main-background > th > p{
+  color:  #ffffff;
+
 }
 
 .holder-blue::-webkit-input-placeholder {
@@ -156,6 +217,11 @@ a {
 
 .logo {
   width:130px; /* you can use % */
+    height: auto;
+}
+
+.table-icon {
+  width:30px; /* you can use % */
     height: auto;
 }
 
