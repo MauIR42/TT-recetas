@@ -1,0 +1,14 @@
+
+
+.no-left-padding {
+  padding-left: 0px;
+}
+
+.no-right-padding {
+  padding-right: 0px;
+}
+
+.no-bottom-padding {
+  padding-bottom: 0px;
+  margin-bottom: 0px;
+}

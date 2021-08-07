@@ -1,0 +1,105 @@
+<div class="d-none d-lg-block">
+	<ul class="nav  nav-justified text-center navbar-blue pt-2 pb-2">
+		<li class="nav-item">
+	  		<img src="assets/images/keto_TT_grey.png" class="img-fluid logo">
+		</li>
+		<li class="nav-item dropdown" (mouseover)="selected = 1" (mouseout)="selected = 0" [ngClass]="(selected == 1)? 'shadow-lg' : ''" >
+	  		<img [src]="icons['info_icon']['base']" class="img-fluid">
+	  		<a class="nav-link dropdown-toggle" data-toggle="dropdown"  data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" [ngClass]="(selected == 1)? '' : 'strong_blue_clor'">Información</a>
+	  		<div class="dropdown-menu orange-background fill-dropdown">
+		      <a class="dropdown-item" [routerLink]="['/dieta_keto']">¿Qué es una <br class="d-xl-none">dieta Keto?</a>
+		      <div class="dropdown-divider"></div>
+		      <a class="dropdown-item" [routerLink]="['/sindrome_metabolico']">¿Qué es el <br>síndrome metabólico?</a>
+		    </div>
+		</li>
+		<li class="nav-item" (mouseover)="selected = 2" (mouseout)="selected = 0" [ngClass]="(selected == 2)? 'shadow-lg' : ''">
+	  		<img [src]="icons['calendar_icon']['base']" class="img-fluid">
+	  		<a class="nav-link" [routerLink]="['/planeacion_semanal']" [ngClass]="(selected == 2)? '' : 'strong_blue_clor'">Planeación semanal</a>
+		</li>
+		<li class="nav-item dropdown" (mouseover)="selected = 3" (mouseout)="selected = 0" [ngClass]="(selected == 3)? 'shadow-lg' : ''">
+	  		<img [src]="icons['archive_icon']['base']" class="img-fluid">
+	  		<a class="nav-link dropdown-toggle" data-toggle="dropdown"  data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" [ngClass]="(selected == 3)? '' : 'strong_blue_clor'">Inventario</a>
+	  		<div class="dropdown-menu orange-background fill-dropdown">
+		      <a class="dropdown-item" [routerLink]="['/bascula']">Mis báscula</a>
+		      <div class="dropdown-divider"></div>
+		      <a class="dropdown-item" [routerLink]="['/inventario']">Mi inventario</a>
+		    </div>
+		</li>
+		<li class="nav-item dropdown" (mouseover)="selected = 4" (mouseout)="selected = 0" [ngClass]="(selected == 4)? 'shadow-lg' : ''">
+	  		<img [src]="icons['person_icon']['base']" class="img-fluid">
+	  		<a class="nav-link dropdown-toggle" data-toggle="dropdown"  data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"  href="#" [ngClass]="(selected == 4)? '' : 'strong_blue_clor'">Yo</a>
+	  		<div class="dropdown-menu orange-background fill-dropdown">
+		      <a class="dropdown-item" [routerLink]="['/estadisticas']">Mis estadisticas</a>
+		      <div class="dropdown-divider"></div>
+		      <a class="dropdown-item" [routerLink]="['/perfil']">Mi perfil</a>
+		      <div class="dropdown-divider"></div>
+		      <button class="dropdown-item" (click)="logout()">Cerrar sesión</button>
+		    </div>
+		</li>
+	</ul>
+</div>
+<div class="d-block d-lg-none">
+	<div class="container-fluid">
+		<div class="row navbar-blue text-center align-items-center">
+			<div class="col-3">	
+				<nav class="navbar navbar-blue">
+					<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
+						<img src="assets/images/list-white.svg" class="lines-menu">
+					</button>
+				</nav>
+			</div>
+			<div class="col-3 pt-2 pb-2 offset-6">	
+				<img src="assets/images/keto_TT_black.png" class="img-fluid logo">
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="collapse fill-dropdown" id="navbarToggleExternalContent">
+	<div class="row">
+		<div class="col-12 navbar-blue text-center border-bottom border-white"> 
+			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#info-col" aria-controls="info-col" aria-expanded="false" aria-label="Toggle navigation">
+				<img [src]="icons['info_icon']['base']" class="img-fluid">
+				<p class="white">Información</p>
+			</button>
+		</div>
+		<div class="col-12 orange-background text-center border-bottom border-white collapse" id="info-col">
+			<a class="dropdown-item" [routerLink]="['/dieta_keto']">¿Qué es una dieta Keto?</a>
+			<div class="dropdown-divider"></div>
+			<a class="dropdown-item border-bottom border-white" [routerLink]="['/sindrome_metabolico']">¿Qué es el síndrome metabólico?</a>
+		</div>
+		<div class="w-100"></div>
+		<div class="col-12 navbar-blue text-center border-bottom border-white">
+			<a [routerLink]="['/planeacion_semanal']">
+				<img [src]="icons['calendar_icon']['base']" class="img-fluid">
+				<p class="white">Planeación semanal</p>
+			</a>
+		</div>
+		<div class="w-100"></div>
+		<div class="col-12 navbar-blue text-center border-bottom border-white">
+			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#inventory-col" aria-controls="inventory-col" aria-expanded="false" aria-label="Toggle navigation">
+				<img [src]="icons['archive_icon']['base']" class="img-fluid">
+				<p class="white">Inventario</p>
+			</button>
+		</div>
+		<div class="col-12 orange-background text-center border-bottom border-white collapse" id="inventory-col">
+			<a class="dropdown-item" [routerLink]="['/bascula']">Mis báscula</a>
+		      <div class="dropdown-divider"></div>
+		      <a class="dropdown-item" [routerLink]="['/inventario']">Mi inventario</a>
+		</div>
+		<div class="w-100"></div>
+		<div class="col-12 navbar-blue text-center border-bottom border-white">
+			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#user-col" aria-controls="user-col" aria-expanded="false" aria-label="Toggle navigation">
+				<img [src]="icons['person_icon']['base']" class="img-fluid">
+				<p class="white"> Yo</p>
+			</button>
+		</div>
+		<div class="col-12 orange-background text-center border-bottom border-white collapse" id="user-col">
+			<a class="dropdown-item" [routerLink]="['/estadisticas']">Mis estadisticas</a>
+		      <div class="dropdown-divider"></div>
+		      <a class="dropdown-item" [routerLink]="['/perfil']">Mi perfil</a>
+		      <div class="dropdown-divider"></div>
+		      <a class="dropdown-item" (click)="logout()">Cerrar sesión</a>
+		</div>
+	</div>
+</div>

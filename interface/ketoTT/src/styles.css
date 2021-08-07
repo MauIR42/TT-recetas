@@ -1,0 +1,174 @@
+/* You can add global styles to this file, and also import other style files */
+
+:root {
+  --orange-light: #FDC216;
+  --orange-background: #FDCE46 ;
+  --main-blue: #0AAFC6;
+  --strong-blue:  #026876;
+  --strongest-blue:  #066976;
+  --p-header:  #FFFFFF;
+}
+
+
+a {
+	color: #3498DB;
+}
+
+/*a:active {
+	color: #FDC216;
+}*/
+
+.btn-outline {
+  color: var(--main-blue);
+  background-color: #ffffff;
+  border-color: var(--main-blue);
+  font-weight: bold;
+  letter-spacing: 0.05em;
+}
+
+.btn-outline {
+  color: var(--main-blue);
+  background-color: #ffffff;
+  border-color: var(--main-blue);
+  font-weight: bold;
+  border-radius: 10px;
+}
+
+.btn-outline:hover,
+.btn-outline:active,
+.btn-outline:focus,
+.btn-outline.active {
+  background: var(--main-blue);
+  color: #ffffff;
+  border-color: var(--main-blue);
+  
+}
+
+
+.btn-outline-orange {
+  color: var(--orange-light);
+  background-color: #ffffff;
+  border-color: var(--orange-light);
+  font-weight: bold;
+  letter-spacing: 0.05em;
+}
+
+.btn-outline-orange {
+  color: var(--orange-light);
+  background-color: #ffffff;
+  border-color: var(--orange-light);
+  font-weight: bold;
+  border-radius: 10px;
+}
+
+.btn-outline-orange:hover,
+.btn-outline-orange:active,
+.btn-outline-orange:focus,
+.btn-outline-orange.active {
+  background: var(--orange-light);
+  color: #ffffff;
+  border-color: var(--orange-light);
+  
+}
+
+
+.blue_text_color {
+  /*font-family: Lucida Console;*/
+  color: var(--main-blue);
+}
+
+.strong_blue_clor {
+  color: var(--strong-blue);
+}
+
+
+.most-strong-blue-color {
+  color:  var(--strongest-blue);
+}
+
+.orange-light {
+	color : var(--orange-light);
+}
+
+.orange-background {
+	background-color: var(--orange-background);
+}
+
+.holder-blue::-webkit-input-placeholder {
+    /* WebKit, Blink, Edge */
+    color: var(--main-blue);
+}
+.holder-blue:-moz-placeholder {
+    /* Mozilla Firefox 4 to 18 */
+    color: var(--main-blue);
+    opacity: 1;
+}
+.holder-blue::-moz-placeholder {
+    /* Mozilla Firefox 19+ */
+    color: var(--main-blue);
+    opacity: 1;
+}
+.holder-blue:-ms-input-placeholder {
+    /* Internet Explorer 10-11 */
+    color: var(--main-blue);
+}
+
+
+/*hr {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  border: 0;
+  border-top: 1px solid var(--orange-background);
+}*/
+
+.orange-line {
+  /*margin-top: 1rem;*/
+  /*margin-bottom: 1rem;*/
+  border: 0;
+  border-top: 1px solid var(--orange-background);
+}
+
+.radio-test{
+  color:  var(--main-blue);
+  border-color: var(--orange-light);
+  background-color: #ffffff;
+}
+
+.radio-test :checked{
+  color:  var(--main-blue);
+  border-color: var(--orange-light);
+  background-color: #ffffff;
+}
+
+.radio-test :checked + label{
+  color:  var(--main-blue);
+  border-color: var(--orange-light);
+  background-color: #ffffff;
+}
+
+.navbar-blue {
+  background-color: var(--main-blue);
+}
+
+.navbar-orange {
+  background-color: var(--orange-background);
+}
+
+.logo {
+  width:130px; /* you can use % */
+    height: auto;
+}
+
+
+.white-text {
+  color: #FFFFFF;
+}
+
+.orange-text{
+  color: var(--orange-light);
+}
+
+.bottom-footer{
+  position: fixed;
+  bottom: 0;
+}

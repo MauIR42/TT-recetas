@@ -1,0 +1,41 @@
+
+.lines-menu {
+	width: 30px; /* you can use % */
+    height: auto;
+}
+
+a {
+    color: #FFFFFF;
+}
+
+a:hover {
+	color:  var(--strong-blue);
+	/*color:  #066976;*/
+}
+
+.fill-dropdown{
+	width: 100%;
+}
+
+.white{
+	color: #FFFFFF;
+}
+
+p {
+	color:  var(--p-header);
+}
+
+.dropdown-item : hover,
+.dropdown-item : focus,
+.dropdown-item : active{
+	color:  #FFFFFF !important;
+	background-color: #FDCE46 !important;
+}
+
+.dropdown-item{
+	color:  #FFFFFF !important;
+	background-color: #FDCE46 !important;
+}
+
+
+
