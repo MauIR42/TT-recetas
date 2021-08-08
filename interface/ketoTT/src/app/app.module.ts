@@ -9,6 +9,7 @@ import { RecoveryPasswordComponent } from './components/recovery-password/recove
 import { RegisterComponent } from './components/register/register.component';
 import { HeaderComponent } from './components/header/header.component';
 import { StockComponent } from './components/stock/stock.component';
+import { ConfirmationModalComponent } from './components/modal/confirmation-modal/confirmation-modal.component';
 
 @NgModule({
   declarations: [
@@ -17,7 +18,8 @@ import { StockComponent } from './components/stock/stock.component';
     RecoveryPasswordComponent,
     RegisterComponent,
     HeaderComponent,
-    StockComponent
+    StockComponent,
+    ConfirmationModalComponent
   ],
   imports: [
     BrowserModule,

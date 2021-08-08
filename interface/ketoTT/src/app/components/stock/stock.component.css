@@ -1,0 +1,7 @@
+ul.nav > li.nav-item > a.active {
+  color : var(--orange-light) !important;
+}
+
+ul.nav > li.nav-item > a.nav-link {
+  color : var(--strongest-blue);
+}

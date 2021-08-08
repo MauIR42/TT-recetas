@@ -1,8 +1,16 @@
 <app-header></app-header>
 
 
-<div class="container pt-3">
-	<div class="row">
+<div class="container pt-3 ">
+	<ul class="nav nav-tabs row">
+	  <li class="nav-item">
+	    <a class="nav-link" href="#" (click)="change_menu($event,'bascula')" [class.active]="menu == 'bascula'">Báscula</a>
+	  </li>
+	  <li class="nav-item">
+	    <a class="nav-link" href="#" (click)="change_menu($event,'inventario')" [class.active]="menu == 'inventario'">Inventario</a>
+	  </li>
+	</ul>
+	<div class="row pt-2" [class.d-none]="menu != 'bascula'">
 		<!-- <div > -->
 			<h3 class="col-12">{{type_info[user_type]['name']}}</h3>
 		<!-- </div> -->
@@ -16,7 +24,7 @@
 			<h4 class="text-center">{{associated_scale}}</h4>
 		</div>
 		<div class="col-12 text-center pt-2" *ngIf="user_type == 2">
-			<button type="button" class="btn btn-normal-blue">Ya no usaré esta báscula</button>
+			<button type="button" class="btn btn-normal-blue" (click)="open_modal('remove_scale')">Ya no usaré esta báscula</button>
 		</div>
 		<div class="col-12 text-center pt-2 table-responsive" *ngIf="user_type == 3">
 			<p class="text-center" class="most-strong-blue-color"><b>Usuarios administrados</b></p>
@@ -35,15 +43,15 @@
 						<p *ngIf="!user.pending">Aceptado</p>
 					</td>
 					<td>
-						<a href="#" *ngIf="user.pending" (click)="accept_user($event, user.id)"><img src="assets/images/check-circle-fill-green.svg" class="img-fluid mr-3 table-icon"></a>
-						<a href="#" (click)="delete_user($event, user.id)"><img src="assets/images/x-circle-fill-orange.svg" class="img-fluid table-icon"></a>
+						<a href="#" *ngIf="user.pending" (click)="accept_user($event, user.id)"><img src="assets/images/check-square-fill-blue.svg" class="img-fluid mr-3 table-icon"></a>
+						<a href="#" (click)="delete_user($event, user.id)"><img src="assets/images/x-square-fill-orange.svg" class="img-fluid table-icon"></a>
 					</td>
 				</tr>
 			</table>
 			<p class="text-left">¿Quieres asignar el rol de administrador a otro usuario?</p>
 			<p class="text-left">A continuación selecciona a que usuario se le dará el rol de administrador: </p>
 		</div>
-		<div class="col-6 mx-auto">
+		<div class="col-6 mx-auto" *ngIf="user_type == 3">
 			<form class="form-inline  text-center d-none d-md-block" (submit)="check()">
 			  <label class="sr-only" for="admin_sel">Usuario</label>
 			  <select id="admin_sel" class="custom-select mb-2 mr-sm-2">
@@ -62,10 +70,9 @@
 			  </div>
 			  <button type="submit" class="btn btn-normal-orange">Cambiar administrador</button>
 			</form>
+			<p>También puedes <a href="#" class="strong_blue_clor" (click)="restart_scale($event)"> reinicia la bascula </a> para eliminar a todos los usuarios de ella.</p>
 		</div>
-	</div>
-	<div class="row justify-content-center" *ngIf="type_info[user_type]['form_use']">
-		<div class="col-6">
+		<div class="col-6 mx-auto" *ngIf="type_info[user_type]['form_use']">
 			<form class="form-inline text-center d-none d-md-block" (submit)="check()">
 			  <label class="sr-only" for="code_scale">Código de báscula</label>
 			  <input type="text" class="form-control mb-2 mr-sm-2 holder-blue" id="code_scale" placeholder="xxx-xxx" [attr.readonly]="(user_type == 4)?true:null" required>
@@ -97,4 +104,52 @@
 			</div>
 		</div>
 	</div>
+	<div class="row pt-2" [class.d-none]="menu != 'inventario'">
+		<div class="col-12 text-center col-md-4">
+			<h3>Inventario</h3>
+		</div>
+		<div class="col-6 col-md-4">
+			<button type="button" class="btn btn-normal-orange">Ver ingredientes pendientes</button>
+		</div>
+		<div class="col-6 col-md-4">
+			<button type="button" class="btn btn-normal-blue">Agregar ingrediente</button>
+		</div>			
+		<div class="col-12 text-center pt-3 table-responsive">	
+			<table class="table table-striped">
+				<tr class="blue-main-background">
+					<th><p>Ingrediente</p></th>
+					<th><p>Cantidad</p></th>
+					<th><p>Fecha</p></th>
+					<th><p>Tipo</p></th>
+					<th><p>Acciones</p></th>
+				</tr>
+				<tr *ngFor="let item of stock_items">
+					<td>
+						{{item.name}}
+					</td>
+					<td>
+						{{item.quantity}} {{item.q_type}}
+					</td>
+					<td>
+						{{item.created_at}}
+					</td>
+					<td>
+						{{item.type}}
+					</td>
+					<td>
+						<a href="#" *ngIf="item.type == 'subido'" (click)="edit_item($event, item.id)"><img src="assets/images/pencil-square-blue.svg" class="img-fluid mr-md-3 table-icon"></a>
+						<!-- <div class="w-100  pb-3 d-block d-md-none"></div>
+						<div class="w-100  pb-3 d-block d-md-none"></div> -->
+						<!-- <br class="d-block d-md-none">
+						<br class="d-block d-md-none"> -->
+						<a href="#" *ngIf="item.type == 'subido'" (click)="delete_item($event, item.id)"><img src="assets/images/x-square-fill-orange.svg" class="img-fluid table-icon"></a>
+					</td>
+				</tr>
+			</table>
+		</div>
+
+	</div>
 </div>
+
+
+<app-confirmation-modal [modal_info]="actual_modal"></app-confirmation-modal>
