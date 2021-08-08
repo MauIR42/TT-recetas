@@ -146,6 +146,15 @@ a {
 	background-color: var(--orange-background);
 }
 
+.orange-light-background {
+  background-color: var(--orange-light);
+}
+
+.orange-light-background > h5 {
+  color:  #ffffff;
+
+}
+
 .blue-main-background {
   background-color: var(--main-blue);
 }

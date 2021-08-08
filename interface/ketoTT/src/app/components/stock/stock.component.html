@@ -70,7 +70,7 @@
 			  </div>
 			  <button type="submit" class="btn btn-normal-orange">Cambiar administrador</button>
 			</form>
-			<p>También puedes <a href="#" class="strong_blue_clor" (click)="restart_scale($event)"> reinicia la bascula </a> para eliminar a todos los usuarios de ella.</p>
+			<p>También puedes <a href="#" class="strong_blue_clor" (click)="open_modal('restart_scale',$event)"> reinicia la bascula </a> para eliminar a todos los usuarios de ella.</p>
 		</div>
 		<div class="col-6 mx-auto" *ngIf="type_info[user_type]['form_use']">
 			<form class="form-inline text-center d-none d-md-block" (submit)="check()">
@@ -152,4 +152,4 @@
 </div>
 
 
-<app-confirmation-modal [modal_info]="actual_modal"></app-confirmation-modal>
+<app-confirmation-modal [modal_info]="actual_modal" (accepted)="check_action($event)"></app-confirmation-modal>

@@ -12,7 +12,7 @@ export class StockComponent implements OnInit {
 
   // @ViewChild("modal_component", { static: true }) modal_component:ElementRef;
 
-  user_type :number = 2;
+  user_type :number = 3;
 
   type_info : any = {
     1 : {'name':'Sin báscula', form_use:true, text: 1 },
@@ -191,13 +191,19 @@ export class StockComponent implements OnInit {
 
   }
 
-  open_modal(type : string){
+  open_modal(type : string, event : any = null){
+    if(event != null)
+      event.preventDefault();
+
     this.actual_modal = {
       'type' : type,
       'text' : this.modal_info[type]
     };
     $('#conf_modal').modal("show");
-    console.log("hace algo")
+  }
+
+  check_action(accepted : any){
+    console.log(accepted);
   }
 
 }
