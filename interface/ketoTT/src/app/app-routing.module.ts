@@ -5,17 +5,17 @@ import { LoginComponent } from './login/login/login.component';
 import { RecoveryPasswordComponent } from './components/recovery-password/recovery-password.component';
 import { HeaderComponent } from './components/header/header.component';
 import { RegisterComponent } from './components/register/register.component';
-import { StockComponent } from './components/stock/stock.component'
+import { StockComponent } from './components/stock/stock.component';
+import { UserInfoComponent } from './components/user-info/user-info.component';
 
 const routes: Routes = [
-  { path:'test', component: HeaderComponent },
-  { path:'perfil', component: HeaderComponent },
-  { path:'estadisticas', component: HeaderComponent },
+  { path:'perfil', component: UserInfoComponent },
+  { path:'estadisticas', component: UserInfoComponent },
   { path:'inventario', component: StockComponent },
   { path:'bascula', component: StockComponent },
-  { path:'planeacion_semanal', component: HeaderComponent },
-  { path:'dieta_keto', component: HeaderComponent },
-  { path:'sindrome_metabolico', component: HeaderComponent },
+  { path:'planeacion_semanal', component: HeaderComponent }, //falta
+  { path:'dieta_keto', component: HeaderComponent }, //falta
+  { path:'sindrome_metabolico', component: HeaderComponent }, //falta
   { path:'recuperar_contraseña', component: RecoveryPasswordComponent },
   { path:'crear_cuenta', component: RegisterComponent },
   { path: '', component: LoginComponent },

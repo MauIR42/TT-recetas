@@ -10,9 +10,8 @@ declare const $ : any;
 })
 export class StockComponent implements OnInit {
 
-  // @ViewChild("modal_component", { static: true }) modal_component:ElementRef;
 
-  user_type :number = 3;
+  user_type :number = 5;
 
   type_info : any = {
     1 : {'name':'Sin báscula', form_use:true, text: 1 },

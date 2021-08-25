@@ -10,6 +10,7 @@ import { RegisterComponent } from './components/register/register.component';
 import { HeaderComponent } from './components/header/header.component';
 import { StockComponent } from './components/stock/stock.component';
 import { ConfirmationModalComponent } from './components/modal/confirmation-modal/confirmation-modal.component';
+import { UserInfoComponent } from './components/user-info/user-info.component';
 
 @NgModule({
   declarations: [
@@ -19,7 +20,8 @@ import { ConfirmationModalComponent } from './components/modal/confirmation-moda
     RegisterComponent,
     HeaderComponent,
     StockComponent,
-    ConfirmationModalComponent
+    ConfirmationModalComponent,
+    UserInfoComponent
   ],
   imports: [
     BrowserModule,

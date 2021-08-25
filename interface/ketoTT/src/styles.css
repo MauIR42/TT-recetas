@@ -229,8 +229,13 @@ a {
 }
 
 .logo {
-  width:130px; /* you can use % */
+  width:160px; /* you can use % */
     height: auto;
+}
+
+.icon-button{
+  width: 30px; /* you can use % */
+  height: auto;
 }
 
 .table-icon {
