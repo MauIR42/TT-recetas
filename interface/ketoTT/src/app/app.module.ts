@@ -12,6 +12,10 @@ import { StockComponent } from './components/stock/stock.component';
 import { ConfirmationModalComponent } from './components/modal/confirmation-modal/confirmation-modal.component';
 import { UserInfoComponent } from './components/user-info/user-info.component';
 
+import { NgxSpinnerModule } from 'ngx-spinner';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { HttpClientModule } from '@angular/common/http';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -21,12 +25,15 @@ import { UserInfoComponent } from './components/user-info/user-info.component';
     HeaderComponent,
     StockComponent,
     ConfirmationModalComponent,
-    UserInfoComponent
+    UserInfoComponent,
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    FormsModule
+    FormsModule,
+    NgxSpinnerModule,
+    BrowserAnimationsModule,
+    HttpClientModule
   ],
   providers: [],
   bootstrap: [AppComponent]

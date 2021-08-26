@@ -10,6 +10,7 @@ class User(models.Model):
 	birthday = models.DateField(auto_now=False, null=True)
 	username = models.CharField(max_length=128, unique=True)
 	active = models.BooleanField(default=True)
+	password = models.CharField(max_length=128, verbose_name='password', default='')
 
 	class Meta:
 		db_table = "user"

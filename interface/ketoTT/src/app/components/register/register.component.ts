@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 import { UserService } from '../../services/user.service';
-
+import { NgxSpinnerService } from 'ngx-spinner';
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
@@ -60,7 +60,7 @@ export class RegisterComponent implements OnInit {
     'check_1': {'show': false, 'message': ''},
     'check_2' : {'show': false, 'message': ''},
   }
-  constructor(private us : UserService) { }
+  constructor(private us : UserService, private spinner: NgxSpinnerService) { }
 
   ngOnInit(): void {
   }
@@ -69,6 +69,7 @@ export class RegisterComponent implements OnInit {
     console.log(event)
     event.preventDefault;
     // console.log(this.user_info)  
+    let form = new FormData();
     let confirm = true;
     for(let key in this.validations){
         let value : any = this.validations[key];
@@ -93,11 +94,17 @@ export class RegisterComponent implements OnInit {
           continue;
         }
         this.errors[key]['show'] = false;
+        form.append(key, this.user_info[key]);
     }
     
-    if( confirm ){
+    // if( confirm ){
       console.log("se envia")
-    }
+      this.spinner.show("loader");
+      this.us.create_user(form).subscribe( (data : any) => {
+        console.log(data);
+        this.spinner.hide("loader");
+      });
+    // }
 
   }
 
