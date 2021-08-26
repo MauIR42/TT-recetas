@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-
+import { LocalStorageService } from '../../services/local-storage.service';
 declare const $ : any;
 
 @Component({
@@ -23,7 +23,7 @@ export class HeaderComponent implements OnInit {
 
   current : string = '';
 
-  constructor(private router: Router) { }
+  constructor(private router: Router, private ls: LocalStorageService) { }
 
   ngOnInit(): void {
     this.current = this.router.url.replace(/\//g, '');
@@ -38,5 +38,7 @@ export class HeaderComponent implements OnInit {
 
   logout(){
     console.log("logout");
+    this.ls.clean();
+    this.router.navigate([""]);
   }
 }

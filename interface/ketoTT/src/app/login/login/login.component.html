@@ -1,5 +1,8 @@
-<div class="container">
+<ngx-spinner name="loader" [fullScreen]="false" type="ball-spin-clockwise-fade" size="medium" color = "#0AAFC6">
+	<p class="loading">Loading Awesomeness...</p>
+</ngx-spinner>
 
+<div class="container">
 	<div class="row align-items-center">
 		<div class="col-12 col-md-6 card_grey ">
 			<h2 class="text-center mt-5 "><b>¡Bienvenido a tu ReceTTario!</b></h2>
@@ -67,13 +70,15 @@
 					<div class="row justify-content-center mt-5 mb-3">
 						<div class="col-6 form-group  mx-5">
 							<label for="email" class="strong_blue_clor">Correo</label>
-							<input type="email" class="form-control holder-blue" placeholder="ejemplo@gmail.com">
+							<input type="email" class="form-control holder-blue" placeholder="ejemplo@gmail.com" [(ngModel)]="email" name="email">
+							<small class="form-text error-text strong_blue_clor" *ngIf="email_error.length > 0">{{email_error}}</small>
 						</div>
 					</div>
 					<div class="row justify-content-center mt-3 mx-5">
 						<div class="col-6 form-group ">
 							<label for="password" class="strong_blue_clor">Contraseña</label>
-							<input type="password" class="form-control holder-blue" placeholder="**********">
+							<input type="password" class="form-control holder-blue" placeholder="**********" [(ngModel)]="password" name="password">
+							<small class="form-text error-text strong_blue_clor" *ngIf="password_error.length > 0">{{password_error}}</small>
 						</div>
 					</div>
 					<div class="row justify-content-end">
@@ -81,9 +86,12 @@
 							<a [routerLink]="['recuperar_contraseña']" class="text-right"><small>¿olvidaste tu contraseña?</small></a>
 						</div>
 					</div>
+					<div class="alert alert-danger row justify-content-center" role="alert" *ngIf="login_error.length > 0">
+	  					{{login_error}}
+					</div>
 					<div class="row justify-content-center">
 						<div class="col-auto">
-							<button class="btn btn-outline btn-lg mt-2 mb-5 " >Iniciar sesión</button>
+							<button class="btn btn-outline btn-lg mt-2 mb-5 " (click)="login()">Iniciar sesión</button>
 						</div>
 					</div>
 

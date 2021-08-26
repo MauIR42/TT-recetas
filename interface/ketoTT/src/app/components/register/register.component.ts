@@ -1,7 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 
 import { UserService } from '../../services/user.service';
+import { LocalStorageService } from '../../services/local-storage.service';
 import { NgxSpinnerService } from 'ngx-spinner';
+import {Router} from '@angular/router';
+
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
@@ -60,7 +63,17 @@ export class RegisterComponent implements OnInit {
     'check_1': {'show': false, 'message': ''},
     'check_2' : {'show': false, 'message': ''},
   }
-  constructor(private us : UserService, private spinner: NgxSpinnerService) { }
+
+  response_errors : any = {
+    "email_already_registered":'El correo ya tiene asociada una cuenta.'
+  }
+
+  error_message : string = '';
+  constructor(private us : UserService, private spinner: NgxSpinnerService, 
+              private ls : LocalStorageService, private router: Router) { 
+    if( this.ls.getItem('TT_id') )
+      this.router.navigate(["perfil"])
+  }
 
   ngOnInit(): void {
   }
@@ -71,6 +84,7 @@ export class RegisterComponent implements OnInit {
     // console.log(this.user_info)  
     let form = new FormData();
     let confirm = true;
+    this.error_message = '';
     for(let key in this.validations){
         let value : any = this.validations[key];
         if('requiered' in value && (this.user_info[key].length == 0 || !this.user_info[key] ) ){
@@ -97,14 +111,21 @@ export class RegisterComponent implements OnInit {
         form.append(key, this.user_info[key]);
     }
     
-    // if( confirm ){
+    if( confirm ){
       console.log("se envia")
       this.spinner.show("loader");
       this.us.create_user(form).subscribe( (data : any) => {
         console.log(data);
         this.spinner.hide("loader");
+        if( data['error'] )
+          this.error_message = this.response_errors[data['message']]
+        else{
+          this.ls.setItem('TT_id', data['id'])
+          this.router.navigate(["perfil"]);
+        }
+
       });
-    // }
+    }
 
   }
 
