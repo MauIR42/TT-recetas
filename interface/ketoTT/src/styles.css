@@ -256,3 +256,8 @@ a {
   position: fixed;
   bottom: 0;
 }
+
+
+.error-text {
+  color : red;
+}
