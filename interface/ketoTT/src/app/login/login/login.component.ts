@@ -43,15 +43,16 @@ export class LoginComponent implements OnInit {
       this.password_error = "La contraseña debe tener al menos 8 caracteres y debe contener al menos un número, un caracter especial ( /, #, $ o  &) y una letra mayúscula.";
       ok = false;
     }
-
+    this.spinner.show("loader");
     if(ok){
-      
       this.us.auth_user({'username':this.email, 'pass':this.password}).subscribe( (data : any) =>{
         if(data['error']){
-          this.login_error = SERVER_MESSAGES[data['message']]
+          this.login_error = SERVER_MESSAGES[data['message']];
+          this.spinner.hide("loader");
           return;
         }
         this.ls.setItem("TT_id", data['id']);
+        this.spinner.hide("loader");
         this.router.navigate(["perfil"]);
       });
     }

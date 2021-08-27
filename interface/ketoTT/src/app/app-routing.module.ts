@@ -8,6 +8,8 @@ import { RegisterComponent } from './components/register/register.component';
 import { StockComponent } from './components/stock/stock.component';
 import { UserInfoComponent } from './components/user-info/user-info.component';
 
+import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
+
 const routes: Routes = [
   { path:'perfil', component: UserInfoComponent },
   { path:'estadisticas', component: UserInfoComponent },
@@ -17,6 +19,7 @@ const routes: Routes = [
   { path:'dieta_keto', component: HeaderComponent }, //falta
   { path:'sindrome_metabolico', component: HeaderComponent }, //falta
   { path:'recuperar_contraseña', component: RecoveryPasswordComponent },
+  { path:'recuperar_contraseña/:recovery_token', component: ResetPasswordComponent },
   { path:'crear_cuenta', component: RegisterComponent },
   { path: '', component: LoginComponent },
   { path: '**', component: LoginComponent },

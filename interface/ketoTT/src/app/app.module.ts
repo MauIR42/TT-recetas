@@ -15,6 +15,7 @@ import { UserInfoComponent } from './components/user-info/user-info.component';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
+import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
 
 @NgModule({
   declarations: [
@@ -26,6 +27,7 @@ import { HttpClientModule } from '@angular/common/http';
     StockComponent,
     ConfirmationModalComponent,
     UserInfoComponent,
+    ResetPasswordComponent,
   ],
   imports: [
     BrowserModule,

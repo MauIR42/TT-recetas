@@ -8,6 +8,7 @@ export class UserService {
 
   url : string = '';
   url_user : string = 'user';
+  url_recovery: string = 'user/recovery';
 
   constructor(private http: HttpClient) {
     this.url = environment.server_direction;
@@ -23,5 +24,19 @@ export class UserService {
   create_user(data: any){
     console.log(data);
     return this.http.post(this.url + this.url_user, data, {});
+  }
+
+  request_recovery_password(data: any){
+    return this.http.post(this.url + this.url_recovery, data, {});
+  }
+
+  check_recovery_token(data:any){
+    let header = new HttpHeaders();
+    header.set('Content-Type', 'application/json');
+    return this.http.get(this.url + this.url_recovery, {headers: header, params: data});
+  }
+
+  reset_password(data:any){
+    return this.http.put(this.url + this.url_recovery, data, {});
   }
 }
