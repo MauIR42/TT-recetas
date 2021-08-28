@@ -11,7 +11,9 @@ class User(models.Model):
 	username = models.CharField(max_length=128, unique=True)
 	active = models.BooleanField(default=True)
 	password = models.CharField(max_length=128, verbose_name='password', default='')
-
+	gender = models.CharField(max_length=1, default='M')
+	height = models.DecimalField(max_digits= 3, decimal_places= 2)
+	created_at = models.DateTimeField(default=timezone.now, verbose_name='created at')
 	class Meta:
 		db_table = "user"
 
@@ -24,7 +26,7 @@ class Stat(models.Model):
 		db_table = "stat"
 
 
-class userStat(models.Model):
+class UserStat(models.Model):
 	id = models.AutoField(auto_created=True, primary_key=True, serialize=False)
 	created_at = models.DateTimeField(default=timezone.now, verbose_name='created at')
 	value = models.DecimalField(max_digits= 3, decimal_places= 2)

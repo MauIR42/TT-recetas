@@ -15,17 +15,30 @@ from django.core.mail import send_mail
 from services.settings import EMAIL_HOST, ANGULAR_DIR
 from django.db.models import F
 
-class UserView(APIView):
+class AuthUserView(APIView):
 	def get(self, request, *args, **kwargs):
 		email = request.GET.get('username','')
 		password =  request.GET.get('pass','')
-
 		if len(email) == 0 or len(password) == 0:
 			return JsonResponse(data={"error": True, "message": 'incomplete_data' })
 		user = User.objects.filter(username= email).first()
 		if user and check_password(password, user.password) :
 			return JsonResponse(data={"error": False, "id":user.id})
 		return JsonResponse(data={"error": True, "message": 'wrong_login_data'})
+
+class UserView(APIView):
+	def get(self, request, *args, **kwargs):
+		try:
+			user_id = request.GET.get('user_id','')
+			if len(user_id) == 0:
+				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
+			user = User.objects.filter(id= user_id, active = True)
+			if user:
+				return JsonResponse(data={"error": False, "user_info":user.values('first_name','last_name','username','birthday','gender')[0]})
+			return JsonResponse(data={"error": True, "message": 'user_not_exists'})
+		except Exception as e:
+			print(e)
+			return JsonResponse(data={"error": True,  "message":"internal_server_error"})
 
 
 
@@ -41,8 +54,34 @@ class UserView(APIView):
 				return JsonResponse(data={'error': True, 'message':'email_already_registered'}, safe=False)
 			new_pass = make_password(data['password'])
 			print(new_pass)
-			new_user = User.objects.create(first_name=data['first_name'], last_name=data['last_name'], birthday=data['birthday'], username=data['email'], password=new_pass)
+			new_user = User.objects.create(first_name=data['first_name'], last_name=data['last_name'], birthday=data['birthday'], username=data['email'], password=new_pass, genre=data['gender'])
 			return JsonResponse(data={'error': False, 'id': new_user.id}, safe=False)
+		except Exception as e:
+			print(e)
+			return JsonResponse(data={"error": True,  "message":"internal_server_error"})
+
+	def put(self, request, *args, **kwargs):
+		try:
+			data = request.POST.dict()
+			print(data)
+			if  not ('first_name' in data and 'last_name' in data and 'birthday' in data  and 'gender' in data and 'user_id' in data):
+				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
+			user = User.objects.filter(id= data['user_id']).first()
+			if not user:
+				return JsonResponse(data={"error": True, "message": 'user_not_exists' })
+			user.first_name = data['first_name']
+			user.last_name = data['last_name']
+			user.birthday = data['birthday']
+			user.gender = data['gender']
+			if 'password' in data:	
+				user.password = make_password(data['password'])
+			if 'username' in data:
+				check_email = User.objects.filter(username=data['email']).all()
+				if check_email:
+					return JsonResponse(data={'error': True, 'message':'email_already_registered'}, safe=False)
+				user.username = data['first_name']
+			user.save()
+			return JsonResponse(data={'error': False}, safe=False)
 		except Exception as e:
 			print(e)
 			return JsonResponse(data={"error": True,  "message":"internal_server_error"})
@@ -114,6 +153,21 @@ class passwordView(APIView):
 		}
 		send_mail('una prueba', 'esta es una prueba', EMAIL_HOST, [user.username], fail_silently= False, html_message=render_to_string('mainServices/test.html',context))
 
-
-def index(request):
-	return HttpResponse("Hola mundo")
+class UserStatView(APIView):
+	def get(self, request, *args, **kwargs):
+		try:
+			user_id = request.GET.get('user_id','')
+			if len(user_id) == 0:
+				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
+			user = User.objects.filter(id= user_id, active = True)
+			if user:
+				user_stats = UserStat.objects.filter(user_id = user_id);
+				print(user_stats)
+				if( user_stats):
+					return JsonResponse(data={"error": False, 'data':  { 'info':user_stats.values(), 'has_data': True} })
+				stats = list(Stat.objects.all().values())
+				return JsonResponse(data={"error": False, 'data': { 'info':stats, 'has_data':False} })
+			return JsonResponse(data={"error": True, "message": 'user_not_exists'})
+		except Exception as e:
+			print(e)
+			return JsonResponse(data={"error": True,  "message":"internal_server_error"})

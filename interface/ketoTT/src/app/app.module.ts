@@ -16,6 +16,8 @@ import { NgxSpinnerModule } from 'ngx-spinner';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
 import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
+import { FormModalComponent } from './components/modal/form-modal/form-modal.component';
+import { HeathModalComponent } from './components/modal/heath-modal/heath-modal.component';
 
 @NgModule({
   declarations: [
@@ -28,6 +30,8 @@ import { ResetPasswordComponent } from './components/reset-password/reset-passwo
     ConfirmationModalComponent,
     UserInfoComponent,
     ResetPasswordComponent,
+    FormModalComponent,
+    HeathModalComponent,
   ],
   imports: [
     BrowserModule,

@@ -7,8 +7,10 @@ import { HttpClient, HttpHeaders, HttpParams, HttpEventType, HttpEvent, HttpRequ
 export class UserService {
 
   url : string = '';
+  url_auth : string = 'auth';
   url_user : string = 'user';
   url_recovery: string = 'user/recovery';
+  url_health: string = 'user/health';
 
   constructor(private http: HttpClient) {
     this.url = environment.server_direction;
@@ -18,12 +20,23 @@ export class UserService {
     console.log(data);
     let header = new HttpHeaders();
     header.set('Content-Type', 'application/json');
+    return this.http.get(this.url + this.url_auth, {headers: header, params: data});
+  }
+
+  get_user_info(data:any){
+    console.log(data);
+    let header = new HttpHeaders();
+    header.set('Content-Type', 'application/json');
     return this.http.get(this.url + this.url_user, {headers: header, params: data});
   }
 
   create_user(data: any){
     console.log(data);
     return this.http.post(this.url + this.url_user, data, {});
+  }
+
+  put_user(data: any){
+    return this.http.put(this.url + this.url_user, data, {});
   }
 
   request_recovery_password(data: any){
@@ -38,5 +51,12 @@ export class UserService {
 
   reset_password(data:any){
     return this.http.put(this.url + this.url_recovery, data, {});
+  }
+
+  get_user_health_data(data:any){
+    console.log(data);
+    let header = new HttpHeaders();
+    header.set('Content-Type', 'application/json');
+    return this.http.get(this.url + this.url_health, {headers: header, params: data});
   }
 }

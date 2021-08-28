@@ -1,0 +1,80 @@
+<div class="modal fade" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" id="edit_form">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header orange-light-background">
+        <h5 class="modal-title "> Editar perfil </h5>
+      </div>
+      <div class="modal-body">
+        <form class="row">
+	      	<div class="form-group col-12 col-lg-6">
+				    <label for="name" class="strong_blue_clor">Nombre(s)*</label>
+				    <input type="text" class="form-control holder-blue strong_blue_clor" id="name" aria-describedby="name" placeholder="Marco Antonio" required [(ngModel)]="user_info.first_name" name="first_name">
+				    <small class="form-text error-text strong_blue_clor" *ngIf="errors['first_name']['show']">{{errors['first_name']['message']}}</small>
+				  </div>
+				  <div class="form-group col-12 col-lg-6">
+				    <label for="last_name1" class="strong_blue_clor">Apellido(s)*</label>
+				    <input type="text" class="form-control holder-blue strong_blue_clor" id="last_name1" aria-describedby="last_name1" placeholder="Robles Emmert" [(ngModel)]="user_info.last_name" name="last_name">
+				    <small class="form-text error-text strong_blue_clor" *ngIf="errors['last_name']['show']">{{errors['last_name']['message']}}</small>
+				  </div>
+				  <div class="form-group col-12 col-lg-6">
+				    <label for="birthday" class="strong_blue_clor">Fecha de nacimiento*</label>
+				    <input type="date" class="form-control holder-blue strong_blue_clor" id="birthday" aria-describedby="birthday" [(ngModel)]="user_info.birthday" name="birthday">
+				    <small class="form-text error-text strong_blue_clor" *ngIf="errors['birthday']['show']">{{errors['birthday']['message']}}</small>
+				  </div>
+				  <div class="form-group col-12 col-lg-6">
+						<label for="arterial1" class="strong_blue_clor">Sexo biológico* </label>
+						<div class="pt-lg-2">
+					    	<div class="form-check form-check-inline">
+							  <input class="form-check-input radio-test" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="M" [(ngModel)]="user_info.gender" name="gender">
+							  <label class="form-check-label strong_blue_clor" for="inlineRadio1">Masculino</label>
+							</div>
+							<div class="form-check form-check-inline">
+							  <input class="form-check-input radio-test" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="F" [(ngModel)]="user_info.gender" name="gender">
+							  <label class="form-check-label strong_blue_clor" for="inlineRadio2">Femenino</label>
+							</div>
+							<small class="form-text error-text strong_blue_clor" *ngIf="errors['gender']['show']">{{errors['gender']['message']}}</small>
+						</div>
+				  </div>
+				  <div class="form-group col-12 col-lg-6" [class.d-none]="! show_email">
+				    <label for="email1" class="strong_blue_clor">Correo*</label>
+				    <input type="email" class="form-control holder-blue strong_blue_clor" id="email1" aria-describedby="last_name1" placeholder="ejemplo@gmail.com" [(ngModel)]="user_info.username" name="email">
+				    <small class="form-text error-text strong_blue_clor" *ngIf="errors['username']['show']">{{errors['username']['message']}}</small>
+				  </div>
+				  <div class="form-group col-12 col-lg-6" [class.d-none]="! show_email">
+				    <label for="email2" class="strong_blue_clor">Confirmar correo*</label>
+				    <input type="email" class="form-control holder-blue strong_blue_clor" id="email2" aria-describedby="last_name1" placeholder="ejemplo@gmail.com" [(ngModel)]="user_info.email_check" name="email_check">
+				    <small class="form-text error-text strong_blue_clor" *ngIf="errors['email_check']['show']">{{errors['email_check']['message']}}</small>
+				  </div>
+				  <div class="form-group col-12 col-lg-6" [class.d-none]="! show_pass">
+				    <label for="password1" class="strong_blue_clor">Contraseña*</label>
+				    <input type="password" class="form-control holder-blue strong_blue_clor" id="password1" placeholder="********" [(ngModel)]="user_info.password" name="password" autocomplete="off">
+				    <small id="password1" class="form-text text-muted strong_blue_clor">La contraseña debe tener al menos 8 caracteres y debe contener al menos un número, un caracter especial ( /, #, $ o  &) y una letra mayúscula.</small>
+				    <small class="form-text error-text strong_blue_clor" *ngIf="errors['password']['show']">{{errors['password']['message']}}</small>
+				  </div>
+				  <div class="form-group col-12 col-lg-6" [class.d-none]="! show_pass">
+				    <label for="password2" class="strong_blue_clor">Confirmar contraseña*</label>
+				    <input type="password" class="form-control holder-blue strong_blue_clor" id="password2" placeholder="********" [(ngModel)]="user_info.check_password" name="check_password" autocomplete="off">
+				    <small class="form-text error-text strong_blue_clor" *ngIf="errors['check_password']['show']">{{errors['check_password']['message']}}</small>
+				  </div>
+				  <div class="col-12 col-lg-6 text-center">
+				  	<button type="button" class="btn btn-normal-blue btn-sm" (click)="show_pass = true" *ngIf="! show_pass">Editar contraseña</button>
+      			<button type="button" class="btn btn-normal-orange btn-sm" (click)="show_pass = false" *ngIf="show_pass">Cancelar edición</button>
+				  </div>
+				  <div class="col-12 col-lg-6 text-center">
+				  	<button type="button" class="btn btn-normal-blue btn-sm" (click)="show_email = true" *ngIf="! show_email">Editar correo</button>
+						<button type="button" class="btn btn-normal-orange btn-sm" (click)="show_email = false" *ngIf="show_email">Cancelar edición</button>
+				  </div>
+        </form>
+        <div class="row justify-content-center pt-3">
+        	<div class="alert alert-danger col-12 text-center" role="alert" *ngIf="server_error.length > 0">
+							{{server_error}}
+					</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+      	<button type="button" class="btn btn-normal-blue" (click)="save()">Editar</button>
+        <button type="button" class="btn btn-normal-orange" (click)="close_modal()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
