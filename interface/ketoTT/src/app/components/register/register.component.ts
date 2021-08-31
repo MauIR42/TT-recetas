@@ -4,6 +4,7 @@ import { UserService } from '../../services/user.service';
 import { LocalStorageService } from '../../services/local-storage.service';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { Router } from '@angular/router';
+import { SERVER_MESSAGES } from '../../messages/messages';
 
 @Component({
   selector: 'app-register',
@@ -17,6 +18,7 @@ export class RegisterComponent implements OnInit {
     'last_name' : '',
     'birthday' : '',
     'gender' : '',
+    'height' : '',
     'email' : '',
     'email_check' : '',
     'password' : '',
@@ -43,6 +45,7 @@ export class RegisterComponent implements OnInit {
     'check_password' : {'equal':'password', 'requiered': true},
     'check_1': {'requiered': true},
     'check_2' : {'requiered': true},
+    'height' : {'requiered': true}
   }
 
   regex : any = {
@@ -62,10 +65,7 @@ export class RegisterComponent implements OnInit {
     'check_password' : {'show': false, 'message': ''},
     'check_1': {'show': false, 'message': ''},
     'check_2' : {'show': false, 'message': ''},
-  }
-
-  response_errors : any = {
-    "email_already_registered":'El correo ya tiene asociada una cuenta.'
+    'height' : {'show': false, 'message': ''},
   }
 
   error_message : string = '';
@@ -117,13 +117,14 @@ export class RegisterComponent implements OnInit {
       this.us.create_user(form).subscribe( (data : any) => {
         console.log(data);
         this.spinner.hide("loader");
-        if( data['error'] )
-          this.error_message = this.response_errors[data['message']]
+        if( data['error'] ){
+          console.log(data['message'])
+          this.error_message = SERVER_MESSAGES[data['message']]
+        }
         else{
           this.ls.setItem('TT_id', data['id'])
           this.router.navigate(["perfil"]);
         }
-
       });
     }
 

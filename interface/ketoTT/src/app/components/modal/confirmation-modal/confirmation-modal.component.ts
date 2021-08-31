@@ -28,7 +28,7 @@ export class ConfirmationModalComponent implements OnInit {
 
 
   close_modal(type: boolean){
-    this.accepted.emit(type);
+    this.accepted.emit({'accepted':type, 'action':this.type});
     $("#conf_modal").modal("hide");
 
   }

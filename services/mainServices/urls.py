@@ -7,4 +7,5 @@ urlpatterns = [
 	path('user/recovery', views.passwordView.as_view(), name='passwordView'),
 	path('auth', views.AuthUserView.as_view(), name='AuthUserView'),
 	path('user/health', views.UserStatView.as_view(), name='UserStatView'),
+	path('scale', views.ScaleView.as_view(), name='ScaleView'),
 ]

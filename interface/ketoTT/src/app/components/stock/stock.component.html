@@ -1,3 +1,6 @@
+<ngx-spinner name="loader" [fullScreen]="false" type="ball-spin-clockwise-fade" size="medium" color = "#0AAFC6">
+	<p class="loading">{{loader_message}}</p>
+</ngx-spinner>
 <app-header></app-header>
 
 
@@ -10,7 +13,16 @@
 	    <a class="nav-link" href="#" (click)="change_menu($event,'inventario')" [class.active]="menu == 'inventario'">Inventario</a>
 	  </li>
 	</ul>
-	<div class="row pt-2" [class.d-none]="menu != 'bascula'">
+	<div class="row pt-2">
+		<div class="alert alert-danger col-12 text-center alert-dismissible fade show" role="alert" *ngIf="error_server.length > 0">
+				{{error_server}}
+				<button type="button" class="close" (click)="error_server = ''">
+			    <span aria-hidden="true">&times;</span>
+			  </button>
+		</div>
+	</div>
+	<div class="row" [class.d-none]="menu != 'bascula'">
+
 		<!-- <div > -->
 			<h3 class="col-12">{{type_info[user_type]['name']}}</h3>
 		<!-- </div> -->
@@ -34,7 +46,7 @@
 					<th><p>Estado</p></th>
 					<th><p>Acciones</p></th>
 				</tr>
-				<tr *ngFor="let user of scale_users">
+				<tr *ngFor="let user of scale_users; let i = index">
 					<td>
 						{{user.name}}
 					</td>
@@ -43,8 +55,9 @@
 						<p *ngIf="!user.pending">Aceptado</p>
 					</td>
 					<td>
-						<a href="#" *ngIf="user.pending" (click)="accept_user($event, user.id)"><img src="assets/images/check-square-fill-blue.svg" class="img-fluid mr-3 table-icon"></a>
-						<a href="#" (click)="delete_user($event, user.id)"><img src="assets/images/x-square-fill-orange.svg" class="img-fluid table-icon"></a>
+						<a href="#" *ngIf="user.pending" (click)="change_user_type($event, 2, user.id, i)"><img src="assets/images/check-square-fill-blue.svg" class="img-fluid mr-3 table-icon"></a>
+						<a href="#" *ngIf="user.pending" (click)="change_user_type($event, 5, user.id, i)"><img src="assets/images/x-square-fill-orange.svg" class="img-fluid table-icon"></a>
+						<a href="#" *ngIf="! user.pending" (click)="change_user_type($event, 1, user.id, i)"><img src="assets/images/x-square-fill-orange.svg" class="img-fluid table-icon"></a>
 					</td>
 				</tr>
 			</table>
@@ -72,24 +85,26 @@
 			</form>
 			<p>También puedes <a href="#" class="strong_blue_clor" (click)="open_modal('restart_scale',$event)"> reinicia la bascula </a> para eliminar a todos los usuarios de ella.</p>
 		</div>
-		<div class="col-6 mx-auto" *ngIf="type_info[user_type]['form_use']">
-			<form class="form-inline text-center d-none d-md-block" (submit)="check()">
+		<div class="col-9 col-lg-12  mx-auto" *ngIf="type_info[user_type]['form_use']">
+			<form class="form-inline text-center d-none d-lg-block" (submit)="send_scale_id()">
 			  <label class="sr-only" for="code_scale">Código de báscula</label>
-			  <input type="text" class="form-control mb-2 mr-sm-2 holder-blue" id="code_scale" placeholder="xxx-xxx" [attr.readonly]="(user_type == 4)?true:null" required>
+			  <input type="text" class="form-control mb-2 mr-sm-2 holder-blue" id="code_scale" placeholder="xxx-xxx" [attr.readonly]="(user_type == 4)?true:null" required [(ngModel)]="associated_scale" name="scale_name">
 			  <button type="submit" class="btn btn-normal-orange mb-2" [attr.disabled]="(user_type == 4)?true:null">Validar</button>
+			  <small class="form-text error-text strong_blue_clor" *ngIf="scale_input_error.length > 0">{{scale_input_error}}</small>
 			</form>
 
-			<form class="form-inline text-center d-block d-md-none pb-2" (submit)="check()">
+			<form class="form-inline text-center d-block d-lg-none pb-2" (submit)="send_scale_id()">
 			  <div class="form-group">
 			    <label for="code_scale" class="strong_blue_clor">Código de báscula</label>
-			    <input type="text" class="form-control holder-blue" placeholder="xxx-xxx" id="code_scale" [attr.readonly]="(user_type == 4)?true:null" required>
+			    <input type="text" class="form-control holder-blue" placeholder="xxx-xxx" id="code_scale" [attr.readonly]="(user_type == 4)?true:null" required [(ngModel)]="associated_scale" name="scale_name_res">
 			  </div>
 			  <button type="submit" class="btn btn-normal-orange" [attr.disabled]="(user_type == 4)?true:null">Validar</button>
+			  <small class="form-text error-text strong_blue_clor text-justify" *ngIf="scale_input_error.length > 0">{{scale_input_error}}</small>
 			</form>
 		</div>
 		<div class="col-12" [class.d-none] ="!(user_type == 4)" >
 			<div class="alert alert-info alert-dismissible fade show" role="alert">
-			  <strong>Por validarse</strong> Aún no se te ha aceptado en la báscula con el código que ingresaste, puedes esperar o <a class="most-strong-blue-color" (click)="change_user_type($event)" href="#">Cancelar el uso de esta báscula e ingresar otro código valido.</a>
+			  <strong>Por validarse</strong> Aún no se te ha aceptado en la báscula con el código que ingresaste, puedes esperar o <a class="most-strong-blue-color" (click)="change_user_type($event,1, user_id)" href="#">Cancelar el uso de esta báscula e ingresar otro código valido.</a>
 			  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
 			    <span aria-hidden="true">&times;</span>
 			  </button>
@@ -104,7 +119,7 @@
 			</div>
 		</div>
 	</div>
-	<div class="row pt-2" [class.d-none]="menu != 'inventario'">
+	<div class="row" [class.d-none]="menu != 'inventario'">
 		<div class="col-12 text-center col-md-4">
 			<h3>Inventario</h3>
 		</div>

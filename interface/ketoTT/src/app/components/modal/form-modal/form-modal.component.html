@@ -22,6 +22,11 @@
 				    <small class="form-text error-text strong_blue_clor" *ngIf="errors['birthday']['show']">{{errors['birthday']['message']}}</small>
 				  </div>
 				  <div class="form-group col-12 col-lg-6">
+				    <label for="height" class="strong_blue_clor">Estatura*</label>
+				    <input type="number" class="form-control holder-blue strong_blue_clor" id="height" aria-describedby="height" [(ngModel)]="user_info.height" name="height">
+				    <small class="form-text error-text strong_blue_clor" *ngIf="errors['height']['show']">{{errors['height']['message']}}</small>
+				  </div>
+				  <div class="form-group col-12 col-lg-6">
 						<label for="arterial1" class="strong_blue_clor">Sexo biológico* </label>
 						<div class="pt-lg-2">
 					    	<div class="form-check form-check-inline">
@@ -35,6 +40,7 @@
 							<small class="form-text error-text strong_blue_clor" *ngIf="errors['gender']['show']">{{errors['gender']['message']}}</small>
 						</div>
 				  </div>
+				  <div class="w-100"></div> 
 				  <div class="form-group col-12 col-lg-6" [class.d-none]="! show_email">
 				    <label for="email1" class="strong_blue_clor">Correo*</label>
 				    <input type="email" class="form-control holder-blue strong_blue_clor" id="email1" aria-describedby="last_name1" placeholder="ejemplo@gmail.com" [(ngModel)]="user_info.username" name="email">
@@ -56,11 +62,12 @@
 				    <input type="password" class="form-control holder-blue strong_blue_clor" id="password2" placeholder="********" [(ngModel)]="user_info.check_password" name="check_password" autocomplete="off">
 				    <small class="form-text error-text strong_blue_clor" *ngIf="errors['check_password']['show']">{{errors['check_password']['message']}}</small>
 				  </div>
-				  <div class="col-12 col-lg-6 text-center">
+				  <div class="w-100"></div> 
+				  <div class="col-6 text-center">
 				  	<button type="button" class="btn btn-normal-blue btn-sm" (click)="show_pass = true" *ngIf="! show_pass">Editar contraseña</button>
       			<button type="button" class="btn btn-normal-orange btn-sm" (click)="show_pass = false" *ngIf="show_pass">Cancelar edición</button>
 				  </div>
-				  <div class="col-12 col-lg-6 text-center">
+				  <div class="col-6 text-center">
 				  	<button type="button" class="btn btn-normal-blue btn-sm" (click)="show_email = true" *ngIf="! show_email">Editar correo</button>
 						<button type="button" class="btn btn-normal-orange btn-sm" (click)="show_email = false" *ngIf="show_email">Cancelar edición</button>
 				  </div>

@@ -1,5 +1,10 @@
 import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
+import { NgxSpinnerService } from 'ngx-spinner';
+import { LocalStorageService } from '../../services/local-storage.service';
+import { StockService } from '../../services/stock.service';
+import { forkJoin  } from 'rxjs';
+import { SERVER_MESSAGES } from '../../messages/messages';
 
 declare const $ : any;
 
@@ -11,7 +16,17 @@ declare const $ : any;
 export class StockComponent implements OnInit {
 
 
-  user_type :number = 5;
+  user_id : string = '';
+
+  user_type :number = 1;
+
+  loader_message : string = '';
+
+  error_server: string = '';
+
+  scale_regex : any = /^[a-zA-Z0-9]{3}-[a-zA-Z0-9]{3}$/;
+
+  scale_input_error: string = '';
 
   type_info : any = {
     1 : {'name':'Sin báscula', form_use:true, text: 1 },
@@ -21,42 +36,12 @@ export class StockComponent implements OnInit {
     5 : {'name':'Sin báscula', form_use:true, text: 1},
   }
 
-  scale_users : any = [
-    {
-      'name': 'Martin Perez',
-      'id': 504,
-      'pending' : true
-    },
-    {
-      'name': 'Juanita Perez',
-      'id': 505,
-      'pending' : false
-    },
-    {
-      'name': 'Marcos Perez',
-      'id': 506,
-      'pending' : true
-    },
-    {
-      'name': 'Karen Perez',
-      'id': 507,
-      'pending' : false
-    },
+  scale_users : any = [ ];
 
-  ];
+  current_users : any = [ ];
 
-  current_users : any = [
-    {
-        'name': 'Juanita Perez',
-        'id': 505,
-      },
-    {
-        'name': 'Karen Perez',
-        'id': 507,
-      },
-  ]
 
-  associated_scale : string = "xxx-xxx";
+  associated_scale : string = "";
 
   menu = 'scale';
 
@@ -142,23 +127,41 @@ export class StockComponent implements OnInit {
 
   actual_modal : any;
 
-  constructor(private router: Router) {
-    console.log(this.router.url)
+  constructor(private router: Router, private ls : LocalStorageService, private ss: StockService, private spinner: NgxSpinnerService) {
     this.menu = this.router.url.replace(/\//g, '');
+    if(this.menu == 'inventario')
+      this.loader_message = 'cargando inventario';
+    else
+      this.loader_message = 'obteniendo información de báscula';
+    this.spinner.show("loader");
    }
 
   ngOnInit(): void {
+    this.user_id = this.ls.getItem("TT_id");
+    if(! this.user_id)
+      this.router.navigate([""])
+    let services = [
+      this.ss.get_scale_info({'user_id': this.user_id}),
+      // this.ss.get_inventory_info({'user_id': this.user_id}),
+    ]
+
+    forkJoin(services).subscribe( (data)=>{
+      let scale_data : any = data[0];
+
+      if(scale_data['error']){
+        this.error_server = SERVER_MESSAGES[scale_data['message']];
+        this.spinner.hide("loader");
+        return;
+      }
+      this.user_type = scale_data['user_type'];
+      if( 'current_users' in scale_data)
+        this.process_users(scale_data['current_users'])
+      this.spinner.hide("loader");
+    });
+
+
   }
 
-  accept_user(event: any, user_id: number){
-    event.preventDefault();
-    console.log("aceptar usuario", user_id);
-  }
-
-  delete_user(event: any, user_id: number){
-    event.preventDefault();
-    console.log("eliminar usuario", user_id);
-  }
 
   edit_item(event: any, item_id: number){
     event.preventDefault();
@@ -175,13 +178,128 @@ export class StockComponent implements OnInit {
     console.log("reiniciar bascula");
   }
 
-  change_user_type(event : any){
-    console.log("listo!");
-    event.preventDefault();
+  change_user_type(event : any, status:number, user_id: any, position : number = -1 ){
+    if( event != null)
+      event.preventDefault();
+    let form = new FormData();
+    let is_current = 0;
+    this.error_server = '';
+
+    if(status == 2 && this.current_users.length + 1 == 5){
+      this.error_server = "No puedes agregar más usuarios, has llegado al máximo.";
+      return;
+    }
+
+    if(status == 3){ //3 a 1 y 1 a 3
+      form.append('admin_id', this.user_id);
+      is_current = 1;
+    }
+
+    else if(this.user_id == user_id){ // 2 a 1, 4 a 1
+      is_current = 1;
+    }
+    form.append('user_id',user_id.toString());
+    form.append('status_id',status.toString());
+    this.spinner.show("loader");
+    this.ss.change_user_type(form).subscribe( (data : any)=>{
+      if(data['error']){
+            this.error_server = SERVER_MESSAGES[data['message']];
+            this.spinner.hide("loader");
+            return;
+          }
+          if( is_current){
+            this.user_type = 1;
+            // this.current_users = [];
+            // this.scale_users = [];
+          }
+          else if( status == 2)
+            this.add_user(user_id, position);
+          else if( status == 5 || status == 1){
+            if( status == 1 )
+              this.remove_user(user_id,this.current_users);
+            this.scale_users.splice(position,1);
+          }
+
+          this.spinner.hide("loader");
+      });
+  }
+
+  remove_user(id:number, elements: any){
+    let position = -1;
+    for(let i =0 ; i<elements.length; i++){
+      if(id == elements[i]['id']){
+        position = i;
+        break;
+      }
+    }
+    if(position > -1){
+      elements.splice(position,1);
+    }
+  }
+
+  add_user(user_id : number, position: number){
+    this.scale_users[position]['pending'] = false;
+    this.current_users.push({
+      'name' : this.scale_users[position]['name'],
+      'id' : this.scale_users[position]['id']
+    })
   }
 
   check(){
     console.log("se revisa");
+  }
+
+  send_scale_id(){
+    this.scale_input_error = '';
+    if(this.associated_scale.length < 0){
+      this.scale_input_error = 'Debes llenar este campo';
+      return;
+    }
+    else if( !(this.scale_regex.test(this.associated_scale) ) ){
+      this.scale_input_error = 'Sigue la estructura del código de la báscula (lineas incluidas)';
+      return;
+    }
+    let form = new FormData();
+
+    form.append('user_id', this.user_id);
+    form.append('scale_code', this.associated_scale);
+    this.spinner.show("loader");
+    this.ss.post_scale_request(form).subscribe( (data : any)=>{
+      if(data['error']){
+        this.error_server = SERVER_MESSAGES[data['message']];
+        this.spinner.hide("loader");
+        return;
+      }
+      this.user_type = data['user_type'];
+      if(this.user_type == 3){
+        this.ss.get_scale_info({'user_id': this.user_id}).subscribe( (data: any)=>{
+          if(data['error']){
+            this.error_server = SERVER_MESSAGES[data['message']];
+            this.spinner.hide("loader");
+            return;
+          }
+          this.process_users(data['current_users'])
+        });
+      }
+      this.spinner.hide("loader");
+    });
+  }
+
+  process_users(data: any){
+    this.current_users = [];
+    this.scale_users = [];
+    for(let i =0; i<data.length; i++){
+      data[i]['name'] = data[i]['first_name'] + ' ' + data[i]['last_name'];
+      data[i]['pending'] = (data[i]['user_type'] == 4) ? true : false;
+      delete data[i]['first_name'];
+      delete data[i]['last_name'];
+      if(! data[i]['pending'])
+        this.current_users.push({
+          'name': data[i]['name'],
+          'id' : data[i]['id']
+        })
+    }
+    this.scale_users = data;
   }
 
   change_menu(event : any, menu : string){
@@ -201,8 +319,11 @@ export class StockComponent implements OnInit {
     $('#conf_modal').modal("show");
   }
 
-  check_action(accepted : any){
-    console.log(accepted);
+  check_action(result : any){
+    if( result['accepted'] ){
+      if(result['action'] == 'remove_scale')
+        this.change_user_type(null,1, this.user_id);
+    }
   }
 
 }

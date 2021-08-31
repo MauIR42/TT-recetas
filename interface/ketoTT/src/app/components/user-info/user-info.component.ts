@@ -24,7 +24,7 @@ export class UserInfoComponent implements OnInit {
     'birthday': "",
     'gender': '',
     'username': "",
-
+    'height' : 0
   };
 
   user_id : number = -1;

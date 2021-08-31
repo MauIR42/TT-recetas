@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  server_direction : 'http://localhost:8000/services/'
+  server_direction : 'http://192.168.100.44:8000/services/'
 };
 
 /*

@@ -29,6 +29,7 @@ export class FormModalComponent implements OnInit {
     'email_check' : '',
     'password' : '',
     'check_password' : '',
+    'height' : 0
   }
 
   validations: any = {
@@ -46,6 +47,7 @@ export class FormModalComponent implements OnInit {
     'email_check' : {'equal':'username', 'requiered': true},
     'password' : {'regex': 'password'},
     'check_password' : {'equal':'password', 'requiered': true},
+    'height' : {'requiered': true}
   }
 
   regex : any = {
@@ -63,6 +65,7 @@ export class FormModalComponent implements OnInit {
     'email_check' : {'show': false, 'message': ''},
     'password' : {'show': false, 'message': ''},
     'check_password' : {'show': false, 'message': ''},
+    'height' : {'show': false, 'message': ''},
   }
 
   show_pass: boolean = false;
@@ -131,6 +134,7 @@ export class FormModalComponent implements OnInit {
             'birthday' : this.user_info.birthday,
             'gender' : this.user_info.gender,
             'username' : this.user_info.username,
+            'height' : this.user_info.height
           }
         })
         $("#edit_form").modal("hide");
