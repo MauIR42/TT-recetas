@@ -86,3 +86,40 @@ class ScaleUpdate(models.Model):
 
 	class Meta:
 		db_table = "scale_update"
+
+class Unit(models.Model):
+	id = models.AutoField(auto_created=True, primary_key=True, serialize=False)
+	name = models.CharField(max_length=255)
+	active = models.BooleanField(default = True)
+
+	class Meta:
+		db_table = "unit"
+
+class Ingredient(models.Model):
+	id = models.AutoField(auto_created=True, primary_key=True, serialize=False)
+	name = models.CharField(max_length=255)
+	type = models.ForeignKey(Unit, on_delete=models.PROTECT, null = False)
+	active = models.BooleanField(default = True)
+
+	class Meta:
+		db_table = "ingredient"
+
+class InventoryType(models.Model):
+	id = models.AutoField(auto_created=True, primary_key=True, serialize=False)
+	name = models.CharField(max_length=255)
+	active = models.BooleanField(default = True)
+
+	class Meta:
+		db_table = 'inventory_type'
+
+class Inventory(models.Model):
+	id = models.AutoField(auto_created=True, primary_key=True, serialize=False)
+	user = models.ForeignKey(User, on_delete=models.PROTECT, null = False)
+	type = models.ForeignKey(InventoryType, on_delete=models.PROTECT, null = False)
+	quantity = models.IntegerField(null = False)
+	ingredient = models.ForeignKey(Ingredient, on_delete=models.PROTECT, null = False)
+	active = models.BooleanField(default = True)
+	created_at = models.DateTimeField(default=timezone.now, verbose_name='created at')
+
+	class Meta:
+		db_table = 'inventory'

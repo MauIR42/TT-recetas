@@ -123,11 +123,11 @@
 		<div class="col-12 text-center col-md-4">
 			<h3>Inventario</h3>
 		</div>
-		<div class="col-6 col-md-4">
-			<button type="button" class="btn btn-normal-orange">Ver ingredientes pendientes</button>
+		<div class="col-6 col-md-4 pt-2">
+			<a  href="#"><img src="assets/images/card-list-blue.svg" class="img-fluid d-inline pr-2 icon-button" ><p class="strong_blue_clor d-inline h">Ver ingredientes pendientes</p></a>
 		</div>
-		<div class="col-6 col-md-4">
-			<button type="button" class="btn btn-normal-blue">Agregar ingrediente</button>
+		<div class="col-6 col-md-4 pt-2">
+			<a  href="#" (click)="open_ingredient_modal($event)"><img src="assets/images/plus-circle-fill-blue.svg" class="img-fluid d-inline pr-2 icon-button" ><p class="strong_blue_clor d-inline h">Agregar ingredientes</p></a>
 		</div>			
 		<div class="col-12 text-center pt-3 table-responsive">	
 			<table class="table table-striped">
@@ -168,3 +168,4 @@
 
 
 <app-confirmation-modal [modal_info]="actual_modal" (accepted)="check_action($event)"></app-confirmation-modal>
+<app-ingredient-modal></app-ingredient-modal>

@@ -18,6 +18,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
 import { FormModalComponent } from './components/modal/form-modal/form-modal.component';
 import { HeathModalComponent } from './components/modal/heath-modal/heath-modal.component';
+import { IngredientModalComponent } from './components/modal/ingredient-modal/ingredient-modal.component';
 
 @NgModule({
   declarations: [
@@ -32,6 +33,7 @@ import { HeathModalComponent } from './components/modal/heath-modal/heath-modal.
     ResetPasswordComponent,
     FormModalComponent,
     HeathModalComponent,
+    IngredientModalComponent,
   ],
   imports: [
     BrowserModule,

@@ -354,4 +354,9 @@ export class StockComponent implements OnInit {
     }
   }
 
+  open_ingredient_modal(event:any){
+    event.preventDefault();
+    $('#ingredient_modal').modal('show');
+  }
+
 }
