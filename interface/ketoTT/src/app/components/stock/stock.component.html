@@ -65,25 +65,25 @@
 			<p class="text-left">A continuación selecciona a que usuario se le dará el rol de administrador: </p>
 		</div>
 		<div class="col-6 mx-auto" *ngIf="user_type == 3">
-			<form class="form-inline  text-center d-none d-md-block" (submit)="check()">
+			<form class="form-inline  text-center d-none d-md-block" (submit)="change_user_type($event,3,new_admin)">
 			  <label class="sr-only" for="admin_sel">Usuario</label>
-			  <select id="admin_sel" class="custom-select mb-2 mr-sm-2">
+			  <select id="admin_sel" class="custom-select mb-2 mr-sm-2" [(ngModel)]="new_admin" name="admin_sel">
 			    <option value="-1" selected disabled>Selecciona una opción...</option>
-			    <option *ngFor="let user of current_users" [value]="user.id">{{user.name}}</option>
+			    <option *ngFor="let user of current_users" [value]="user.id" >{{user.name}}</option>
 			  </select>
 			  <button type="submit" class="btn btn-normal-orange mb-2">Cambiar administrador</button>
 			</form>
-			<form class="form-inline text-center d-block d-md-none pb-2" (submit)="check()">
+			<form class="form-inline text-center d-block d-md-none pb-2" (submit)="change_user_type($event,3,new_admin)">
 			  <div class="form-group">
 			    <label for="code_scale" class="strong_blue_clor">Usuario</label>
-			    <select id="admin_sel" class="custom-select mb-2 mr-sm-2">
+			    <select id="admin_sel" class="custom-select mb-2 mr-sm-2 " [(ngModel)]="new_admin" name="admin_sel_2">
 				    <option value="-1" selected disabled>Selecciona una opción...</option>
 				    <option *ngFor="let user of current_users" [value]="user.id">{{user.name}}</option>
 				</select>
 			  </div>
 			  <button type="submit" class="btn btn-normal-orange">Cambiar administrador</button>
 			</form>
-			<p>También puedes <a href="#" class="strong_blue_clor" (click)="open_modal('restart_scale',$event)"> reinicia la bascula </a> para eliminar a todos los usuarios de ella.</p>
+			<p>También puedes <a href="#" class="strong_blue_clor" (click)="open_modal('restart_scale',$event)"> reiniciar la bascula </a> para eliminar a todos los usuarios de ella.</p>
 		</div>
 		<div class="col-9 col-lg-12  mx-auto" *ngIf="type_info[user_type]['form_use']">
 			<form class="form-inline text-center d-none d-lg-block" (submit)="send_scale_id()">

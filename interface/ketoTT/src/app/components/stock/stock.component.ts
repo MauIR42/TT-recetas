@@ -28,6 +28,8 @@ export class StockComponent implements OnInit {
 
   scale_input_error: string = '';
 
+  scale_id : number = -1;
+
   type_info : any = {
     1 : {'name':'Sin báscula', form_use:true, text: 1 },
     2 : {'name':'Con báscula', form_use:false, text:2},
@@ -127,6 +129,8 @@ export class StockComponent implements OnInit {
 
   actual_modal : any;
 
+  new_admin: number = -1;
+
   constructor(private router: Router, private ls : LocalStorageService, private ss: StockService, private spinner: NgxSpinnerService) {
     this.menu = this.router.url.replace(/\//g, '');
     if(this.menu == 'inventario')
@@ -146,6 +150,7 @@ export class StockComponent implements OnInit {
     ]
 
     forkJoin(services).subscribe( (data)=>{
+      // console.log(data)
       let scale_data : any = data[0];
 
       if(scale_data['error']){
@@ -154,8 +159,10 @@ export class StockComponent implements OnInit {
         return;
       }
       this.user_type = scale_data['user_type'];
-      if( 'current_users' in scale_data)
+      if( this.user_type == 3 ){
         this.process_users(scale_data['current_users'])
+        this.scale_id = scale_data['scale_id'];
+      }
       this.spinner.hide("loader");
     });
 
@@ -173,9 +180,26 @@ export class StockComponent implements OnInit {
     console.log("eliminar ingrediente", item_id);
   }
 
-  restart_scale(event: any){
-    event.preventDefault();
-    console.log("reiniciar bascula");
+  restart_scale(){
+    this.spinner.show('loader');
+    let form = new FormData();
+    // form.append("scale_id", this.scale_id.toString());
+    // form.append('restart', '1');
+    this.spinner.show("loader");
+    this.ss.restart_scale({"scale_id" : this.scale_id.toString()}).subscribe( (data : any)=>{
+      // console.log(data);
+      if(data['error']){
+        this.error_server = SERVER_MESSAGES[data['message']];
+        this.spinner.hide("loader");
+        return;
+      }
+      this.user_type = 1;
+      this.scale_id = -1;
+      this.scale_users = [];
+      this.current_users = [];
+      this.associated_scale = "";
+      this.spinner.hide("loader");
+    });
   }
 
   change_user_type(event : any, status:number, user_id: any, position : number = -1 ){
@@ -183,6 +207,7 @@ export class StockComponent implements OnInit {
       event.preventDefault();
     let form = new FormData();
     let is_current = 0;
+    let new_status = 1;
     this.error_server = '';
 
     if(status == 2 && this.current_users.length + 1 == 5){
@@ -193,6 +218,7 @@ export class StockComponent implements OnInit {
     if(status == 3){ //3 a 1 y 1 a 3
       form.append('admin_id', this.user_id);
       is_current = 1;
+      new_status = 2;
     }
 
     else if(this.user_id == user_id){ // 2 a 1, 4 a 1
@@ -208,9 +234,9 @@ export class StockComponent implements OnInit {
             return;
           }
           if( is_current){
-            this.user_type = 1;
-            // this.current_users = [];
-            // this.scale_users = [];
+            this.user_type = new_status;
+            this.current_users = [];
+            this.scale_users = [];
           }
           else if( status == 2)
             this.add_user(user_id, position);
@@ -323,6 +349,8 @@ export class StockComponent implements OnInit {
     if( result['accepted'] ){
       if(result['action'] == 'remove_scale')
         this.change_user_type(null,1, this.user_id);
+      else if( result['action'] == 'restart_scale' )
+        this.restart_scale();
     }
   }
 

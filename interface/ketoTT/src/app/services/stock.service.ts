@@ -28,4 +28,10 @@ export class StockService {
   change_user_type(data: any){
     return this.http.put(this.url + this.url_scale, data, {});
   }
+
+  restart_scale(data: any){
+    let header = new HttpHeaders();
+    header.set('Content-Type', 'application/json');
+    return this.http.delete(this.url + this.url_scale, { headers: header, params: data} );
+  }
 }

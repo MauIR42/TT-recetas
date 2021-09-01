@@ -80,7 +80,9 @@ class ScaleUpdate(models.Model):
 	id = models.AutoField(auto_created=True, primary_key=True, serialize=False)
 	active = models.BooleanField(default = True)
 	update_type = models.ForeignKey(UpdateType, on_delete=models.PROTECT)
-	user_id = models.ForeignKey(User, on_delete=models.PROTECT)
+	user = models.ForeignKey(User, on_delete=models.PROTECT, null = False)
+	scale = models.ForeignKey(Scale, on_delete=models.PROTECT, null = False)
+	created_at = models.DateTimeField(default=timezone.now, verbose_name='created at')
 
 	class Meta:
 		db_table = "scale_update"
