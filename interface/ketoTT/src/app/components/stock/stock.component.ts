@@ -23,6 +23,7 @@ export class StockComponent implements OnInit {
   loader_message : string = '';
 
   error_server: string = '';
+  success_message : string = '';
 
   scale_regex : any = /^[a-zA-Z0-9]{3}-[a-zA-Z0-9]{3}$/;
 
@@ -47,89 +48,23 @@ export class StockComponent implements OnInit {
 
   menu = 'scale';
 
-  stock_items : any = [
-    {
-      'name' : 'Jamón',
-      'id':'1',
-      'quantity':'1',
-      'q_type': 'kg.',
-      'type': 'subido',
-      'created_at': '08/08/2021'
-    },
-    {
-      'name' : 'Leche',
-      'id':'1',
-      'quantity':'1',
-      'q_type': 'Lt.',
-      'type': 'subido',
-      'created_at': '07/08/2021'
-    },
-    {
-      'name' : 'Harina de almendras',
-      'id':'1',
-      'quantity':'500',
-      'q_type': 'gr.',
-      'type': 'lista de compra',
-      'created_at': '07/08/2021'
-    },
-    {
-      'name' : 'Tocino',
-      'id':'1',
-      'quantity':'250',
-      'q_type': 'gr.',
-      'type': 'subido',
-      'created_at': '08/08/2021'
-    },
-    {
-      'name' : 'Huevo',
-      'id':'1',
-      'quantity':'400',
-      'q_type': 'gr.',
-      'type': 'subido',
-      'created_at': '07/08/2021'
-    },
-    {
-      'name' : 'Queso Oaxaca',
-      'id':'1',
-      'quantity':'1.5',
-      'q_type': 'kg.',
-      'type': 'lista de compra',
-      'created_at': '07/08/2021'
-    },
-    {
-      'name' : 'Aceite de oliva',
-      'id':'1',
-      'quantity':'200',
-      'q_type': 'ml.',
-      'type': 'subido',
-      'created_at': '08/08/2021'
-    },
-    {
-      'name' : 'Cacao en polvo',
-      'id':'1',
-      'quantity':'20',
-      'q_type': 'gr.',
-      'type': 'subido',
-      'created_at': '07/08/2021'
-    },
-    {
-      'name' : 'Camaron',
-      'id':'1',
-      'quantity':'200',
-      'q_type': 'gr.',
-      'type': 'lista de compra',
-      'created_at': '07/08/2021'
-    },
-  ]
+  stock_items : any = [ ];
+
+  pending_items : any = [];
 
   modal_info : any = {
     'remove_scale' : '¿Deseas desvincularse de la báscula? Para volver a usarla deberá reiniciar el proceso.',
-    'restart_scale' : '¿Deseas reiniciar la báscula? esta acción no se puede deshacer.'
+    'restart_scale' : '¿Deseas reiniciar la báscula? Esta acción no se puede deshacer.',
+    'delete_item' : '¿Deseas eliminar este ingrediente de tu inventario? Esta acción no se puede deshacer.'
   }
 
   actual_modal : any;
 
   new_admin: number = -1;
+
+  delete_index : number = -1;
+
+  edit_item : any = null;
 
   constructor(private router: Router, private ls : LocalStorageService, private ss: StockService, private spinner: NgxSpinnerService) {
     this.menu = this.router.url.replace(/\//g, '');
@@ -146,13 +81,13 @@ export class StockComponent implements OnInit {
       this.router.navigate([""])
     let services = [
       this.ss.get_scale_info({'user_id': this.user_id}),
-      // this.ss.get_inventory_info({'user_id': this.user_id}),
+      this.ss.get_stock({'user_id': this.user_id}),
     ]
 
     forkJoin(services).subscribe( (data)=>{
-      // console.log(data)
+      console.log(data)
       let scale_data : any = data[0];
-
+      let stock_data : any = data[1];
       if(scale_data['error']){
         this.error_server = SERVER_MESSAGES[scale_data['message']];
         this.spinner.hide("loader");
@@ -163,31 +98,52 @@ export class StockComponent implements OnInit {
         this.process_users(scale_data['current_users'])
         this.scale_id = scale_data['scale_id'];
       }
+
+      if(stock_data['error']){
+        this.error_server = SERVER_MESSAGES[stock_data['message']];
+        this.spinner.hide("loader");
+        return;
+      }
+      this.stock_items = stock_data['subidos'];
+      this.pending_items = stock_data['pendientes'];
       this.spinner.hide("loader");
     });
 
-
   }
 
-
-  edit_item(event: any, item_id: number){
+  start_edit(event:any, item:any){
     event.preventDefault();
-    console.log("editar ingrediente", item_id);
+    this.edit_item = item;
   }
 
-  delete_item(event: any, item_id: number){
-    event.preventDefault();
-    console.log("eliminar ingrediente", item_id);
+  // edit_item(event: any, index: number){
+  //   event.preventDefault();
+  //   console.log("editar ingrediente", index);
+  // }
+
+  delete_item(){
+    if(this.delete_index > -1){
+      let form = new FormData();
+      form.append('item_id',this.stock_items[this.delete_index]['id']);
+      form.append('deactivate', '1');
+      this.spinner.show("loader");
+      this.ss.put_stock(form).subscribe( (data : any)=>{
+        if(data['error']){
+          this.error_server = SERVER_MESSAGES[data['message']];
+          this.spinner.hide("loader");
+          return;
+        }
+        this.spinner.hide("loader");
+        this.reload_stock("Ingrediente eliminado");
+      });
+    }
   }
 
   restart_scale(){
     this.spinner.show('loader');
     let form = new FormData();
-    // form.append("scale_id", this.scale_id.toString());
-    // form.append('restart', '1');
     this.spinner.show("loader");
     this.ss.restart_scale({"scale_id" : this.scale_id.toString()}).subscribe( (data : any)=>{
-      // console.log(data);
       if(data['error']){
         this.error_server = SERVER_MESSAGES[data['message']];
         this.spinner.hide("loader");
@@ -271,10 +227,6 @@ export class StockComponent implements OnInit {
     })
   }
 
-  check(){
-    console.log("se revisa");
-  }
-
   send_scale_id(){
     this.scale_input_error = '';
     if(this.associated_scale.length < 0){
@@ -334,9 +286,11 @@ export class StockComponent implements OnInit {
 
   }
 
-  open_modal(type : string, event : any = null){
+  open_modal(type : string, event : any = null, delete_index : any = null){
     if(event != null)
       event.preventDefault();
+    if(delete_index)
+      this.delete_index = delete_index;
 
     this.actual_modal = {
       'type' : type,
@@ -351,12 +305,32 @@ export class StockComponent implements OnInit {
         this.change_user_type(null,1, this.user_id);
       else if( result['action'] == 'restart_scale' )
         this.restart_scale();
+      else if( result['action'] == 'delete_item' )
+        this.delete_item();
     }
   }
 
   open_ingredient_modal(event:any){
     event.preventDefault();
     $('#ingredient_modal').modal('show');
+  }
+
+  reload_stock(success_message: string){
+    this.stock_items  = [ ];
+    this.pending_items  = [];
+    this.delete_index  = -1;
+    this.spinner.show("loader");
+    this.ss.get_stock({'user_id': this.user_id}).subscribe( (stock_data : any) =>{
+      if(stock_data['error']){
+        this.error_server = SERVER_MESSAGES[stock_data['message']];
+        this.spinner.hide("loader");
+        return;
+      }
+      this.stock_items = stock_data['subidos'];
+      this.pending_items = stock_data['pendientes'];
+      this.spinner.hide("loader");
+      this.success_message = success_message;
+    });
   }
 
 }

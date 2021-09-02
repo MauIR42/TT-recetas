@@ -20,6 +20,12 @@
 			    <span aria-hidden="true">&times;</span>
 			  </button>
 		</div>
+		<div class="alert alert-success col-12 text-center alert-dismissible fade show" role="alert" *ngIf="success_message.length > 0">
+				{{success_message}}
+				<button type="button" class="close" (click)="success_message = ''">
+			    <span aria-hidden="true">&times;</span>
+			  </button>
+		</div>
 	</div>
 	<div class="row" [class.d-none]="menu != 'bascula'">
 
@@ -129,43 +135,70 @@
 		<div class="col-6 col-md-4 pt-2">
 			<a  href="#" (click)="open_ingredient_modal($event)"><img src="assets/images/plus-circle-fill-blue.svg" class="img-fluid d-inline pr-2 icon-button" ><p class="strong_blue_clor d-inline h">Agregar ingredientes</p></a>
 		</div>			
-		<div class="col-12 text-center pt-3 table-responsive">	
+		<div class="col-12 text-center pt-3 table-responsive" *ngIf="stock_items.length > 0">	
 			<table class="table table-striped">
 				<tr class="blue-main-background">
 					<th><p>Ingrediente</p></th>
 					<th><p>Cantidad</p></th>
 					<th><p>Fecha</p></th>
-					<th><p>Tipo</p></th>
 					<th><p>Acciones</p></th>
 				</tr>
-				<tr *ngFor="let item of stock_items">
+				<tr *ngFor="let item of stock_items; let i = index">
 					<td>
-						{{item.name}}
+						{{item.ingredient_name}}
 					</td>
 					<td>
-						{{item.quantity}} {{item.q_type}}
+						{{item.quantity}} {{item.unit}}.
 					</td>
 					<td>
-						{{item.created_at}}
+						{{item.created_at | datetimeOne}}
 					</td>
+
 					<td>
-						{{item.type}}
-					</td>
-					<td>
-						<a href="#" *ngIf="item.type == 'subido'" (click)="edit_item($event, item.id)"><img src="assets/images/pencil-square-blue.svg" class="img-fluid mr-md-3 table-icon"></a>
-						<!-- <div class="w-100  pb-3 d-block d-md-none"></div>
-						<div class="w-100  pb-3 d-block d-md-none"></div> -->
-						<!-- <br class="d-block d-md-none">
-						<br class="d-block d-md-none"> -->
-						<a href="#" *ngIf="item.type == 'subido'" (click)="delete_item($event, item.id)"><img src="assets/images/x-square-fill-orange.svg" class="img-fluid table-icon"></a>
+						<a href="#" (click)="start_edit($event, item)"><img src="assets/images/pencil-square-blue.svg" class="img-fluid mr-md-3 table-icon"></a>
+
+						<a href="#" (click)="open_modal('delete_item', $event ,i )"><img src="assets/images/x-square-fill-orange.svg" class="img-fluid table-icon"></a>
 					</td>
 				</tr>
 			</table>
 		</div>
+		<div class="col-12 text-center" *ngIf="stock_items.length == 0">
+			<h5>No tienes ingredientes agregados, cuando compres ingredientes subelos con tu báscula o desde aquí.</h5>
+		</div>
+
+		<div class="col-12 text-center col-md-4">
+			<h3>Ingredientes pendientes</h3>
+		</div>
+
+		<div class="col-12 text-center pt-3 table-responsive" *ngIf="pending_items.length > 0">	
+			<table class="table table-striped">
+				<tr class="blue-main-background">
+					<th><p>Ingrediente</p></th>
+					<th><p>Cantidad</p></th>
+					<th><p>Fecha</p></th>
+				</tr>
+				<tr *ngFor="let item of pending_items">
+					<td>
+						{{item.ingredient_name}}
+					</td>
+					<td>
+						{{item.quantity}} {{item.unit}}.
+					</td>
+					<td>
+						{{item.created_at | datetimeOne}}
+					</td>
+				</tr>
+			</table>
+		</div>
+
+		<div class="col-12 text-center" *ngIf="pending_items.length == 0">
+			<h5>¡Hurra! no tienes ingredientes pendientes espera, ¿Agregaste recetas para esta semana?</h5>
+		</div>
+
 
 	</div>
 </div>
 
 
 <app-confirmation-modal [modal_info]="actual_modal" (accepted)="check_action($event)"></app-confirmation-modal>
-<app-ingredient-modal></app-ingredient-modal>
+<app-ingredient-modal (elements_edited)="reload_stock($event)" [edit_info]= edit_item></app-ingredient-modal>

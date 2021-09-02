@@ -19,6 +19,7 @@ import { ResetPasswordComponent } from './components/reset-password/reset-passwo
 import { FormModalComponent } from './components/modal/form-modal/form-modal.component';
 import { HeathModalComponent } from './components/modal/heath-modal/heath-modal.component';
 import { IngredientModalComponent } from './components/modal/ingredient-modal/ingredient-modal.component';
+import { DatetimeOnePipe } from './pipes/datetime-one.pipe';
 
 @NgModule({
   declarations: [
@@ -34,6 +35,7 @@ import { IngredientModalComponent } from './components/modal/ingredient-modal/in
     FormModalComponent,
     HeathModalComponent,
     IngredientModalComponent,
+    DatetimeOnePipe,
   ],
   imports: [
     BrowserModule,

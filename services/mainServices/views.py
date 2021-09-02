@@ -13,7 +13,9 @@ import random
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
 from services.settings import EMAIL_HOST, ANGULAR_DIR
-from django.db.models import F, Q
+from django.db.models import F, Q, Case, When, Value
+from ast import literal_eval
+import json
 
 class AuthUserView(APIView):
 	def get(self, request, *args, **kwargs):
@@ -245,4 +247,149 @@ class ScaleView(APIView):
 		except Exception as e:
 			print(e)
 			return JsonResponse(data={"error": True,  "message":"internal_server_error"})
+
+class IngredientView(APIView):
+
+	def get(self, request, *args, **kwargs):
+		try:
+			ingredients = list(Ingredient.objects.filter(~Q(type_id = 2) & Q(active=True)).annotate(
+				unit = Case(
+					When(type_id = 1, then=Value('pzs')),
+					When(type_id = 3, then=Value('ml')),
+					)
+				).values('unit','id','name'))
+			return JsonResponse(data={'error': False, 'ingredients' : ingredients }, safe=False)
+		except Exception as e:
+			print(e)
+			return JsonResponse(data={"error": True,  "message":"internal_server_error"})
+
+class StockView(APIView):
+
+	def get(self, request, *args, **kwargs):
+		try:
+			user_id = request.GET.get('user_id','')
+			user_stock = Inventory.objects.filter(user_id = user_id, active= True).annotate(unit = Case(
+					When(ingredient__type_id = 1, then=Value('pzs')),
+					When(ingredient__type_id = 3, then=Value('ml')),
+					When(ingredient__type_id = 3, then=Value('gm')),
+					), ingredient_name=F('ingredient__name')).values()
+			user_stock = list(user_stock)
+			subidos = []
+			pendientes = []
+			units = {
+				'gr' : 'Kg',
+				'ml' : 'L',
+			}
+			for element in user_stock:
+				if element['quantity'] > 1000 and element['unit'] in units:
+					element['quantity'] = element['quantity'] / 1000
+					element['unit'] = units[ element['unit'] ]
+				if element['type_id'] == 1:
+					subidos.append(element)
+				else:
+					pendientes.append(element)
+
+			return JsonResponse(data={'error': False, 'subidos' : subidos, 'pendientes': pendientes }, safe=False)
+
+		except Exception as e:
+			print(e)
+			return JsonResponse(data={"error": True,  "message":"internal_server_error"})
+
+	def post(self, request, *args, **kwargs):
+		try:
+			data =  request.POST.dict()
+			if not ( 'user_id' in data and 'ingredients' in data ):
+				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
+			data['ingredients'] = literal_eval(data['ingredients'])
+
+			to_bulk = []
+			for ing in data['ingredients']:
+				to_bulk.append( Inventory(quantity=ing['quantity'], ingredient_id=ing['id'], user_id=data['user_id'], type_id=ing['type']) )
+			Inventory.objects.bulk_create( to_bulk )
+			return JsonResponse(data={'error': False}, safe=False)
+		except Exception as e:
+			print(e)
+			return JsonResponse(data={"error": True,  "message":"internal_server_error"})
+
+	def put(self, request, *args, **kwargs):
+		try:
+			data =  request.POST.dict()
+			if not ('item_id' in data) :
+				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
+			if 'deactivate' in data:
+				Inventory.objects.filter(id= data['item_id']).update(active= False)
+				return JsonResponse(data={'error': False}, safe=False)
+			Inventory.objects.filter(id= data['item_id']).update(quantity=data['quantity'], ingredient_id=data['ingredient_id'], type_id=data['type'])
+			return JsonResponse(data={'error': False}, safe=False)
+		except Exception as e:
+			print(e)
+			return JsonResponse(data={"error": True,  "message":"internal_server_error"})
+
+class EmbebbedScaleView(APIView):
+
+	def get(self, request, *args, **kwargs):
+		try:
+			access_code = request.GET.get('access_code','')
+			print(access_code)
+			if not access_code:
+				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
+			scale = Scale.objects.filter(access_code= access_code, active=True).first()
+			if not scale:
+				return JsonResponse(data={"error": True,  "message":"scale_not_exists"})
+
+			updates = ScaleUpdate.objects.filter(scale=scale, active=True).annotate(username=F('user_id__username')).order_by('update_type_id').values()
+
+			format_updates = {
+				'add':{
+
+				},
+				'delete': {
+
+				},
+				'ingredients': {
+
+				}
+			}
+
+			not_checked = []
+			for update in updates:
+				print(update['update_type_id'])
+				if update['update_type_id'] == 3:
+					format_updates['add'][update['username']] = update['user_id']
+				if update['update_type_id'] == 4:
+					format_updates['delete'][update['username']] = update['user_id']
+				if update['update_type_id'] == 5:
+					if update['username'] in format_updates['delete']:
+						continue
+					else:
+						print("obteniendo ingredientes")
+						print("id_usuario: ",update['user_id'])
+						pending = Inventory.objects.filter(user_id = update['user_id'], active = True, type_id=2, ingredient_id__type_id=2)\
+						.annotate(ingredient_name=F('ingredient_id__name')).order_by('ingredient_name').values()
+						if len(pending) > 0:
+							format_updates['ingredients'][update['username']] = {}
+							user_ingr = format_updates['ingredients'][update['username']]
+							for pen in pending:
+								print(pen['ingredient_name'])
+								user_ingr[pen['ingredient_name']] = pen['ingredient_id']
+			ScaleUpdate.objects.filter(scale=scale, active=True).update(active = False)			
+			return JsonResponse(data={"error": False, 'add': format_updates['add'], 'delete': format_updates['delete'], 'ingredients':format_updates['ingredients']})
+		except Exception as e:
+			print(e)
+			return JsonResponse(data={"error": True,  "message":"internal_server_error"})
+
+	def post(self, request, *args, **kwargs):
+		try:
+			data =  request.POST.dict()
+			if not ( 'user_id' in data and 'access_code' in data and 'quantity' in data and 'ingredient_id' in data):
+					return JsonResponse(data={"error": True, "message": 'incomplete_data' })
+			scale = Scale.objects.filter(access_code= data['access_code'], active=True).first()
+			if not scale:
+					return JsonResponse(data={"error": True,  "message":"scale_not_exists"})
+			Inventory.objects.create(quantity=data['quantity'], ingredient_id=data['ingredient_id'], type_id=1, user_id = data['user_id'])
+			return JsonResponse(data={"error": False})
+		except Exception as e:
+			print(e)
+			return JsonResponse(data={"error": True,  "message":"internal_server_error"})
+
 

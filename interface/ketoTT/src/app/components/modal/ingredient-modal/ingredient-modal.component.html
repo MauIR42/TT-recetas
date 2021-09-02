@@ -1,15 +1,71 @@
 <div class="modal fade" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" id="ingredient_modal">
-  <div class="modal-dialog modal-dialog-centered">
+  <ngx-spinner name="loader" [fullScreen]="false" type="ball-spin-clockwise-fade" size="medium" color = "#0AAFC6">
+  <p class="loading">Cargando...</p>
+  </ngx-spinner>
+  <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
       <div class="modal-header orange-light-background">
-        <h5 class="modal-title ">Agregar ingredientes</h5>
+        <h5 class="modal-title ">{{type}} ingredientes</h5>
       </div>
       <div class="modal-body">
-        
+      		<table class="table table-striped mx-lg-2 text-center table-responsive-lg" *ngIf="!edit_mode">
+            <tr class="blue-main-background">
+              <th><p>Ingrediente</p></th>
+              <th><p>Cantidad</p></th>
+              <th><p>Acciones</p></th>
+            </tr>
+            <tr *ngFor="let item of stock_items; let i = index">
+              <td>
+                {{item.name}}
+              </td>
+              <td>
+                {{item.quantity}} {{item.unit}}
+              </td>
+              <td>
+                <a href="#" (click)="delete_item($event, i)"><img src="assets/images/x-circle-fill-orange.svg" class="img-fluid table-icon"></a>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <select id="admin_sel" class="custom-select mb-2 mr-sm-2" [(ngModel)]="ingredient_selected" name="ingr_sel">
+                  <option [ngValue]="preview" selected disabled>Selecciona una opción...</option>
+                  <option *ngFor="let ingredient of available_ingredients" [ngValue]="ingredient" >{{ingredient.name}}</option>
+                </select>
+              </td>
+              <td>
+                <div class="input-group  w-100">
+                  <input type="number"placeholder="0.0" [(ngModel)]="quantity" class="w-75" >
+                  <div class="input-group-append w-25" >
+                    <span class="input-group-text">{{ingredient_selected.unit}}</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <a href="#" (click)="add_item($event)"><img src="assets/images/check-circle-fill-green.svg" class="img-fluid table-icon"></a>
+              </td>
+            </tr>
+          </table>
+            <div class="input-group  w-100" *ngIf="edit_mode">
+                <select id="admin_sel_edit" class="custom-select " [(ngModel)]="ingredient_selected" name="ingr_sel_edit">
+                    <option [ngValue]="preview" selected disabled>Selecciona una opción...</option>
+                    <option *ngFor="let ingredient of available_ingredients" [ngValue]="ingredient" >{{ingredient.name}}</option>
+                </select>
+                <input type="number"placeholder="0.0" [(ngModel)]="quantity" >
+                <div class="input-group-append" >
+                  <span class="input-group-text">{{ingredient_selected.unit}}</span>
+                </div>
+            </div>
+          <div class="alert alert-danger col-12 text-center alert-dismissible fade show" role="alert" *ngIf="error_server.length > 0">
+              {{error_server}}
+              <button type="button" class="close" (click)="error_server = ''">
+                <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
       </div>
       <div class="modal-footer">
-      	<button type="button" class="btn btn-normal-blue" (click)="check()">Aceptar</button>
-        <button type="button" class="btn btn-normal-orange" (click)="check()">Rechazar</button>
+      	<button type="button" class="btn btn-normal-blue" (click)="save_ingredients()" *ngIf="!edit_mode">Guardar</button>
+        <button type="button" class="btn btn-normal-blue" (click)="edit_ingredient()" *ngIf="edit_mode">Editar</button>
+        <button type="button" class="btn btn-normal-orange" (click)="cancel()"> Cancelar</button>
       </div>
     </div>
   </div>
