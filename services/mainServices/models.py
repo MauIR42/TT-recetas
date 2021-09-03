@@ -47,7 +47,7 @@ class Stat(models.Model):
 class UserStat(models.Model):
 	id = models.AutoField(auto_created=True, primary_key=True, serialize=False)
 	created_at = models.DateTimeField(default=timezone.now, verbose_name='created at')
-	value = models.DecimalField(max_digits= 3, decimal_places= 2)
+	value = models.DecimalField(max_digits= 4, decimal_places= 2)
 	stat_type = models.ForeignKey(Stat, on_delete=models.PROTECT)
 	user = models.ForeignKey(User, on_delete=models.PROTECT)
 	week_number = models.IntegerField(null = False)

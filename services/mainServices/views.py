@@ -13,7 +13,7 @@ import random
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
 from services.settings import EMAIL_HOST, ANGULAR_DIR
-from django.db.models import F, Q, Case, When, Value
+from django.db.models import F, Q, Case, When, Value, Max
 from ast import literal_eval
 import json
 
@@ -155,7 +155,7 @@ class UserStatView(APIView):
 			if user:
 				user_stats = UserStat.objects.filter(user_id = user_id);
 				if( user_stats):
-					return JsonResponse(data={"error": False, 'data':  { 'info':user_stats.values(), 'has_data': True} })
+					return JsonResponse(data={"error": False, 'data':  { 'info':list(user_stats.values()), 'has_data': True} })
 				stats = list(Stat.objects.all().values())
 				return JsonResponse(data={"error": False, 'data': { 'info':stats, 'has_data':False} })
 			return JsonResponse(data={"error": True, "message": 'user_not_exists'})
@@ -165,11 +165,27 @@ class UserStatView(APIView):
 
 	def post(self, request, *args, **kwargs):
 		try:
-			user_id = request.GET.get('user_id', 0)
-			imc = request.GET.get( "imc" , 0)
-			weight = request.GET.get( "weight" , 0)
-			diameter = request.GET.get( "diameter" , 0)
+			data = request.POST.dict()
+			week = 1
 
+			data['weight'] = round(float(data['weight']), 2)
+			data['imc'] = round(float(data['imc']), 2)
+			data['diameter'] = round(float(data['diameter']), 2)
+
+			if not ( data['user_id'] and data['imc'] and data['weight'] and data['diameter']):
+				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
+
+			last_week = UserStat.objects.filter(user_id=data['user_id'], active=True)
+			print(last_week)
+			if last_week['week_number__max'] :
+				week = last_week['week_number__max'] + 1
+			stats = []
+			stats.append(UserStat(value=data['imc'], week_number=week, stat_type_id=2, user_id=data['user_id']))
+			stats.append(UserStat(value=data['weight'], week_number=week, stat_type_id=3, user_id=data['user_id']))
+			stats.append(UserStat(value=data['diameter'], week_number=week, stat_type_id=4, user_id=data['user_id']))
+			UserStat.objects.bulk_create( stats )
+
+			return JsonResponse(data={"error": False})
 
 
 		except Exception as e:

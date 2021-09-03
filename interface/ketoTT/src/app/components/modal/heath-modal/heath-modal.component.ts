@@ -30,7 +30,7 @@ export class HeathModalComponent implements OnInit {
 
   close_modal(){
     this.form_info['diameter']['value'] = 0;
-     this.form_info['weight']['value'] = 0;
+    this.form_info['weight']['value'] = 0;
     $('#health_form').modal('hide');
   }
 
@@ -60,14 +60,17 @@ export class HeathModalComponent implements OnInit {
       form.append('weight', this.form_info['weight']['value']);
       form.append('diameter', this.form_info['diameter']['value']);
       form.append('user_id', this.user_id.toString());
+      this.spinner.show("loader");
       this.us.post_stat_info(form).subscribe( (data: any)=>{
         console.log(data);
         if(data['error']){
-          // $("#edit_form").modal("hide");
+          this.spinner.hide("loader");
           this.server_error = SERVER_MESSAGES[data['message']];
           return;
         }
 
+        this.spinner.hide("loader");
+        this.close_modal();
       });
     }
 
