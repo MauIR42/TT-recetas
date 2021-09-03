@@ -30,7 +30,7 @@
 	<div class="row" [class.d-none]="menu != 'bascula'">
 
 		<!-- <div > -->
-			<h3 class="col-12">{{type_info[user_type]['name']}}</h3>
+			<h3 class="col-12 strong_blue_clor">{{type_info[user_type]['name']}}</h3>
 		<!-- </div> -->
 		<div class="col-12" *ngIf="type_info[user_type]['text'] == 1">
 			<p><b>Agrega una báscula.</b></p>
@@ -126,72 +126,79 @@
 		</div>
 	</div>
 	<div class="row" [class.d-none]="menu != 'inventario'">
-		<div class="col-12 text-center col-md-4">
+		<div class="col-12 col-md-4 strong_blue_clor">
 			<h3>Inventario</h3>
 		</div>
-		<div class="col-6 col-md-4 pt-2">
+		<div class="col-6 col-md-4 pt-2 text-center">
 			<a  href="#"><img src="assets/images/card-list-blue.svg" class="img-fluid d-inline pr-2 icon-button" ><p class="strong_blue_clor d-inline h">Ver ingredientes pendientes</p></a>
 		</div>
-		<div class="col-6 col-md-4 pt-2">
+		<div class="col-6 col-md-4 pt-2 text-center">
 			<a  href="#" (click)="open_ingredient_modal($event)"><img src="assets/images/plus-circle-fill-blue.svg" class="img-fluid d-inline pr-2 icon-button" ><p class="strong_blue_clor d-inline h">Agregar ingredientes</p></a>
 		</div>			
-		<div class="col-12 text-center pt-3 table-responsive" *ngIf="stock_items.length > 0">	
-			<table class="table table-striped">
-				<tr class="blue-main-background">
-					<th><p>Ingrediente</p></th>
-					<th><p>Cantidad</p></th>
-					<th><p>Fecha</p></th>
-					<th><p>Acciones</p></th>
-				</tr>
-				<tr *ngFor="let item of stock_items; let i = index">
-					<td>
-						{{item.ingredient_name}}
-					</td>
-					<td>
-						{{item.quantity}} {{item.unit}}.
-					</td>
-					<td>
-						{{item.created_at | datetimeOne}}
-					</td>
+		<div class="col-12 text-center pt-3 table-responsive" *ngIf="stock_items.length > 0">
+			<table id="stock" class="display">
+				<thead>
+					<tr class="blue-main-background">
+						<th><p>Ingrediente</p></th>
+						<th><p>Cantidad</p></th>
+						<th><p>Fecha de subida</p></th>
+						<th><p>Acciones</p></th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr *ngFor="let item of stock_items; let i = index">
+						<td>
+							{{item.ingredient_name}}
+						</td>
+						<td>
+							{{item.quantity}} {{item.unit}}.
+						</td>
+						<td>
+							{{item.created_at | datetimeOne}}
+						</td>
 
-					<td>
-						<a href="#" (click)="start_edit($event, item)"><img src="assets/images/pencil-square-blue.svg" class="img-fluid mr-md-3 table-icon"></a>
+						<td>
+							<a href="#" (click)="start_edit($event, item)" *ngIf="item.unit != 'gr' && item.unit != 'Kg'"><img src="assets/images/pencil-square-blue.svg" class="img-fluid mr-md-3 table-icon"></a>
 
-						<a href="#" (click)="open_modal('delete_item', $event ,i )"><img src="assets/images/x-square-fill-orange.svg" class="img-fluid table-icon"></a>
-					</td>
-				</tr>
+							<a href="#" (click)="open_modal('delete_item', $event ,i )"><img src="assets/images/x-square-fill-orange.svg" class="img-fluid table-icon"></a>
+						</td>
+					</tr>
+				</tbody>
 			</table>
 		</div>
-		<div class="col-12 text-center" *ngIf="stock_items.length == 0">
+		<div class="col-12 text-center pt-5 pt-lg-5 pb-5 pb-lg-5" *ngIf="stock_items.length == 0">
 			<h5>No tienes ingredientes agregados, cuando compres ingredientes subelos con tu báscula o desde aquí.</h5>
 		</div>
-
-		<div class="col-12 text-center col-md-4">
+		<div class="col-12 col-md-4 strong_blue_clor">
 			<h3>Ingredientes pendientes</h3>
 		</div>
 
 		<div class="col-12 text-center pt-3 table-responsive" *ngIf="pending_items.length > 0">	
-			<table class="table table-striped">
-				<tr class="blue-main-background">
-					<th><p>Ingrediente</p></th>
-					<th><p>Cantidad</p></th>
-					<th><p>Fecha</p></th>
-				</tr>
-				<tr *ngFor="let item of pending_items">
-					<td>
-						{{item.ingredient_name}}
-					</td>
-					<td>
-						{{item.quantity}} {{item.unit}}.
-					</td>
-					<td>
-						{{item.created_at | datetimeOne}}
-					</td>
-				</tr>
+			<table class="table table-striped" id="pending_stock">
+				<thead>
+					<tr class="blue-main-background">
+						<th><p>Ingrediente</p></th>
+						<th><p>Cantidad</p></th>
+						<th><p>Fecha de creación</p></th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr *ngFor="let item of pending_items">
+						<td>
+							{{item.ingredient_name}}
+						</td>
+						<td>
+							{{item.quantity}} {{item.unit}}.
+						</td>
+						<td>
+							{{item.created_at | datetimeOne}}
+						</td>
+					</tr>
+				</tbody>
 			</table>
 		</div>
 
-		<div class="col-12 text-center" *ngIf="pending_items.length == 0">
+		<div class="col-12 text-center pt-5 pt-lg-5" *ngIf="pending_items.length == 0">
 			<h5>¡Hurra! no tienes ingredientes pendientes espera, ¿Agregaste recetas para esta semana?</h5>
 		</div>
 

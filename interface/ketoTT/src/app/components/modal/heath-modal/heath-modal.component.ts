@@ -7,8 +7,12 @@ declare const $: any;
 })
 export class HeathModalComponent implements OnInit {
 
+  @Input() height : number = 0;
 
-  data: any;
+  form_info : any = {
+    'waist': {'value': 0, 'validations': ['not_null', 'positive_number']},
+    'weight': {'value': 0, 'validations': ['not_null', 'positive_number']}
+  }
 
   constructor() { }
 

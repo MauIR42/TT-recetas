@@ -66,6 +66,26 @@ export class StockComponent implements OnInit {
 
   edit_item : any = null;
 
+  language : any = {
+    "emptyTable":     "No hay ingredientes en la tabla",
+    "info":           "mostrando _START_ a _END_ de  _TOTAL_ ingredientes",
+    "infoEmpty":      "No hay ingredientes por mostrar",
+    "infoFiltered":   "(filtrado de un total de _MAX_ ingredientes)",
+    "lengthMenu":     "mostrar hasta _MENU_ ingredientes",
+    "search":         "Buscar:",
+    "zeroRecords":    "No se encontraron datos",
+    "paginate": {
+        "first":      "Primera",
+        "last":       "Última",
+        "next":       "Siguiente",
+        "previous":   "Anterior"
+    },
+    "aria": {
+        "sortAscending":  ": activar para ordenar en ascenso",
+        "sortDescending": ": activar para ordenar en descenso"
+    }
+  }
+
   constructor(private router: Router, private ls : LocalStorageService, private ss: StockService, private spinner: NgxSpinnerService) {
     this.menu = this.router.url.replace(/\//g, '');
     if(this.menu == 'inventario')
@@ -76,6 +96,8 @@ export class StockComponent implements OnInit {
    }
 
   ngOnInit(): void {
+    // let header: any = ['titulo1', 'titulo2', 'titulo3'];
+    // let data: any = [['test','test2','test3'], ['test','test2','test3'], ['test','test2','test3'], ['test','test2','test3']];
     this.user_id = this.ls.getItem("TT_id");
     if(! this.user_id)
       this.router.navigate([""])
@@ -106,6 +128,12 @@ export class StockComponent implements OnInit {
       }
       this.stock_items = stock_data['subidos'];
       this.pending_items = stock_data['pendientes'];
+      let that = this;
+      $( document ).ready(function() {
+          console.log( "ready!" );
+          $('#stock').DataTable({ "language": that.language });
+          $('#pending_stock').DataTable({ "language": that.language });
+      });
       this.spinner.hide("loader");
     });
 
@@ -316,6 +344,8 @@ export class StockComponent implements OnInit {
   }
 
   reload_stock(success_message: string){
+    $('#stock').DataTable().destroy();
+    $('#pending_stock').DataTable().destroy();
     this.stock_items  = [ ];
     this.pending_items  = [];
     this.delete_index  = -1;
@@ -328,8 +358,15 @@ export class StockComponent implements OnInit {
       }
       this.stock_items = stock_data['subidos'];
       this.pending_items = stock_data['pendientes'];
+      let that = this;
+      $( document ).ready(function() {
+          console.log( "ready!" );
+          $('#stock').DataTable({ "language": that.language });
+          $('#pending_stock').DataTable({ "language": that.language });
+      });
       this.spinner.hide("loader");
       this.success_message = success_message;
+
     });
   }
 

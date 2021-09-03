@@ -271,7 +271,7 @@ class StockView(APIView):
 			user_stock = Inventory.objects.filter(user_id = user_id, active= True).annotate(unit = Case(
 					When(ingredient__type_id = 1, then=Value('pzs')),
 					When(ingredient__type_id = 3, then=Value('ml')),
-					When(ingredient__type_id = 3, then=Value('gm')),
+					When(ingredient__type_id = 2, then=Value('gr')),
 					), ingredient_name=F('ingredient__name')).values()
 			user_stock = list(user_stock)
 			subidos = []
@@ -281,7 +281,7 @@ class StockView(APIView):
 				'ml' : 'L',
 			}
 			for element in user_stock:
-				if element['quantity'] > 1000 and element['unit'] in units:
+				if element['quantity'] >= 1000 and element['unit'] in units:
 					element['quantity'] = element['quantity'] / 1000
 					element['unit'] = units[ element['unit'] ]
 				if element['type_id'] == 1:

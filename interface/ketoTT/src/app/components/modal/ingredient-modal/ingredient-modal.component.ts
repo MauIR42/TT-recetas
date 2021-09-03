@@ -42,7 +42,10 @@ export class IngredientModalComponent implements OnInit {
         'L' : 'ml',
         'Kg': 'gr'
       }
-      this.quantity = value['quantity'];
+      if( value['unit'] in units)
+        this.quantity = value['quantity'] * 1000;  
+      else
+        this.quantity = value['quantity'];
       
       for(let i =0; i<this.available_ingredients.length; i++){
         if(this.available_ingredients[i]['id'] == value['ingredient_id']){

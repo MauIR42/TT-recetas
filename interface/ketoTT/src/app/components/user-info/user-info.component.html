@@ -6,8 +6,8 @@
 
 <div class="container pt-3 ">
 	<div class="row pt-2">
-		<h3 class="strong_blue_clor col-12 col-lg-6 mb-5 ">Información personal del usuario</h3>
-		<div class="col-12 col-lg-6 text-right pb-lg-0 pb-3">
+		<h3 class="strong_blue_clor col-12 col-lg-6 mb-lg-4 ">Información personal del usuario</h3>
+		<div class="col-12 col-lg-6 text-right pb-lg-0 mb-3 mb-lg-0">
 			<a (click)="open_modal_edit('edit_form',$event)" href="#"><img src="assets/images/pencil-square-blue.svg" class="img-fluid d-inline pr-2 icon-button" ><p class="strong_blue_clor d-inline">Editar</p></a>
 		</div>
 		<div class="alert alert-danger col-12 text-center" role="alert" *ngIf="error_server.length > 0">
@@ -36,7 +36,7 @@
 			<p><b class="strong_blue_clor">Correo:</b> {{user_info['username']}}</p>
 		</div>
 		<div class="col-12 col-lg-4 ">
-			<p><b class="strong_blue_clor">Altura:</b> {{user_info['height']}}</p>
+			<p><b class="strong_blue_clor">Altura:</b> {{user_info['height']}} metros.</p>
 		</div>
 	</div>
 
@@ -47,7 +47,7 @@
 			<a (click)="open_modal_edit('health_form',$event)" href="#"><img src="assets/images/plus-circle-fill-blue.svg" class="img-fluid d-inline pr-2 icon-button" ><p class="strong_blue_clor d-inline">Agregar datos</p></a>
 		</div>
 		<div class="w-100"></div>
-		<h4 *ngIf="graphs_empty" class="text-center col-12">Sin datos, empieza a subir datos para dar un seguimiento a tu progreso</h4>
+		<h4 *ngIf="graphs_empty" class="text-center col-12 pt-3">Sin datos, empieza a subir datos para dar un seguimiento a tu progreso</h4>
 		<div class="col-12 col-lg-4" *ngFor="let graph of graphs">
 			<canvas id="peso" class="img-fluid" width="5" height="5"></canvas>
 		</div>
@@ -56,4 +56,4 @@
 
 <app-form-modal [info]="user_info" (result)="check_result($event)"></app-form-modal>
 
-<app-heath-modal></app-heath-modal>
+<app-heath-modal [height]="user_info['height']"></app-heath-modal>
