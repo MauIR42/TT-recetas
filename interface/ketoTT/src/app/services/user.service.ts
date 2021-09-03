@@ -59,4 +59,8 @@ export class UserService {
     header.set('Content-Type', 'application/json');
     return this.http.get(this.url + this.url_health, {headers: header, params: data});
   }
+
+  post_stat_info(form : FormData){
+    return this.http.post(this.url + this.url_health, form, {});
+  }
 }

@@ -163,6 +163,20 @@ class UserStatView(APIView):
 			print(e)
 			return JsonResponse(data={"error": True,  "message":"internal_server_error"})
 
+	def post(self, request, *args, **kwargs):
+		try:
+			user_id = request.GET.get('user_id', 0)
+			imc = request.GET.get( "imc" , 0)
+			weight = request.GET.get( "weight" , 0)
+			diameter = request.GET.get( "diameter" , 0)
+
+
+
+		except Exception as e:
+			print(e)
+			return JsonResponse(data={"error": True,  "message":"internal_server_error"})
+
+
 
 class ScaleView(APIView):
 	def get(self, request, *args, **kwargs):
