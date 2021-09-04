@@ -1,0 +1,13 @@
+bitacora 
+
+1 hx711py			Con video Con bitacora
+2 hx711C			Con video (comparacion de básculas, principal) Con bitacora
+3 reloj tiempo real	Con video Con bitacora
+4 bascula_reloj		Con video Con bitacora
+5 push_button_test  Con video Con bitacora
+6 selection_list	Con video Con bitacora
+7 food_list			Con video Con bitacora
+8 menu_first_try	Con video Con bitacora
+9 bascula_reloj_menu	Con video Con bitacora
+10 http_connection	Con video Con bitacora
+11 projecto_v_1	Sin video Con bitacora

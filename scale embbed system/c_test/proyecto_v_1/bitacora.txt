@@ -1,0 +1,9 @@
+version 1 del proyecto
+fecha de inicio 31/03/2021
+
+resumen : en este proyecto se avanza en el envio de información de datos al servidor y se realizar la primera aproximación de envio de JSON de programa en C desde la raspberry pi B3+ al servidor (de momento la computadora local por medio de la dirección IP) en DJANGO a traves de un Json
+
+cambios realizados :
+
+- se modificó la librería communication.h y el código en communication.c para poder manipular la información que se obtiene del RTCC DS3231
+

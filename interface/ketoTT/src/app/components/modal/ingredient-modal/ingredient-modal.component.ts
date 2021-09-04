@@ -27,6 +27,8 @@ export class IngredientModalComponent implements OnInit {
 
   quantity : number = 0;
 
+  original_value : number = 0;
+
   error_server : string = '';
 
   stock_added : any = {};
@@ -46,6 +48,7 @@ export class IngredientModalComponent implements OnInit {
         this.quantity = value['quantity'] * 1000;  
       else
         this.quantity = value['quantity'];
+      this.original_value = this.quantity;
       
       for(let i =0; i<this.available_ingredients.length; i++){
         if(this.available_ingredients[i]['id'] == value['ingredient_id']){
@@ -130,6 +133,7 @@ export class IngredientModalComponent implements OnInit {
     form.append('item_id', this.edit_id);
     form.append('ingredient_id', this.ingredient_selected['id'])
     form.append('quantity', this.quantity)
+    form.append('difference', (this.original_value - this.quantity).toString())
     form.append('type', '1')
     this.ss.put_stock(form).subscribe((data : any)=>{
       if(data['error']){

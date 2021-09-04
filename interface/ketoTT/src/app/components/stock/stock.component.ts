@@ -315,9 +315,10 @@ export class StockComponent implements OnInit {
   }
 
   open_modal(type : string, event : any = null, delete_index : any = null){
+    console.log(delete_index)
     if(event != null)
       event.preventDefault();
-    if(delete_index)
+    if(delete_index != null)
       this.delete_index = delete_index;
 
     this.actual_modal = {

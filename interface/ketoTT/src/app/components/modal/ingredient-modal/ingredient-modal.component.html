@@ -46,7 +46,7 @@
             </tr>
           </table>
             <div class="input-group  w-100" *ngIf="edit_mode">
-                <select id="admin_sel_edit" class="custom-select " [(ngModel)]="ingredient_selected" name="ingr_sel_edit">
+                <select id="admin_sel_edit" class="custom-select " [(ngModel)]="ingredient_selected" name="ingr_sel_edit" disabled>
                     <option [ngValue]="preview" selected disabled>Selecciona una opción...</option>
                     <option *ngFor="let ingredient of available_ingredients" [ngValue]="ingredient" >{{ingredient.name}}</option>
                 </select>

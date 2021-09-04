@@ -1,0 +1,19 @@
+bascula_reloj_menu
+fecha de inicio desconocido
+
+resumen : Unión de los proyectos hx711C, relojds3231 y menu_first_try, las librerías se fusionaron aquellas que tenían nombres iguales, para saber más a fondo sus funciones leer las bitacoras en los proyectos mencionados anteriormente.
+
+En este proyecto ya se puede interactuar con la báscula como un usuario a excepción de la LCD necesaria para desplegar la información.
+
+Detalles:
+
+	-como se menciona en food_list se puede mejorar la implementación de este menu para reducir el código y hacer más dinamica la creación del menu, se trabajará más adelante en esta idea.
+
+	-los botones siguen teniendo problemas al presionarse una vez, en ocasiones marca que se presionaron dos veces.
+
+por hacer:
+	- resolver los detalles
+	- realizar la librería de conexiones http
+	- realizar la librería de la LCD
+
+

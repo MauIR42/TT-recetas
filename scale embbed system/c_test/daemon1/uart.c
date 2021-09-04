@@ -1,0 +1,189 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <termios.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <string.h>
+#include <syslog.h>
+
+#include "uart.h"
+
+void ini_uart(){
+	int fd_serie, indx = 0, current = 0;
+	fd_serie = config_serial( "/dev/ttyS0", B9600 );
+	syslog(LOG_INFO,"Iniciando comunicacion UART con PC\n");
+	char * text = (char*)malloc(50 * sizeof(char));
+	char * name = (char*)malloc(50 * sizeof(char));
+	char * pass = (char*)malloc(50 * sizeof(char));
+	char * ssid = (char*)malloc(50 * sizeof(char));
+	char * psk = (char*)malloc(50 * sizeof(char));
+	unsigned char dato = 0;
+	while(indx < 4)
+	{
+		fflush(stdout);
+		read( fd_serie, &dato, 1 );
+		if(dato == '\n'){
+			text[ current ] = '\0';
+			++indx;
+			current = 0;
+			if(indx == 1)
+				strcpy(name,text);
+			else if(indx == 2)
+				strcpy(pass,text);
+			else if(indx == 3)
+				strcpy(ssid,text);
+			else if(indx == 4)
+				strcpy(psk,text);
+		}
+		else{
+			text[ current++ ] = dato;
+		}
+
+	}
+	close( fd_serie );
+	free(text);
+	set_user(name, pass);
+	free(name);
+	free(pass);
+	set_wifi(ssid,psk);
+	free(ssid);
+	free(psk);
+	syslog(LOG_INFO, "Terminando exitosamente la comunicacion con UART");
+}
+
+int config_serial( char *dispositivo_serial, speed_t baudios )
+{
+	struct termios newtermios;
+  	int fd;
+
+  	fd = open( dispositivo_serial, (O_RDWR | O_NOCTTY) & ~O_NONBLOCK );
+	if( fd == -1 )
+	{
+		syslog(LOG_INFO,"Error al abrir el dispositivo tty \n");
+		exit( EXIT_FAILURE );
+  	}
+
+	newtermios.c_cflag 	= CBAUD | CS8 | CLOCAL | CREAD;
+  	newtermios.c_iflag 	= IGNPAR;
+  	newtermios.c_oflag	= 0;
+  	newtermios.c_lflag 	= TCIOFLUSH | ~ICANON;
+  	newtermios.c_cc[VMIN]	= 1;
+  	newtermios.c_cc[VTIME]	= 0;
+
+  	if( cfsetospeed( &newtermios, baudios ) == -1 )
+	{
+		syslog(LOG_INFO,"Error al establecer velocidad de salida \n");
+		exit( EXIT_FAILURE );
+  	}
+	if( cfsetispeed( &newtermios, baudios ) == -1 )
+	{
+		syslog(LOG_INFO,"Error al establecer velocidad de entrada \n" );
+		exit( EXIT_FAILURE );
+	}
+	if( tcflush( fd, TCIFLUSH ) == -1 )
+	{
+		syslog(LOG_INFO,"Error al limpiar el buffer de entrada \n" );
+		exit( EXIT_FAILURE );
+	}
+	if( tcflush( fd, TCOFLUSH ) == -1 )
+	{
+		syslog(LOG_INFO,"Error al limpiar el buffer de salida \n" );
+		exit( EXIT_FAILURE );
+	}
+
+	if( tcsetattr( fd, TCSANOW, &newtermios ) == -1 )
+	{
+		syslog(LOG_INFO,"Error al establecer los parametros de la terminal \n" );
+		exit( EXIT_FAILURE );
+	}
+	return fd;
+}
+
+void set_user( char *name, char* pass ){
+	char user_name[50]; 
+	char password[50];
+	sprintf(user_name,"user_name=%s\n",name);
+	sprintf(password,"password=%s\n",pass);
+	FILE * fd_uf; //user_file
+	fd_uf = fopen("/home/pi/Documents/scale_info/user_info.txt", "w");
+	fputs(user_name,fd_uf);
+	fputs(password, fd_uf);
+	fclose(fd_uf);
+
+}
+
+void set_wifi( char *ssid, char* psk ){
+	printf("iniciando\n");
+	char * ini_info = "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=MX\n";
+	char network[300]; 
+	char ssid_get[50]; 
+	char psk_get[50];
+	char aux;
+	char word[250];
+	int indx = 0, type= 0, found = 0, keep = 1; //check_type 0=ssid 1=psk
+	FILE * fd_suplicant, *fd_aux; //user_file
+	fd_suplicant = fopen("/etc/wpa_supplicant/wpa_supplicant.conf", "r");
+	if(fd_suplicant != NULL){
+		while(keep){
+			aux = fgetc(fd_suplicant);
+			if(!found && aux == '=' ){
+				word[indx] = '\0';
+				if(!type && (!strcmp("ssid",word))){
+					found = 1;
+					type = 1;
+				}
+				else if(type && (!strcmp("psk",word))){
+					found = 1;
+					type = 0;
+				}
+				indx = 0;
+			}
+			else if(found && aux == '\n'){
+				word[ indx ] = '\0';
+				if(!strcmp(ssid,word)){ //same as sended by user
+					type = 0;
+				}
+				else{
+					word[ indx ] = '\n';
+					word[ indx + 1 ] = '\0';
+					fd_aux = fopen("/home/pi/Documents/scale_info/aux.txt", "a");
+					fputs(word,fd_aux);
+					fclose(fd_aux);
+				}
+				found = 0;
+				indx = 0;
+			}
+			if(aux != '\"' && aux !='\n' && aux != '=' && aux != '\t' && aux !=' ' && aux != '{' && aux != '}')
+				word[indx++] = aux;
+			if(feof(fd_suplicant))
+				keep = 0;
+		}
+		fclose(fd_suplicant);
+		fd_suplicant = fopen("/etc/wpa_supplicant/wpa_supplicant.conf", "w");
+		fd_aux = fopen("/home/pi/Documents/scale_info/aux.txt", "r");
+		keep = 1;
+		fputs(ini_info, fd_suplicant);
+
+		sprintf(network,"\nnetwork={\n        ssid=\"%s\"\n        psk=\"%s\"\n        key_mgmt=WPA-PSK\n}\n", ssid, psk);
+		fputs(network, fd_suplicant);
+		while(keep){
+			if(fgets(ssid_get, 50, fd_aux) != NULL && fgets(psk_get, 50, fd_aux) != NULL){
+				ssid_get[strlen(ssid_get) -1 ] = '\0';
+				psk_get[strlen(psk_get) -1 ] = '\0';
+				sprintf(network,"\nnetwork={\n        ssid=\"%s\"\n        psk=\"%s\"\n        key_mgmt=WPA-PSK\n}\n", ssid_get, psk_get);
+				fputs(network, fd_suplicant);
+			}
+			if(feof(fd_aux))
+				keep = 0;
+		}
+		fclose(fd_aux);
+
+		fclose(fd_suplicant);
+		remove("/home/pi/Documents/scale_info/aux.txt");
+		system("wpa_cli -i wlan0 reconfigure");
+	}
+	else{
+		syslog(LOG_INFO,"Archivo no encontrado!!!!\n");
+		fclose(fd_suplicant);
+	}
+}

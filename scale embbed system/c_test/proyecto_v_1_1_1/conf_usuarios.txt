@@ -1,0 +1,4 @@
+Cambiar usuario,0,4
+users.txt
+Eliminar usuario,0,5
+users.txt

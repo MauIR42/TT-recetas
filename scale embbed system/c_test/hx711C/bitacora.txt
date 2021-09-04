@@ -1,0 +1,17 @@
+version 1 de HX711C
+fecha de inicio sin registro
+
+resumen : Basandose en la librería hx711py se hizo la versión en C, se dividieron en distintas librerías el funcionamiento de esta aplicación, las cuales se dividen en :
+	-DEFS : contiene valores importantes para todas las librerías, en este caso tiene los valores en los que se lee y escribe para comunicarse con el HX711.
+
+	-GPIO : maneja todas las comunicaciones con las entradas GPIO de la raspberry para inicializar, terminar, leer o escribir en cada pin.
+
+	-COMMUNICATION: que maneja la comunicacion entre el programa principal y el hx711 para leer 1 bit, byte, una serie de datos y mandarlos a que se procesen una vez obtenidos.
+
+	-PROCESSING: procesamiento de datos que no requiere comunicación con algún componente, son funciones que pasan valores de un tipo de dato a otro, obtener el promedio de datos o acomodarlos de forma ascendente.
+
+	-SIGNALS: revisa las señales e interrupciones que pueda haber de hilos o del usuario en este caso, para la terminación temprana del programa.
+
+	-SCALE: programa principal en el que se integran todos los anteriores explicados para la ejecución de la báscula.
+
+

@@ -1,0 +1,5 @@
+pesar,0
+lista.txt
+marcar0,2
+configurar,3
+apagar,4

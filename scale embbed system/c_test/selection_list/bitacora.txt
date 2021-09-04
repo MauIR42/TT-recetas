@@ -1,0 +1,11 @@
+selection_list
+fecha de inicio sin datos
+
+resumen : Mejora del proyecto push_button_test en el que se agrega el menu principal con el que se va trabajar de momento, este menú está dividido en: pesar, marcar 0 y apagar.
+El menu es creado a partir de una lista circular con el nombre y la acción que realizará el programa al ser seleccionado.
+Las librerías son las mismas que en push_button_test, solo cambia push_button.c con el menu en nodos.
+
+mejoras: se mejoró la lectura de los botones para evitar un falso presionado y así segurar que se ese presionando realmente el botón para realizar su acción.
+
+detalles: a pesar de mejorar el comportamiento de los botones se siguen marcando '1''s en la seleccion por lo que debe mejorarse el código.
+

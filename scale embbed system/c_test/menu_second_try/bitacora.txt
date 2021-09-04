@@ -1,0 +1,15 @@
+selection_list
+fecha de 20/04/2021
+
+resumen : Mejora del proyecto selection_list se cambia la generacion de los menus de algo estatico a algo dinamico dividiendo el menu en varios archivos :
+	- principal.txt -> tiene el nombre de todas las opciones en el menu principal. En teoría casi no va a modificar su contenido
+	-lista.txt lista del submenu de principal.txt en caso de que el usuario quiera agregar más listas (para este ejemplo tenemos frutas y verduras)
+	-verduras.txt : nombre y id de cada verdura en este submenu
+	-frutas.txt : -- -- -- de cada fruta en este submenu
+También se agregó un nuevo botón para regresar al menu anterior en caso de ser necesario.
+
+detalles: sin encontrar por el momento
+
+por trabajar :
+	- programar LCD para mostrar la información de la bascula
+	- programar el TTL para comunicarse con una computadora 

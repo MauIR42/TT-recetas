@@ -1,0 +1,17 @@
+push_button_test
+fecha de inicio sin datos
+
+resumen : usando la librería GPIO.h de hx711C se integran los push button a través del GPIO, se trabajan con 3 botones que servirán de la siguiente manera:
+	- LEFT la opción seleccionada ahora es la izquierda a la actual.
+	- RIGHT la opción seleccionada ahora es la derecha a la actual.
+	- ACCEPT se selecciona la opción actual y se ejecuta su acción
+
+Las librerías que tiene son :
+	GPIO : lectura, escritura y configuración del GPIO de la raspberry.
+	DEFS: definicion de los pines en los que se encuentran conectados los pines.
+	PUSH_BUTTON: código en el que se integran las librerías.
+
+detalles :
+
+- cuando se presiona una vez se leen multiples elecciones de ese botón al tener lecturas muy rápidas de los valores en el gpio, por lo que se debe buscar una nueva forma de leer los botones, con retrasos o interrupciones.
+

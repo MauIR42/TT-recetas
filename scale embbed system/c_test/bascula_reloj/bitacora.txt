@@ -1,0 +1,10 @@
+bascula_reloj
+fecha de inicio sin info
+
+resumen : en esta parte del proyecto se integran los proyectos relojds3231 y hx711C, las librerías son una combinación de estas dos librerías al tener nombres iguales, solo se hace una pequeña modificación
+
+comunicacion -> comunnication para las funciones que se tenían en relojds3231.comunicacion.
+
+Para mayor información lea las bitacoras de estos proyectos.
+
+

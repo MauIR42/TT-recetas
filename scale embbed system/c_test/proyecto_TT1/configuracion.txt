@@ -1,0 +1,4 @@
+bascula,0 
+bascula.txt
+usuarios,0
+conf_usuarios.txt

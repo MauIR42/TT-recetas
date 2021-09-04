@@ -298,7 +298,7 @@ class StockView(APIView):
 	def get(self, request, *args, **kwargs):
 		try:
 			user_id = request.GET.get('user_id','')
-			user_stock = Inventory.objects.filter(user_id = user_id, active= True).annotate(unit = Case(
+			user_stock = Inventory.objects.filter(user_id = user_id, active= True, quantity__gt=0).annotate(unit = Case(
 					When(ingredient__type_id = 1, then=Value('pzs')),
 					When(ingredient__type_id = 3, then=Value('ml')),
 					When(ingredient__type_id = 2, then=Value('gr')),
@@ -331,11 +331,21 @@ class StockView(APIView):
 			if not ( 'user_id' in data and 'ingredients' in data ):
 				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
 			data['ingredients'] = literal_eval(data['ingredients'])
+			pending = Inventory.objects.filter(active= True, type_id=2, user_id= data['user_id'])
 
+			index_pending = {}
+			for pen in pending:
+				index_pending[ pen.ingredient_id ] = pen
 			to_bulk = []
+			to_update = []
 			for ing in data['ingredients']:
+				if ing['id'] in index_pending:
+					index_pending[ ing['id'] ].quantity -= ing['quantity']
+					to_update.append( index_pending[ ing['id'] ] )
 				to_bulk.append( Inventory(quantity=ing['quantity'], ingredient_id=ing['id'], user_id=data['user_id'], type_id=ing['type']) )
 			Inventory.objects.bulk_create( to_bulk )
+			if len(to_update) > 0 :
+				Inventory.objects.bulk_update( to_update, ['quantity'] )
 			return JsonResponse(data={'error': False}, safe=False)
 		except Exception as e:
 			print(e)
@@ -347,8 +357,19 @@ class StockView(APIView):
 			if not ('item_id' in data) :
 				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
 			if 'deactivate' in data:
-				Inventory.objects.filter(id= data['item_id']).update(active= False)
+				print(data)
+				updated = Inventory.objects.filter(id= data['item_id']).first()
+				pending = Inventory.objects.filter(active = True, ingredient_id = data['item_id'], type_id = 2 ).first()
+				if pending:
+					pending.quantity += updated.quantity
+					pending.save()
+				updated.active = False
+				updated.save()
 				return JsonResponse(data={'error': False}, safe=False)
+			pending = Inventory.objects.filter(active = True, ingredient_id = data['ingredient_id'], type_id = 2 ).first()
+			if pending:
+				pending.quantity += float(data['difference'])
+				pending.save()
 			Inventory.objects.filter(id= data['item_id']).update(quantity=data['quantity'], ingredient_id=data['ingredient_id'], type_id=data['type'])
 			return JsonResponse(data={'error': False}, safe=False)
 		except Exception as e:
