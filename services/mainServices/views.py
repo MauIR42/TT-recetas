@@ -391,17 +391,10 @@ class EmbebbedScaleView(APIView):
 			updates = ScaleUpdate.objects.filter(scale=scale, active=True).annotate(username=F('user_id__username')).order_by('update_type_id').values()
 
 			format_updates = {
-				'add':{
-
-				},
-				'delete': {
-
-				},
-				'ingredients': {
-
-				}
+				'add':{},
+				'delete': {},
+				'ingredients': {}
 			}
-
 			not_checked = []
 			for update in updates:
 				print(update['update_type_id'])
