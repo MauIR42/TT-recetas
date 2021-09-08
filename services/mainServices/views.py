@@ -16,6 +16,7 @@ from services.settings import EMAIL_HOST, ANGULAR_DIR
 from django.db.models import F, Q, Case, When, Value, Max
 from ast import literal_eval
 import json
+import unidecode
 
 class AuthUserView(APIView):
 	def get(self, request, *args, **kwargs):
@@ -388,20 +389,20 @@ class EmbebbedScaleView(APIView):
 			if not scale:
 				return JsonResponse(data={"error": True,  "message":"scale_not_exists"})
 
-			updates = ScaleUpdate.objects.filter(scale=scale, active=True).annotate(username=F('user_id__username')).order_by('update_type_id').values()
+			updates = ScaleUpdate.objects.filter(scale=scale, active=True).annotate(username=F('user_id__scale_name')).order_by('update_type_id').values()
 
 			format_updates = {
-				'add':{},
-				'delete': {},
-				'ingredients': {}
+				'add':'',
+				'delete': '',
+				'ingredients': ''
 			}
 			not_checked = []
 			for update in updates:
 				print(update['update_type_id'])
 				if update['update_type_id'] == 3:
-					format_updates['add'][update['username']] = update['user_id']
+					format_updates['add'] += update['username'] + ',' + str(update['user_id']) + ' '
 				if update['update_type_id'] == 4:
-					format_updates['delete'][update['username']] = update['user_id']
+					format_updates['delete'] += update['username'] + str(update['user_id']) + ' '
 				if update['update_type_id'] == 5:
 					if update['username'] in format_updates['delete']:
 						continue
@@ -411,13 +412,14 @@ class EmbebbedScaleView(APIView):
 						pending = Inventory.objects.filter(user_id = update['user_id'], active = True, type_id=2, ingredient_id__type_id=2)\
 						.annotate(ingredient_name=F('ingredient_id__name')).order_by('ingredient_name').values()
 						if len(pending) > 0:
-							format_updates['ingredients'][update['username']] = {}
-							user_ingr = format_updates['ingredients'][update['username']]
+							format_updates['ingredients'] += update['username'] +';' 
+							# user_ingr = format_updates['ingredients'][update['username']]
+
 							for pen in pending:
 								print(pen['ingredient_name'])
-								user_ingr[pen['ingredient_name']] = pen['ingredient_id']
-			ScaleUpdate.objects.filter(scale=scale, active=True).update(active = False)			
-			return JsonResponse(data={"error": False, 'add': format_updates['add'], 'delete': format_updates['delete'], 'ingredients':format_updates['ingredients']})
+								format_updates['ingredients'] += unidecode.unidecode(pen['ingredient_name']) +',' + str(pen['ingredient_id']) + ' '
+			# ScaleUpdate.objects.filter(scale=scale, active=True).update(active = False)			
+			return JsonResponse(data={"error": False, 'scale#delete': format_updates['delete'], 'scale#add': format_updates['add'], 'scale#ingredients':format_updates['ingredients']})
 		except Exception as e:
 			print(e)
 			return JsonResponse(data={"error": True,  "message":"internal_server_error"})

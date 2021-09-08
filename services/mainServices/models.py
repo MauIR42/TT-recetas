@@ -32,6 +32,7 @@ class User(models.Model):
 	created_at = models.DateTimeField(default=timezone.now, verbose_name='created at')
 	scale = models.ForeignKey(Scale, on_delete=models.PROTECT,null=True)
 	user_type = models.ForeignKey(UserType, on_delete=models.PROTECT,null=False, default=1)
+	scale_name = models.CharField(max_length=16, default='')
 	class Meta:
 		db_table = "user"
 

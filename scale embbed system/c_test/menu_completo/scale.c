@@ -35,6 +35,9 @@ struct node * restart_menu(struct node * head);
 char * current_user;
 int has_users = 1;
 
+//scale info
+char * access_code;
+
 int main(){
 
 	/* LCD section*/
@@ -43,6 +46,7 @@ int main(){
 
 	/*user*/
 	current_user = get_first("last.txt");
+	access_code = get_first("scale.txt");
 	printf("res:%d\n", strcmp(current_user,""));
 	if(strcmp(current_user,"") != 0){
 		printf("Ultimo usuario: %s\n", current_user);
@@ -98,10 +102,12 @@ void start_menu(pthread_t thread_id){
 	struct datos *test;
 
 	char * ip;
-	ip = "192.168.100.41";
+	ip = "192.168.100.44";
 	int puerto = 8000;
 	char *petition_complete;
 	int sockfd;
+
+	char * response;
 
 	printf("current = %s\n", menu->name);
 	clear_display();
@@ -173,7 +179,7 @@ void start_menu(pthread_t thread_id){
 				// printf("La hora es : %x:%x:%x\n", test->horas,test->minutos,test->segundos );
 				// printf("La fecha es : %x/%x/%x\n", test->dia,test->mes,test->anio);
 				// printf("%d\n", weight);
-				// petition_complete = struct_to_http_method("POST", "/scale/user_weight/", test, weight, menu->id );
+				// petition_complete = struct_to_http_method("/scale/user_weight/", test, weight, menu->id );
 				// sockfd = connect_to_server(ip, puerto);
 				sockfd = -1;
 				if(sockfd == -1){
@@ -235,6 +241,51 @@ void start_menu(pthread_t thread_id){
 				free_menu(head);
 				head = create_menu(0);
 				menu = restart_menu(head);
+
+			}
+			else if(menu->type == 5){
+				clear_display();
+				writeWord("Actualizando...");
+				change_display_line(1);
+				writeWord("Espere por favor");
+				petition_complete = get_request("/services/scale/update", access_code);
+				sockfd = connect_to_server(ip, puerto);
+				if(sockfd == -1){
+					clear_display();
+					writeWord("Error de conexion\nen su internet.");
+					printf("No hay conexion a internet\n");
+					sleep(2);
+					// return -1;
+				}
+				else if(sockfd == -2){
+					clear_display();
+					writeWord("Error externo\nReintente despues");
+					printf("no se pudo conectar con el servidor\n");
+					sleep(2);
+					// return -1;
+				}
+				else if(sockfd == -3){
+					clear_display();
+					writeWord("Error externo\nReintente despues");
+					printf("El servidor tardo en responder no se pudo conectar con el servidor\n");
+					sleep(2);
+					// return -1;
+				}
+				else{
+					send_petition(sockfd, petition_complete);
+					printf("Información enviada.\n");
+					response = read_response(sockfd);
+					manage_get_response(response);
+					close(sockfd);
+
+				}
+
+			}else if(menu->type == 6){
+				clear_display();
+				writeWord("Reiniciando...");
+				change_display_line(1);
+				writeWord("Espere por favor");
+
 
 			}
 			else{

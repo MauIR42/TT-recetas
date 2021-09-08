@@ -1,3 +1,0 @@
-manzana,1,37
-pera,1,52
-mandarina,1,42

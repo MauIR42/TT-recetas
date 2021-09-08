@@ -49,7 +49,7 @@ void copy_except(char * file,char * except){
 	fd = fopen(file,"r");
 	while( keep ){
 		aux = fgetc(fd);
-		printf("%c\n", aux);
+		// printf("%c\n", aux);
 		if(aux == '\n' || aux == '\0'){
 			container[cont_indx] = '\0';
 			printf("%s\n", container);

@@ -11,38 +11,6 @@
 #include "defs.h"
 #include "http.h"
 
-// int main(int argc, char **argv)
-// {
-// 	int puerto;
-// 	// char * hostName;
-// 	int sockfd;
-// 	char * ip;
-// 	// ip = hostname_to_ip(hostName);
-// 	ip = "192.168.100.41";
-// 	puerto = 8000;
-
-// 	char *petition_complete;
-
-// 	/* petition section*/
-
-// 	// petition_complete = struct_to_http_method("POST", "/scale/user_weight/", prueba, weight );
-// 	petition_complete = struct_to_http_method("GET", "/scale/user_weight/", prueba, weight );
-
-// 	/* socket init section*/
-// 	sockfd = connect_to_server(ip, puerto);
-// 	/* socket end section */
-
-// 	// printf("%s\n", petition_complete);
-// 	send_petition(sockfd, petition_complete);
-// 	// sleep(2);
-// 	read_response(sockfd);
-
-// 	close(sockfd);
-
-// 	return 0;
-// }
-
-
 int connect_to_server(char * ip, int puerto){
 	int sockfd;
 	struct sockaddr_in direccion_servidor;
@@ -92,7 +60,7 @@ void send_petition(int sockfd, char * petition){
 void read_response(int sockfd){
 	char response[51];
 	// char complete[300]="";
-	char * complete = (char*)malloc(300 * sizeof(char));
+	char * complete = (char*)malloc(1000 * sizeof(char));
 	char column_name[40], next_c = '\r', previous = '\n', aux_char;
 	int n, aux, aux2 = 0,cont = 0, next = 0; //cont is just for testing
 	int add = 1, c_l = 0, returns = 0, content = 0;
@@ -152,45 +120,64 @@ void read_response(int sockfd){
 	// printf("%s\n", response); //last piece of information
 	printf("%s\n", complete);
 	free(complete);
+	return complete;
 }
 
 
-char * struct_to_http_method(char * method, char * url, struct datos * data, int weight, int id){
+char * post_request(char * url, struct datos * data, int weight, int id){
 	// char petition[] = "GET /scale/user_weight/?test=hola HTTP/1.0\r\n\r\n";
 	static char petition_complete[150];
 	printf("%d\n", sizeof(petition_complete));
 	// char petition2[] = "POST /scale/user_weight/ HTTP/1.0\r\nContent-Length: %d\r\nContent-Type: application/json\r\n\r\n %s";
 	// method (POST,GET) url(scale/{{rest_of_url}}) get_params(?test=hola) post_addition variable post_json_content ({'test':'123'})
-	char petition[] = "%s %s%s HTTP/1.0%s\r\n\r\n %s";
+	char petition[] = "POST %s%s HTTP/1.0%s\r\n\r\n %s";
 	char post_addition_bone[] = "\r\nContent-Length: %d\r\nContent-Type: application/json";
 	char post_addition[60];
 
 	char post_json_bone[] = "{\"time\" : \"%x:%x:%x_%x-%x-%x\", \"weight\": %d, \"id\": %d}\0";
 	char post_json[70];
 
-	char get_params_bone[] = "?time=%x:%x:%x_%x-%x-%x&weight=%d&id=%d";
+	printf("POST petition\n");
+	sprintf(post_json, post_json_bone, data->horas, data->minutos, data->segundos,data->dia,data->mes,data->anio,weight,id);
+	sprintf(post_addition,post_addition_bone, sizeof(post_json));
+	sprintf(petition_complete, petition,url,"",post_addition,post_json );
+	printf("%s\n", petition_complete);
+
+	return petition_complete;
+}
+
+
+char * get_request(char * url, char * access_code){
+	static char petition_complete[150];
+	printf("%d\n", sizeof(petition_complete));
+
+	char petition[] = "GET %s%s HTTP/1.0%s\r\n\r\n %s";
+
+	char get_params_bone[] = "?access_code=%s";
 	char get_params[20];
 
+	printf("GET petition\n");
+	sprintf(get_params,get_params_bone, access_code);
+	sprintf(petition_complete, petition,url,get_params,"","");
 
-	if(!strcmp("POST", method)){
-		printf("POST petition\n");
-		sprintf(post_json, post_json_bone, data->horas, data->minutos, data->segundos,data->dia,data->mes,data->anio,weight,id);
-		// printf("json: %s\n", post_json);
-		sprintf(post_addition,post_addition_bone, sizeof(post_json));
-		// printf("post_addition: %s\n", post_addition);
-		sprintf(petition_complete, petition, method,url,"",post_addition,post_json );
-	}
-	else{
-		printf("GET petition\n");
-		sprintf(get_params,get_params_bone,data->horas, data->minutos, data->segundos,data->dia,data->mes,data->anio,weight,id);
-		sprintf(petition_complete, petition, method,url,get_params,"","");
-	}
 	printf("%s\n", petition_complete);
-	// char petition_complete[150];
-	// sprintf(petition_complete, petition, sizeof(json), json);
 
-	// return petition_complete;
 	return petition_complete;
+
+
+
+}
+
+void manage_get_response(char * response){
+	//buscar error, add, delete, ingredients 
+	// reglas:
+	/*
+		si hay "" significa que hay un valor dentro
+		si hay
+	*/
+	while ((n = read (sockfd, response, sizeof(char)*50)) > 0){
+
+	}
 }
 
 char * hostname_to_ip(char * hostname )
