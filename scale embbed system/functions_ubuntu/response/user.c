@@ -26,10 +26,48 @@ void set_last( char * new_last){
 	fclose(fd);
 }
 
+void update_user_pending(char * user, char * pending){
+	char path[30];
+	int index = 0, total = strlen(pending);
+	sprintf(path,"%s/pendientes.txt", user);
+	FILE *fd = fopen(path,"w");
+	printf("Agregando datos al usuario: %s\n", user);
+	while( index != total ){
+		if( pending[ index ] != '#' ){
+			printf("%c", pending[ index]);
+			fputc(pending[ index ], fd);
+		}else{
+			fputc('\n', fd);
+			printf("\n");
+		}
+		index++;
+	}
+	printf("\n");
+	fclose(fd);
+
+}
+
 void add_user(char * user_path){
 
-	// add_at_end("users.txt",user_path);
-	create_path(strtok(user_path, ","));
+	char new_path[30];
+	int i,index = 0;
+	add_at_end("users.txt",user_path);
+
+	for(i = 0; i< strlen(user_path); i++){
+		if(user_path[index] == ','){
+			new_path[ index ] = '\0';
+			break;
+		}
+		new_path[ index ] = user_path[ index ];
+		index++;
+	}
+	create_path(new_path);
+
+	char file[] = "%s/lista.txt";
+	char path_complete[30];
+	sprintf(path_complete,file,new_path);
+
+	copy_file("lista.txt",path_complete);
 
 }
 
@@ -52,8 +90,36 @@ void create_path(char * path){
 	printf("La carpeta a crear es: %s\n", path);
 	struct stat st = {0};
 	if (stat(path, &st) == -1) {
-    	mkdir(path, 0666);
+    	mkdir(path, 0777);
 	}
+}
+
+int copy_file(char* original, char * copy){
+	printf("Original: %s\n", original);
+	printf("copia: %s\n", copy);
+	char aux;
+	FILE *fo, *fc;
+	fo = fopen(original, "r");
+	if( fo == NULL){
+		printf("Error al abrir el archivo: %s\n", original);
+		return -1;
+	}
+
+	fc = fopen(copy, "w");
+	if( fc == NULL){
+		printf("Error al abrir el archivo: %s\n", copy);
+		return -1;
+	}
+
+	aux = fgetc(fo);
+	while(aux != EOF){
+		fputc(aux,fc);
+		aux = fgetc(fo);
+	}
+
+	fclose(fo);
+	fclose(fc);
+	return 0;
 }
 
 
@@ -75,7 +141,7 @@ int delete_file(const char *f_path, const struct stat *sb, int typeflag, struct 
 }
 
 void copy_except(char * file,char * except){
-	// printf("A eliminar: %s\n", except);
+	printf("A eliminar: %s\n", except);
 	FILE * fd, * fd_aux;
 	int keep = 1, cont_indx = 0, copy = 0, first = 1, added = 0;
 	char aux;
@@ -84,13 +150,13 @@ void copy_except(char * file,char * except){
 	while( keep ){
 		aux = fgetc(fd);
 		if(aux == EOF){
-			// printf("final de archivo\n");
+			printf("final de archivo\n");
 			break;
 		}
-		// printf("%c\n", aux);
+		printf("%c\n", aux);
 		if( aux == ',' ){
 			container[ cont_indx ] = '\0';
-			// printf("a comparar: %s\n", container);
+			printf("a comparar: %s\n", container);
 			if(strcmp(except,container) != 0){
 				copy = 1;
 				container[cont_indx++] = aux;
@@ -114,7 +180,7 @@ void copy_except(char * file,char * except){
 				}
 
 				container[ cont_indx ] = '\0';
-				// printf("Escribiendo %s\n", container);
+				printf("Escribiendo %s\n", container);
 				fputs(container,fd_aux);
 				fclose(fd_aux);
 				cont_indx = 0;
@@ -126,25 +192,27 @@ void copy_except(char * file,char * except){
 		}
 	}
 	if(copy){
+		printf("otro copy \n");
 		added= 1;
 		container[ cont_indx] = '\0';
-		// printf("Escribiendo: %s\n", container);
+		printf("Escribiendo: %s\n", container);
 		fd_aux = fopen("aux.txt", "a");
-		fputs("\n",fd_aux);
+		if(!first)
+			fputs("\n",fd_aux);
 		fputs(container,fd_aux);
 		fclose(fd_aux);
 	}
 
-	// printf("Sale!\n");
+	printf("Sale!\n");
 	fclose(fd);
 	if(added){
 		remove(file);
-		// printf("Elimina!\n");
-		rename("aux.txt","users.txt");
-		// printf("Renombra!\n");
+		printf("Elimina!\n");
+		rename("aux.txt",file);
+		printf("Renombra!\n");
 	}else{
-		// printf("eliminar datos del archivo\n");
-		fd_aux = fopen("users.txt", "w");
+		printf("eliminar datos del archivo\n");
+		fd_aux = fopen(file, "w");
 		fclose(fd);
 
 	}

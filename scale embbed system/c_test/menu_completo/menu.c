@@ -132,6 +132,7 @@ struct node*  read_menu(char * file, struct node *file_father){
 				if(first){
 					first = 0;
 					head = actual;
+					head -> next = actual;
 				}
 				else{
 					previous -> next = actual;
