@@ -1,4 +1,0 @@
-verduras,0
-verduras.txt
-frutas,0
-frutas.txt

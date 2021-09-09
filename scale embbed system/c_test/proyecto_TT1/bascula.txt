@@ -1,3 +1,0 @@
-configurar con pc,3
-actualizar bascu,6
-reiniciar bascula,7

@@ -1,7 +1,0 @@
-food_list
-fecha de inicio desconocido
-
-resumen : librería sencilla en la que se lee un archivo .txt para generar una lista circular de opciones de productos, la lista circular son estructuras con apuntadores a la misma estructura.
-
-detalles: Se detectó que el menu en selection_list y food_list se pueden mejorar para hacer un solo menu más complejo y dinamico que nos permitirá que sea más escalable el proyecto en cuanto al menú, falta implementarlo.
-

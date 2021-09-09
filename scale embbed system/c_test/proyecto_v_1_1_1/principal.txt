@@ -1,6 +1,0 @@
-pesar,0
-lista.txt
-marcar0,2
-configurar,0
-configuracion.txt
-apagar,9

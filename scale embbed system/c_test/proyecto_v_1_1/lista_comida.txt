@@ -1,3 +1,0 @@
-naranjas,60 
-lentejas,405
-zanahorias,712

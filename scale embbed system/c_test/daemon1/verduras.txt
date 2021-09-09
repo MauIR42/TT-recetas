@@ -1,3 +1,0 @@
-zanahoria,1,702
-tomate,1,512
-brócoli,1,222
