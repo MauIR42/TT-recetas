@@ -224,7 +224,7 @@ char * read_response(int sockfd){
 }
 
 
-char * format_post_request(char * url, struct datos * data, int weight, int id){
+char * format_post_request(char * url, struct datos * data, int weight, int id){ //falta el scale_id y el current_user
 	// char petition[] = "GET /scale/user_weight/?test=hola HTTP/1.0\r\n\r\n";
 	static char petition_complete[150];
 	printf("%d\n", sizeof(petition_complete));

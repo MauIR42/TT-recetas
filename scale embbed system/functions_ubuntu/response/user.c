@@ -49,25 +49,25 @@ void update_user_pending(char * user, char * pending){
 
 void add_user(char * user_path){
 
-	char new_path[30];
-	int i,index = 0;
+	// char new_path[30];
+	// int i,index = 0;
 	add_at_end("users.txt",user_path);
 
-	for(i = 0; i< strlen(user_path); i++){
-		if(user_path[index] == ','){
-			new_path[ index ] = '\0';
-			break;
-		}
-		new_path[ index ] = user_path[ index ];
-		index++;
-	}
-	create_path(new_path);
+	// for(i = 0; i< strlen(user_path); i++){
+	// 	if(user_path[index] == ','){
+	// 		new_path[ index ] = '\0';
+	// 		break;
+	// 	}
+	// 	new_path[ index ] = user_path[ index ];
+	// 	index++;
+	// }
+	// create_path(new_path);
 
-	char file[] = "%s/lista.txt";
-	char path_complete[30];
-	sprintf(path_complete,file,new_path);
+	// char file[] = "%s/lista.txt";
+	// char path_complete[30];
+	// sprintf(path_complete,file,new_path);
 
-	copy_file("lista.txt",path_complete);
+	// copy_file("lista.txt",path_complete);
 
 }
 
@@ -80,8 +80,10 @@ void add_at_end(char * file, char * user_path){
 	}
 	fclose(fd);
 	fd = fopen(file, "a");
-	if(0 != size)
+	if(0 != size){
+		printf("archivo no vacio");
 		fputs("\n",fd);
+	}
 	fputs(user_path,fd);
 	fclose(fd);
 }

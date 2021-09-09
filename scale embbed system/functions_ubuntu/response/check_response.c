@@ -18,12 +18,14 @@ int check_response( char * response);
 int main(int argc, char **argv)
 {
 	//copy_file("lista.txt","test01/lista.txt");
-	 char * response = "{\"error\": false, \"scale#delete\": \"test01\", \"scale#add\": \"\", \"scale#ingredients\": \"\" }";
+	//test11,123 test12,489 test13,1001
+	 char * response = "{\"error\": false, \"scale#delete\": \"\", \"scale#add\": \"test11,123 test12,489 test13,1001\", \"scale#ingredients\": \"\" }";
 	// // char * response = "{\"error\": false, \"pending\": false}";
-	 char * last_user = "test01";
-	 char * ingredient_name = "sal";
-	 char path[30];
-	 int test = check_response( response);
+	 // char * last_user = "test01";
+	 // char * ingredient_name = "sal";
+	 // char path[30];
+	 // int test = check_response( response);
+	 check_response( response);
 		// if( test ){
 	// 	printf("hay que eliminar el dato\n");
 	// 	sprintf(path,"%s/pendientes.txt",last_user);
@@ -93,13 +95,13 @@ int check_response( char * response){
 				// printf("Se ha encontrado el contenido a agregar\n");
 				if( comillas == 2){
 					complete[aux2] = '\0';
-					// printf("Datos a agregar: %s\n", complete);
+					printf("Datos a agregar: %s\n", complete);
 					add_users(complete);
 					key_found = 0;
 					comillas = 0;
 					restart_complete = 1;
 
-				}else if(response[aux] != ' ' && response[aux] != '"')
+				}else if( ( (comillas == 1 && response[aux] == ' ') || response[aux] != ' ') && response[aux] != '"')
 					complete[aux2++] = response[aux];
 				else if(response[aux] == '"'){
 					// printf("comillas\n");
@@ -162,11 +164,11 @@ void delete_users( char *  users){
 
 void add_users( char *  users){
 	// printf("agregar usuarios\n");
-	char * token = strtok(users, "\t");
+	char * token = strtok(users, " ");
 	while( token != NULL ) {
-	  // printf( "token_add: %s\n", token ); //printing each token
+	  printf( "token_add: %s\n", token ); //printing each token
 	  add_user(token);
-	  token = strtok(NULL, "\t");
+	  token = strtok(NULL, " ");
 	}
 	// delete_user(token);
 }
