@@ -18,6 +18,8 @@ from ast import literal_eval
 import json
 import unidecode
 
+import traceback
+
 class AuthUserView(APIView):
 	def get(self, request, *args, **kwargs):
 		email = request.GET.get('username','')
@@ -248,7 +250,7 @@ class ScaleView(APIView):
 			user = User.objects.filter( id= data['user_id']).first()
 			user.user_type_id = data['status_id'];
 			if data['status_id'] == '1':
-				pending_update = ScaleUpdate.objects.filter(active=True, user = user, update_type_id__in = 3).first()
+				pending_update = ScaleUpdate.objects.filter(active=True, user = user, update_type_id = 3).first()
 				if pending_update:
 					pending_update.active = False
 					pending_update.save()
@@ -268,7 +270,7 @@ class ScaleView(APIView):
 					ScaleUpdate.objects.create(user_id = user.id, scale = user.scale, update_type_id = 3 )
 				has_pending = Inventory.objects.filter(user_id = user.id, type_id=2, ingredient_id__type_id=2)
 				if has_pending:
-					ScaleUpdate.objects.create(user_id = user.id, scale_id = scale.id, update_type_id = 5 )
+					ScaleUpdate.objects.create(user_id = user.id, scale = user.scale, update_type_id = 5 )
 			user.save()
 			return JsonResponse(data={'error': False }, safe=False)
 		except Exception as e:
@@ -407,7 +409,7 @@ class EmbebbedScaleView(APIView):
 			for update in updates:
 				print(update['update_type_id'])
 				if update['update_type_id'] == 3:
-					format_updates['add'] += update['username'] + ',' + str(update['user_id']) + ' '
+					format_updates['add'] += update['username'] + ',4,' +str(update['user_id']) + ' '
 				if update['update_type_id'] == 4:
 					format_updates['delete'] += update['username'] + ','
 				if update['update_type_id'] == 5:
@@ -416,7 +418,7 @@ class EmbebbedScaleView(APIView):
 					else:
 						print("obteniendo ingredientes")
 						print("id_usuario: ",update['user_id'])
-						pending = Inventory.objects.filter(user_id = update['user_id'], active = True, type_id=2, ingredient_id__type_id=2)\
+						pending = Inventory.objects.filter(user_id = update['user_id'], active = True, type_id=2, ingredient_id__type_id=2, quantity__gt= 0)\
 						.annotate(ingredient_name=F('ingredient_id__name')).order_by('ingredient_name').values()
 						if len(pending) > 0:
 							format_updates['ingredients'] += update['username'] +';' 
@@ -424,9 +426,9 @@ class EmbebbedScaleView(APIView):
 
 							for pen in pending:
 								print(pen['ingredient_name'])
-								format_updates['ingredients'] += unidecode.unidecode(pen['ingredient_name']) +',' + str(pen['ingredient_id']) + '#'
+								format_updates['ingredients'] += unidecode.unidecode(pen['ingredient_name']) + ',1,' + str(pen['ingredient_id']) + '#'
 							format_updates['ingredients'] += ';'
-			# ScaleUpdate.objects.filter(scale=scale, active=True).update(active = False)			
+			ScaleUpdate.objects.filter(scale=scale, active=True).update(active = False)			
 			return JsonResponse(data={"error": False, 'scale#delete': format_updates['delete'], 'scale#add': format_updates['add'], 'scale#ingredients':format_updates['ingredients']})
 		except Exception as e:
 			print(e)
@@ -434,7 +436,10 @@ class EmbebbedScaleView(APIView):
 
 	def post(self, request, *args, **kwargs):
 		try:
-			data =  request.POST.dict()
+			print(request.body)
+			data =  json.loads(request.body)
+			print("entra para tomar datos");
+			print(data)
 			is_pending = True
 			if not ( 'user_id' in data and 'access_code' in data and 'quantity' in data and 'ingredient_id' in data):
 					return JsonResponse(data={"error": True, "message": 'incomplete_data' })

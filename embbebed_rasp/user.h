@@ -14,5 +14,7 @@ void add_at_end(char * file,char * user_path);
 void create_path( char * path);
 int copy_file(char * original,char * copy);
 
+int get_user_id(char * current_user);
+
 void update_user_pending(char * user, char * pending);
 #endif

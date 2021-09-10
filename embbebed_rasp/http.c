@@ -16,6 +16,7 @@
 #include "lcd.h"
 
 extern char * current_user;
+extern int user_id;
 extern char * access_code;
 char * ip= "192.168.100.44";
 int puerto = 8000;
@@ -102,8 +103,9 @@ void send_post(struct datos * time, int weight, int id, char* ingredient){
 			response = read_response(sockfd);
 			printf("Entra aquí!!!!\n");
 			delete_pending = check_response( response );
-			if(delete_pending){
+			if(delete_pending == 1){
 				sprintf(path,"%s/pendientes.txt",current_user);
+				printf("a eliminar el pendiente %s, %s", path, ingredient);
 				copy_except(path,ingredient);
 			}
 		}
@@ -225,21 +227,16 @@ char * read_response(int sockfd){
 
 
 char * format_post_request(char * url, struct datos * data, int weight, int id){ //falta el scale_id y el current_user
-	// char petition[] = "GET /scale/user_weight/?test=hola HTTP/1.0\r\n\r\n";
-	static char petition_complete[150];
-	printf("%d\n", sizeof(petition_complete));
-	// char petition2[] = "POST /scale/user_weight/ HTTP/1.0\r\nContent-Length: %d\r\nContent-Type: application/json\r\n\r\n %s";
-	// method (POST,GET) url(scale/{{rest_of_url}}) get_params(?test=hola) post_addition variable post_json_content ({'test':'123'})
+	static char petition_complete[500];
 	char petition[] = "POST %s%s HTTP/1.0%s\r\n\r\n %s";
 	char post_addition_bone[] = "\r\nContent-Length: %d\r\nContent-Type: application/json";
 	char post_addition[60];
-
-	char post_json_bone[] = "{\"time\" : \"%x:%x:%x_%x-%x-%x\", \"weight\": %d, \"id\": %d}\0";
-	char post_json[70];
-
+	char post_json_bone[] = "{\"time\" : \"%x:%x:%x_%x-%x-%x\", \"quantity\": %d, \"ingredient_id\": %d, \"access_code\": \"%s\", \"user_id\": \"%d\"}\0";
+	char post_json[300];
+	printf("user_id: %d", user_id);
 	printf("POST petition\n");
-	sprintf(post_json, post_json_bone, data->horas, data->minutos, data->segundos,data->dia,data->mes,data->anio,weight,id);
-	sprintf(post_addition,post_addition_bone, sizeof(post_json));
+	sprintf(post_json, post_json_bone, data->horas, data->minutos, data->segundos,data->dia,data->mes,data->anio,weight,id,access_code,user_id);
+	sprintf(post_addition,post_addition_bone, strlen(post_json) + 1 );
 	sprintf(petition_complete, petition,url,"",post_addition,post_json );
 	printf("%s\n", petition_complete);
 
@@ -285,7 +282,6 @@ char * hostname_to_ip(char * hostname )
 }
 
 int check_response( char * response){
-	printf("entra aqui\n");
 	printf("%s\n", response);
 	int n, aux, aux2 = 0, key_found = 0, restart_complete = 0, comillas = 0; //cont is just for testing //found encontro una llave
 	char * complete = (char*)malloc(1000 * sizeof(char));
@@ -308,11 +304,14 @@ int check_response( char * response){
 				if(response[aux] != ' ' && response[aux] != ',')
 					complete[aux2++] = response[aux];
 				else if(response[aux] == ','){
+					complete[aux2] = '\0';
+					// printf("comparando error true, %s", complete);
 					if( strcmp("true", complete) == 0){
 						printf("Hubo un error, terminando programa\n");
 						return -1;
 					}
-					printf("Sin error\n");
+					else
+						printf("Sin error\n");
 					key_found = 0;
 					restart_complete = 1;
 
@@ -324,7 +323,7 @@ int check_response( char * response){
 				// printf("%c",response[aux]);
 				if( comillas == 2){
 					complete[aux2] = '\0';
-					printf("Datos a eliminar: %s\n", complete);
+					// printf("Datos a eliminar: %s\n", complete);
 					delete_users(complete);
 					key_found = 0;
 					comillas = 0;
@@ -340,7 +339,7 @@ int check_response( char * response){
 				// printf("Se ha encontrado el contenido a agregar\n");
 				if( comillas == 2){
 					complete[aux2] = '\0';
-					printf("Datos a agregar: %s\n", complete);
+					// printf("Datos a agregar: %s\n", complete);
 					add_users(complete);
 					key_found = 0;
 					comillas = 0;
@@ -356,7 +355,7 @@ int check_response( char * response){
 				// printf("Se ha encontrado el contenido a modificar en los ingredientes\n");
 				if( comillas == 2){
 					complete[aux2] = '\0';
-					printf("Datos a actualizar: %s\n", complete);
+					// printf("Datos a actualizar: %s\n", complete);
 					update_pending(complete);
 					key_found = 0;
 					comillas = 0;
@@ -372,6 +371,7 @@ int check_response( char * response){
 				if(response[aux] != ' ' && response[aux] != ',' && response[aux] != '}')
 					complete[aux2++] = response[aux];
 				else if(response[aux] == '}'){
+					printf("revisando si hay que eliminar\n");
 					complete[aux2] = '\0';
 					if( strcmp("true", complete) == 0)
 						return 0;
@@ -402,18 +402,18 @@ void delete_users( char *  users){
 	while( token != NULL ) {
 	  // printf( "token: %s\n", token ); //printing each token
 	  delete_user(token);
-	  token = strtok(NULL, " ");
+	  token = strtok(NULL, ",");
 	}
 	// delete_user(token);
 }
 
 void add_users( char *  users){
 	printf("agregar usuarios\n");
-	char * token = strtok(users, "\t");
+	char * token = strtok(users, " ");
 	while( token != NULL ) {
 	  printf( "token_add: %s\n", token ); //printing each token
 	  add_user(token);
-	  token = strtok(NULL, "\t");
+	  token = strtok(NULL, " ");
 	}
 	// delete_user(token);
 }

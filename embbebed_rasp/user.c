@@ -10,6 +10,43 @@
 
 #include "user.h"
 
+int get_user_id(char * current_user){
+	FILE * fd = fopen("users.txt", "r");
+	char id[30];
+	int aux, commas = 0, ignore = 0, index = 0, finish = 0;;
+
+	while( (aux = fgetc(fd)) != EOF ){
+		if( ignore ){
+			if( aux == '\n')
+				ignore = 0;
+		}
+		else if( aux == ','){
+			commas++;
+			if( commas == 1){
+				id[ index ] = '\0';
+				if( strcmp(id,current_user) != 0 ){
+					commas = 0;
+					ignore = 1;
+					index = 0;
+				}
+			}
+		}else if( commas == 2 ){
+			index = 0;
+			commas = 0;
+			id[ index++ ] = aux; 
+			finish = 1;
+		}else if( aux != '\n' && aux != ',' ){
+			if( finish )
+				break;
+
+			id[ index++ ] = aux; 		
+		}
+	}
+
+	id[ index ] = '\0';
+	return atoi( id );
+}
+
 char * get_first(char * file){
 	FILE * fd;
 	char text[16], *to_return;
@@ -48,20 +85,25 @@ void set_last( char * new_last){
 }
 
 void update_user_pending(char * user, char * pending){
-	printf("actualizando pendientes\n");
 	char path[30];
-	int index = 0, total = strlen(pending);
+	int index = 0, total = strlen(pending), check_next = 0;
 	sprintf(path,"%s/pendientes.txt", user);
 	FILE *fd = fopen(path,"w");
 	printf("Agregando datos al usuario: %s\n", user);
 	while( index != total ){
+
+		if( check_next ){
+			check_next = 0;
+			fputc('\n', fd);
+			printf("\n");
+		}
 		if( pending[ index ] != '#' ){
 			printf("%c", pending[ index]);
 			fputc(pending[ index ], fd);
 		}else{
-			fputc('\n', fd);
-			printf("\n");
+			check_next = 1;
 		}
+
 		index++;
 	}
 	printf("\n");
@@ -168,28 +210,34 @@ int delete_file(const char *f_path, const struct stat *sb, int typeflag, struct 
 }
 
 void copy_except(char * file,char * except){
-	// printf("A eliminar: %s\n", except);
+	printf("A eliminar: %s\n", except);
 	FILE * fd, * fd_aux;
-	int keep = 1, cont_indx = 0, copy = 0, first = 1, added = 0;
+	int keep = 1, cont_indx = 0, copy = 0, first = 1, added = 0, check_comma = 1;
 	int aux;
 	char container[40];
 	fd = fopen(file,"r");
 	while( keep ){
 		aux = fgetc(fd);
 		if(aux == EOF){
-			// printf("final de archivo\n");
+			printf("final de archivo\n");
 			break;
 		}
-		// printf("%c\n", aux);
-		if( aux == ',' ){
-			container[ cont_indx ] = '\0';
-			// printf("a comparar: %s\n", container);
-			if(strcmp(except,container) != 0){
-				copy = 1;
+		printf("%c\n", aux);
+		if( aux == ','){
+			if( check_comma ){
+				check_comma = 0;
+				container[ cont_indx ] = '\0';
+				printf("a comparar: %s\n", container);
+				if(strcmp(except,container) != 0){
+					copy = 1;
+					container[cont_indx++] = aux;
+					continue;
+				}else
+					cont_indx = 0;
+			}else{
+				check_comma = 1;
 				container[cont_indx++] = aux;
-				continue;
-			}else
-				cont_indx = 0;
+			}
 		}
 		else if( aux != '\n' && aux != '\0')
 			container[cont_indx++] = aux;
@@ -207,7 +255,7 @@ void copy_except(char * file,char * except){
 				}
 
 				container[ cont_indx ] = '\0';
-				// printf("Escribiendo %s\n", container);
+				printf("Escribiendo %s\n", container);
 				fputs(container,fd_aux);
 				fclose(fd_aux);
 				cont_indx = 0;
@@ -219,10 +267,10 @@ void copy_except(char * file,char * except){
 		}
 	}
 	if(copy){
-		// printf("otro copy \n");
+		printf("otro copy \n");
 		added= 1;
 		container[ cont_indx] = '\0';
-		// printf("Escribiendo: %s\n", container);
+		printf("Escribiendo: %s\n", container);
 		fd_aux = fopen("aux.txt", "a");
 		if(!first)
 			fputs("\n",fd_aux);
@@ -230,15 +278,15 @@ void copy_except(char * file,char * except){
 		fclose(fd_aux);
 	}
 
-	// printf("Sale!\n");
+	printf("Sale!\n");
 	fclose(fd);
 	if(added){
 		remove(file);
-		// printf("Elimina!\n");
+		printf("Elimina!\n");
 		rename("aux.txt",file);
-		// printf("Renombra!\n");
+		printf("Renombra!\n");
 	}else{
-		// printf("eliminar datos del archivo\n");
+		printf("eliminar datos del archivo\n");
 		fd_aux = fopen(file, "w");
 		fclose(fd);
 

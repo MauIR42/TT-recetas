@@ -32,6 +32,7 @@ void start_menu(pthread_t thread_id);
 struct node * restart_menu(struct node * head);
 
 // user
+int user_id;
 char * current_user;
 int has_users = 1;
 
@@ -46,6 +47,7 @@ int main(){
 
 	/*user*/
 	current_user = get_first("last.txt");
+	user_id = get_user_id(current_user);
 	access_code = get_first("scale.txt");
 	printf("res:%d\n", strcmp(current_user,""));
 	if(strcmp(current_user,"") != 0){
@@ -99,16 +101,18 @@ void start_menu(pthread_t thread_id){
 	enum ButtonStates b_l= DOWN, b_r=DOWN, b_a=DOWN, b_b=DOWN;
 
 	int weight;
-	struct datos *test;
+	// struct datos *test;
+	struct datos test2;
+	struct datos *test = test;
 
-	// test->segundos = 0x1;
-	// test->minutos = 0x1;
-	// test->horas = 0x1;
-	// test->dia = 0x1;
-	// test->mes = 0x1;
-	// test.anio = 0x1;
-	// test.temperatura = 0x1;
-	weight = 10;
+	test2.segundos = 0x1;
+	test2.minutos = 0x1;
+	test2.horas = 0x1;
+	test2.dia = 0x1;
+	test2.mes = 0x1;
+	test2.anio = 0x1;
+	test2.temperatura = 0x1;
+	weight = 180;
 
 	printf("current = %s\n", menu->name);
 	clear_display();
@@ -183,6 +187,9 @@ void start_menu(pthread_t thread_id){
 				send_post(test, weight, menu->id, menu->name );
 				// free(test);
 				sleep(2);
+				menu = NULL;
+				free_menu(head);
+				head = create_menu(0);
 				menu = restart_menu(head);
 
 			}
@@ -208,8 +215,10 @@ void start_menu(pthread_t thread_id){
 				writeWord("Cambiando\nusuario...");
 				printf("user_id: %d", menu->id);
 				set_last(menu->name);
+				sleep(2);
 				free(current_user);
 				current_user = strdup(menu->name);
+				user_id = menu->id;
 				menu = NULL;
 				free_menu(head);
 				head = create_menu(0);
@@ -224,9 +233,11 @@ void start_menu(pthread_t thread_id){
 				send_get();
 				sleep(2);
 				current_user = get_until_delimiter("users.txt",',');
+				user_id = get_user_id(current_user);
 				set_last(current_user);
 				if(strcmp(current_user,"") != 0){
 					printf("Ultimo usuario: %s\n", current_user);
+					clear_display();
 					writeWord("Bienvenido");
 					change_display_line(1);
 					writeWord(current_user);
