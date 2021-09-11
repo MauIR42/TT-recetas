@@ -26,8 +26,10 @@ export class StockComponent implements OnInit {
   success_message : string = '';
 
   scale_regex : any = /^[a-zA-Z0-9]{3}-[a-zA-Z0-9]{3}$/;
+  name_regex : any = /^[a-zA-Z0-9]*$/;
 
   scale_input_error: string = '';
+  name_input_error: string = '';
 
   scale_id : number = -1;
 
@@ -45,6 +47,9 @@ export class StockComponent implements OnInit {
 
 
   associated_scale : string = "";
+  scale_name : string = "";
+
+
 
   menu = 'scale';
 
@@ -115,7 +120,10 @@ export class StockComponent implements OnInit {
         this.spinner.hide("loader");
         return;
       }
+
       this.user_type = scale_data['user_type'];
+      this.associated_scale = scale_data['scale_identifier'];
+      this.scale_name = scale_data['username'];
       if( this.user_type == 3 ){
         this.process_users(scale_data['current_users'])
         this.scale_id = scale_data['scale_id'];
@@ -256,39 +264,55 @@ export class StockComponent implements OnInit {
   }
 
   send_scale_id(){
+    let send = true;
     this.scale_input_error = '';
-    if(this.associated_scale.length < 0){
+    this.name_input_error = '';
+    console.log(this.associated_scale.length );
+    console.log(this.scale_name.length );
+    if(this.associated_scale.length == 0){
       this.scale_input_error = 'Debes llenar este campo';
-      return;
+        send = false;
     }
     else if( !(this.scale_regex.test(this.associated_scale) ) ){
       this.scale_input_error = 'Sigue la estructura del código de la báscula (lineas incluidas)';
-      return;
+      send = false;
     }
-    let form = new FormData();
+    if(this.scale_name.length == 0){
+      this.name_input_error = 'Debes llenar este campo';
+      send = false;
 
-    form.append('user_id', this.user_id);
-    form.append('scale_code', this.associated_scale);
-    this.spinner.show("loader");
-    this.ss.post_scale_request(form).subscribe( (data : any)=>{
-      if(data['error']){
-        this.error_server = SERVER_MESSAGES[data['message']];
+    }
+    else if( !(this.name_regex.test(this.scale_name) ) ){
+      this.name_input_error = 'Sigue la estructura del código de la báscula (lineas incluidas)';
+      send = false;
+    }
+    if(send){
+      let form = new FormData();
+
+      form.append('user_id', this.user_id);
+      form.append('scale_code', this.associated_scale);
+      form.append('scale_name', this.scale_name);
+      this.spinner.show("loader");
+      this.ss.post_scale_request(form).subscribe( (data : any)=>{
+        if(data['error']){
+          this.error_server = SERVER_MESSAGES[data['message']];
+          this.spinner.hide("loader");
+          return;
+        }
+        this.user_type = data['user_type'];
+        if(this.user_type == 3){
+          this.ss.get_scale_info({'user_id': this.user_id}).subscribe( (data: any)=>{
+            if(data['error']){
+              this.error_server = SERVER_MESSAGES[data['message']];
+              this.spinner.hide("loader");
+              return;
+            }
+            this.process_users(data['current_users'])
+          });
+        }
         this.spinner.hide("loader");
-        return;
-      }
-      this.user_type = data['user_type'];
-      if(this.user_type == 3){
-        this.ss.get_scale_info({'user_id': this.user_id}).subscribe( (data: any)=>{
-          if(data['error']){
-            this.error_server = SERVER_MESSAGES[data['message']];
-            this.spinner.hide("loader");
-            return;
-          }
-          this.process_users(data['current_users'])
-        });
-      }
-      this.spinner.hide("loader");
-    });
+      });
+    }
   }
 
   process_users(data: any){

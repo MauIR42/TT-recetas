@@ -55,6 +55,8 @@ int connect_to_server(char * ip, int puerto){
 		// exit(1);
 	}
 
+	printf("conexión creada\n");
+
 	return sockfd;
 }
 
@@ -77,40 +79,18 @@ void send_post(struct datos * time, int weight, int id, char* ingredient, int ch
 
 	int sockfd = connect_to_server(ip, puerto);
 
-	if(sockfd == -1){
-		clear_display();
-		writeWord("Error de conexion\nen su internet.");
-		printf("No hay conexion a internet\n");
-		sleep(2);
-		// return -1;
-	}
-	else if(sockfd == -2){
-		clear_display();
-		writeWord("Error externo\nReintente despues");
-		printf("no se pudo conectar con el servidor\n");
-		sleep(2);
-		// return -1;
-	}
-	else if(sockfd == -3){
-		clear_display();
-		writeWord("Error externo\nReintente despues");
-		printf("El servidor tardo en responder no se pudo conectar con el servidor\n");
-		sleep(2);
-		// return -1;
-	}
-	else{
+	if( check_connection(sockfd) == 1){
 		if(send_petition(sockfd, petition_complete)){
 			response = read_response(sockfd);
-			printf("Entra aquí!!!!\n");
+			printf("response: %s\n", response);
 			delete_pending = check_response( response );
 			if(delete_pending == 1 && check){
 				sprintf(path,"%s/pendientes.txt",current_user);
-				printf("a eliminar el pendiente %s, %s", path, ingredient);
+				// printf("a eliminar el pendiente %s, %s", path, ingredient);
 				copy_except(path,ingredient);
 			}
 		}
 		free(petition_complete);
-		printf("Información enviada.\n");
 		close(sockfd);
 	}
 
@@ -123,28 +103,26 @@ void send_get(){
 
 	int sockfd = connect_to_server(ip, puerto);
 
-	if(sockfd == -1){
-		clear_display();
-		writeWord("Error de conexion\nen su internet.");
-		printf("No hay conexion a internet\n");
-		sleep(2);
-		// return -1;
+	if( check_connection(sockfd) == 1){
+		if(send_petition(sockfd, petition_complete)){
+			response = read_response(sockfd);
+			check_response( response );
+		}
+		close(sockfd);
 	}
-	else if(sockfd == -2){
-		clear_display();
-		writeWord("Error externo\nReintente despues");
-		printf("no se pudo conectar con el servidor\n");
-		sleep(2);
-		// return -1;
-	}
-	else if(sockfd == -3){
-		clear_display();
-		writeWord("Error externo\nReintente despues");
-		printf("El servidor tardo en responder no se pudo conectar con el servidor\n");
-		sleep(2);
-		// return -1;
-	}
-	else{
+
+
+}
+
+void send_put(){
+	char * petition_complete = format_put_request("/services/scale/update");
+	printf("peticion: %s\n", petition_complete);
+	char * response;
+
+	int sockfd = connect_to_server(ip, puerto);
+
+	if(check_connection(sockfd) == 1){
+
 		if(send_petition(sockfd, petition_complete)){
 			printf("Recibir datos\n");
 			response = read_response(sockfd);
@@ -155,7 +133,6 @@ void send_get(){
 		printf("Información enviada.\n");
 		close(sockfd);
 	}
-
 
 }
 
@@ -233,7 +210,6 @@ char * format_post_request(char * url, struct datos * data, int weight, int id){
 	char post_addition[60];
 	char post_json_bone[] = "{\"time\" : \"%x:%x:%x_%x-%x-%x\", \"quantity\": %d, \"ingredient_id\": %d, \"access_code\": \"%s\", \"user_id\": \"%d\"}\0";
 	char post_json[500];
-	printf("user_id: %d", user_id);
 	printf("POST petition\n");
 	sprintf(post_json, post_json_bone, data->horas, data->minutos, data->segundos,data->dia,data->mes,data->anio,weight,id,access_code,user_id);
 	sprintf(post_addition,post_addition_bone, strlen(post_json) + 1 );
@@ -245,8 +221,7 @@ char * format_post_request(char * url, struct datos * data, int weight, int id){
 
 
 char * format_get_request(char * url){
-	static char petition_complete[150];
-	printf("%d\n", sizeof(petition_complete));
+	char * petition_complete = (char*)malloc(150 * sizeof(char));
 
 	char petition[] = "GET %s%s HTTP/1.0%s\r\n\r\n %s";
 
@@ -263,6 +238,21 @@ char * format_get_request(char * url){
 
 
 
+}
+
+char * format_put_request(char * url){
+	char * petition_complete = (char*)malloc(150 * sizeof(char));
+
+	char petition[] = "PUT %s%s HTTP/1.0%s\r\n\r\n %s";
+	char put_addition_bone[] = "\r\nContent-Length: %d\r\nContent-Type: application/json";
+	char put_addition[50];
+	char put_json_bone[] = "{ \"access_code\":%s, \"reset\":true }";
+	char put_json[150];
+	sprintf(put_json, put_json_bone, access_code);
+	sprintf(put_addition,put_addition_bone, strlen(put_json) + 1 );
+	sprintf(petition_complete, petition,url,"",put_addition,put_json );
+
+	return petition_complete;
 }
 
 char * hostname_to_ip(char * hostname )
@@ -289,13 +279,12 @@ int check_response( char * response){
 	aux = 0;
 	n = strlen(response);
 	while(aux!= n){
-		// printf("%c",response[aux]);
+
 		if( response[aux] == ':'){
 			key_found = 1;
 			complete[aux2] = '\0';
 			strcpy(key, complete);
 			restart_complete = 1;
-			// printf("llave: %s\n", key);
 		}else if( (!key_found) && (response[aux] != '{' && response[aux] != ' ' && response[aux] != '"') )
 			complete[aux2++] = response[aux];
 		else if(key_found){
@@ -305,7 +294,7 @@ int check_response( char * response){
 					complete[aux2++] = response[aux];
 				else if(response[aux] == ','){
 					complete[aux2] = '\0';
-					// printf("comparando error true, %s", complete);
+
 					if( strcmp("true", complete) == 0){
 						printf("Hubo un error, terminando programa\n");
 						return -1;
@@ -314,16 +303,10 @@ int check_response( char * response){
 						printf("Sin error\n");
 					key_found = 0;
 					restart_complete = 1;
-
-					// break;
 				}
 			}else if( strcmp("scale#delete",key) == 0){
-				// printf("Se ha encontrado el contenido a eliminar\n");
-				// printf("texto: %c\n", response[aux]);
-				// printf("%c",response[aux]);
 				if( comillas == 2){
 					complete[aux2] = '\0';
-					// printf("Datos a eliminar: %s\n", complete);
 					delete_users(complete);
 					key_found = 0;
 					comillas = 0;
@@ -332,14 +315,13 @@ int check_response( char * response){
 				}else if(response[aux] != ' ' && response[aux] != '"')
 					complete[aux2++] = response[aux];
 				else if(response[aux] == '"'){
-					// printf("comillas\n");
+
 					comillas++;
 				}
 			}else if( strcmp("scale#add",key) == 0){
-				// printf("Se ha encontrado el contenido a agregar\n");
 				if( comillas == 2){
 					complete[aux2] = '\0';
-					// printf("Datos a agregar: %s\n", complete);
+
 					add_users(complete);
 					key_found = 0;
 					comillas = 0;
@@ -348,14 +330,13 @@ int check_response( char * response){
 				}else if( ( (comillas == 1 && response[aux] == ' ') || response[aux] != ' ') && response[aux] != '"')
 					complete[aux2++] = response[aux];
 				else if(response[aux] == '"'){
-					// printf("comillas\n");
+
 					comillas++;
 				}
 			}else if( strcmp("scale#ingredients",key) == 0){
-				// printf("Se ha encontrado el contenido a modificar en los ingredientes\n");
 				if( comillas == 2){
 					complete[aux2] = '\0';
-					// printf("Datos a actualizar: %s\n", complete);
+
 					update_pending(complete);
 					key_found = 0;
 					comillas = 0;
@@ -364,14 +345,13 @@ int check_response( char * response){
 				}else if( ( (comillas == 1 && response[aux] == ' ') || response[aux] != ' ') && response[aux] != '"')
 					complete[aux2++] = response[aux];
 				else if(response[aux] == '"'){
-					// printf("comillas\n");
+
 					comillas++;
 				}
 			}else if( strcmp("pending",key) == 0){
 				if(response[aux] != ' ' && response[aux] != ',' && response[aux] != '}')
 					complete[aux2++] = response[aux];
 				else if(response[aux] == '}'){
-					printf("revisando si hay que eliminar\n");
 					complete[aux2] = '\0';
 					if( strcmp("true", complete) == 0)
 						return 0;
@@ -379,8 +359,19 @@ int check_response( char * response){
 						return 1;
 					key_found = 0;
 					restart_complete = 1;
-
-					// break;
+				}
+			}else if( strcmp("restart",key) == 0){
+				if(response[aux] != ' ' && response[aux] != ',' && response[aux] != '}')
+					complete[aux2++] = response[aux];
+				else if(response[aux] == '}'){
+					printf("revisando si hay que reiniciar\n");
+					complete[aux2] = '\0';
+					if( strcmp("true", complete) == 0)
+						return 0;
+					else
+						return 1;
+					key_found = 0;
+					restart_complete = 1;
 				}
 			}
 		}
@@ -410,10 +401,10 @@ void delete_users( char *  users){
 }
 
 void add_users( char *  users){
-	printf("agregar usuarios\n");
+	// printf("agregar usuarios\n");
 	char * token = strtok(users, " ");
 	while( token != NULL ) {
-	  printf( "token_add: %s\n", token ); //printing each token
+	  // printf( "token_add: %s\n", token ); //printing each token
 	  add_user(token);
 	  token = strtok(NULL, " ");
 	}
@@ -422,7 +413,7 @@ void add_users( char *  users){
 
 void update_pending( char * pending){
 
-	printf("actualizar usuarios\n");
+	// printf("actualizar usuarios\n");
 	char * user = strtok(pending, ";");
 	char * elements = strtok(NULL, ";");
 	while( user != NULL && elements != NULL) {
@@ -434,4 +425,30 @@ void update_pending( char * pending){
 
 	}
 
+}
+
+int check_connection(int sockfd){
+	if(sockfd == -1){
+		clear_display();
+		writeWord("Error de conexion\nen su internet.");
+		printf("No hay conexion a internet\n");
+		sleep(2);
+		return -1;
+	}
+	else if(sockfd == -2){
+		clear_display();
+		writeWord("Error externo\nReintente despues");
+		printf("no se pudo conectar con el servidor\n");
+		sleep(2);
+		return -1;
+	}
+	else if(sockfd == -3){
+		clear_display();
+		writeWord("Error externo\nReintente despues");
+		printf("El servidor tardo en responder no se pudo conectar con el servidor\n");
+		sleep(2);
+		return -1;
+	}
+
+	return 1;
 }

@@ -269,6 +269,16 @@ void start_menu(pthread_t thread_id){
 				writeWord("Reiniciando...");
 				change_display_line(1);
 				writeWord("Espere por favor");
+				send_put();
+				sleep(2);
+				clear_display();
+				writeWord("Sin Usuarios");
+				sleep(2);
+				has_users = 0;
+				menu = NULL;
+				free_menu(head);
+				head = create_menu(0);
+				menu = restart_menu(head);
 
 
 			}

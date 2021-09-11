@@ -34,19 +34,19 @@
 		<!-- </div> -->
 		<div class="col-12" *ngIf="type_info[user_type]['text'] == 1">
 			<p><b>Agrega una báscula.</b></p>
-			<p class="text-sm-justify">Introduce en el siguiente campo el código de validación de la bascula a la que desea asociarte.</p>
+			<p class="text-sm-justify">Introduce en los siguientes campos la información necesaria para asociarte a la báscula.</p>
 			<p class="text-justify">Toma en cuenta que si eres el primer usuario en introducir el código serás el administrador de esa báscula, de lo contrario deberás esperar a que el adminsitrador acepte o rechace tu petición.</p>
 		</div>
-		<div class="col-12" *ngIf="type_info[user_type]['text'] == 2">
-			<p class="text-sm-justify"><b>Actualmente estás asociado a la báscula con identificador:</b></p>
-			<h4 class="text-center">{{associated_scale}}</h4>
+		<div class="col-12 mb-4" *ngIf="type_info[user_type]['text'] == 2">
+			<h5 class="text-center">Baścula asociada: <b>{{associated_scale}}</b></h5>
+			<h5 class="text-center">Nombre en báscula: <b>{{scale_name}}</b></h5>
 		</div>
 		<div class="col-12 text-center pt-2" *ngIf="user_type == 2">
 			<button type="button" class="btn btn-normal-blue" (click)="open_modal('remove_scale')">Ya no usaré esta báscula</button>
 		</div>
 		<div class="col-12 text-center pt-2 table-responsive" *ngIf="user_type == 3">
-			<p class="text-center" class="most-strong-blue-color"><b>Usuarios administrados</b></p>
-			<table class="table table-striped">
+			<p class="text-center" class="most-strong-blue-color" *ngIf="scale_users.length > 0"><b>Usuarios administrados</b></p>
+			<table class="table table-striped" *ngIf="scale_users.length > 0">
 				<tr class="blue-main-background">
 					<th><p>Usuario</p></th>
 					<th><p>Estado</p></th>
@@ -67,11 +67,17 @@
 					</td>
 				</tr>
 			</table>
-			<p class="text-left">¿Quieres asignar el rol de administrador a otro usuario?</p>
-			<p class="text-left">A continuación selecciona a que usuario se le dará el rol de administrador: </p>
+			<div *ngIf="scale_users.length > 0">
+				<p class="text-left">¿Quieres asignar el rol de administrador a otro usuario?</p>
+				<p class="text-left">A continuación selecciona a que usuario se le dará el rol de administrador: </p>
+			</div>
+			<div *ngIf="scale_users.length == 0">
+				<h5 class="col-12 text-center">¡Sin usuarios por administrar!</h5>
+				<p class="col-6 mx-auto mt-4 mb-4">Si vives con otras personas a las que les interesaría usar este sistema dales tu código de báscula para que puedas aceptarlos en esta sección.</p>
+			</div>
 		</div>
 		<div class="col-6 mx-auto" *ngIf="user_type == 3">
-			<form class="form-inline  text-center d-none d-md-block" (submit)="change_user_type($event,3,new_admin)">
+			<form class="form-inline  text-center d-none d-md-block" (submit)="change_user_type($event,3,new_admin)" *ngIf="scale_users.length > 0">
 			  <label class="sr-only" for="admin_sel">Usuario</label>
 			  <select id="admin_sel" class="custom-select mb-2 mr-sm-2" [(ngModel)]="new_admin" name="admin_sel">
 			    <option value="-1" selected disabled>Selecciona una opción...</option>
@@ -79,7 +85,7 @@
 			  </select>
 			  <button type="submit" class="btn btn-normal-orange mb-2">Cambiar administrador</button>
 			</form>
-			<form class="form-inline text-center d-block d-md-none pb-2" (submit)="change_user_type($event,3,new_admin)">
+			<form class="form-inline text-center d-block d-md-none pb-2" (submit)="change_user_type($event,3,new_admin)" *ngIf="scale_users.length > 0">
 			  <div class="form-group">
 			    <label for="code_scale" class="strong_blue_clor">Usuario</label>
 			    <select id="admin_sel" class="custom-select mb-2 mr-sm-2 " [(ngModel)]="new_admin" name="admin_sel_2">
@@ -91,22 +97,27 @@
 			</form>
 			<p>También puedes <a href="#" class="strong_blue_clor" (click)="open_modal('restart_scale',$event)"> reiniciar la bascula </a> para eliminar a todos los usuarios de ella.</p>
 		</div>
-		<div class="col-9 col-lg-12  mx-auto" *ngIf="type_info[user_type]['form_use']">
-			<form class="form-inline text-center d-none d-lg-block" (submit)="send_scale_id()">
-			  <label class="sr-only" for="code_scale">Código de báscula</label>
-			  <input type="text" class="form-control mb-2 mr-sm-2 holder-blue" id="code_scale" placeholder="xxx-xxx" [attr.readonly]="(user_type == 4)?true:null" required [(ngModel)]="associated_scale" name="scale_name">
-			  <button type="submit" class="btn btn-normal-orange mb-2" [attr.disabled]="(user_type == 4)?true:null">Validar</button>
-			  <small class="form-text error-text strong_blue_clor" *ngIf="scale_input_error.length > 0">{{scale_input_error}}</small>
-			</form>
-
-			<form class="form-inline text-center d-block d-lg-none pb-2" (submit)="send_scale_id()">
-			  <div class="form-group">
-			    <label for="code_scale" class="strong_blue_clor">Código de báscula</label>
-			    <input type="text" class="form-control holder-blue" placeholder="xxx-xxx" id="code_scale" [attr.readonly]="(user_type == 4)?true:null" required [(ngModel)]="associated_scale" name="scale_name_res">
-			  </div>
-			  <button type="submit" class="btn btn-normal-orange" [attr.disabled]="(user_type == 4)?true:null">Validar</button>
-			  <small class="form-text error-text strong_blue_clor text-justify" *ngIf="scale_input_error.length > 0">{{scale_input_error}}</small>
-			</form>
+		<div class="col-9 col-lg-12" *ngIf="type_info[user_type]['form_use']">
+			<!-- <div class="container"> -->
+				<form class="container" (submit)="send_scale_id()">
+					<div class="row justify-content-center">
+						<div class="form-group col-12 col-lg-3">
+							<label class="strong_blue_clor" for="code_scale">Código de báscula</label>
+							<input type="text" class="form-control mb-2 mr-sm-2 holder-blue" id="code_scale" placeholder="xxx-xxx" [attr.readonly]="(user_type == 4)?true:null" required [(ngModel)]="associated_scale" name="scale_name">
+							<small>El código se encuentra a un costado de la báscula.</small>
+							<small class="form-text error-text strong_blue_clor" *ngIf="scale_input_error.length > 0">{{scale_input_error}}</small>
+						</div>
+						<div class="form-group col-12 col-lg-3">
+							<label class="strong_blue_clor" for="code_scale">Tu nombre para la báscula</label>
+							<input type="text" class="form-control mb-2 mr-sm-2 holder-blue" id="code_scale" placeholder="Pruebamax16" [attr.readonly]="(user_type == 4)?true:null" maxlength="16" required [(ngModel)]="scale_name" name="user_scale_name">
+							<small>Solo son validos números y letras sin acentos. {{scale_name.length}} de 16</small>
+							<small class="form-text error-text strong_blue_clor" *ngIf="name_input_error.length > 0">{{name_input_error}}</small>
+						</div>
+						<div class="w-100"></div>
+						<button type="submit" class="btn btn-normal-orange mb-2 col-12 col-lg-6" [attr.disabled]="(user_type == 4)?true:null">Validar</button>
+					</div>
+				</form>
+			<!-- </div> -->
 		</div>
 		<div class="col-12" [class.d-none] ="!(user_type == 4)" >
 			<div class="alert alert-info alert-dismissible fade show" role="alert">

@@ -201,7 +201,7 @@ class ScaleView(APIView):
 	def get(self, request, *args, **kwargs):
 		try:
 			user_id = request.GET.get('user_id','')
-			user_type = User.objects.filter(id = user_id).first()
+			user_type = User.objects.filter(id = user_id).annotate(scale_identifier= F("scale__access_code") ).first()
 			if user_type.user_type:
 				if user_type.user_type.id == 5:
 					user_type.user_type = UserType.objects.get(id = 1)
@@ -210,8 +210,8 @@ class ScaleView(APIView):
 					return JsonResponse(data={"error": False, 'user_type': 5 })
 				if user_type.user_type.id == 3:
 					current_users = list(User.objects.filter( Q(scale = user_type.scale) & Q(active= True ) & ~Q(id= user_id) ).values('first_name', 'last_name', 'id', 'user_type'))
-					return JsonResponse(data={"error": False, 'user_type': user_type.user_type.id, 'current_users': current_users, 'scale_id':user_type.scale_id })
-				return JsonResponse(data={"error": False, 'user_type': user_type.user_type.id })
+					return JsonResponse(data={"error": False, 'user_type': user_type.user_type.id, 'current_users': current_users, 'scale_id':user_type.scale_id, 'scale_identifier':user_type.scale_identifier, 'username':user_type.scale_name })
+				return JsonResponse(data={"error": False, 'user_type': user_type.user_type.id, 'scale_identifier':user_type.scale_identifier, 'username':user_type.scale_name })
 			return JsonResponse(data={"error": True, "message": 'incomplete_data' })
 		except Exception as e:
 			print(e)
@@ -220,14 +220,20 @@ class ScaleView(APIView):
 	def post(self, request, *args, **kwargs):
 		try:
 			data = request.POST.dict()
-			if  not ('user_id' in data and 'scale_code' in data) :
+			if  not ('user_id' in data and 'scale_code' in data and 'scale_name' in data) :
 				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
 			scale = Scale.objects.filter(access_code=data['scale_code'], active= True).first()
 			if not scale:
 				return JsonResponse(data={"error": True,  "message":"scale_not_exists"})
+			has_reset = ScaleUpdate.objects.filter(scale_id = scale.id, update_type_id = 6, active = True )
+			if has_reset :
+				return JsonResponse(data={"error": True,  "message":"scale_must_restart"})
 			users = User.objects.filter(scale=scale, active= True)
 			user = User.objects.filter(id = data['user_id']).first()
 			if users:
+				for scale_user in users:
+					if scale_user.scale_name == data['scale_name'] :
+						return JsonResponse(data={"error": True,  "message":"scale_name_repeated"})
 				user.user_type = UserType.objects.get(name='pending user');
 			else:
 				user.user_type = UserType.objects.get(name='scale administrator');
@@ -235,6 +241,7 @@ class ScaleView(APIView):
 				has_pending = Inventory.objects.filter(user_id = user.id, type_id=2, ingredient_id__type_id=2)
 				if has_pending:
 					ScaleUpdate.objects.create(user_id = user.id, scale_id = scale.id, update_type_id = 5 )
+			user.scale_name = data['scale_name']
 			user.scale = scale
 			user.save()
 			return JsonResponse(data={'error': False, 'user_type': user.user_type.id}, safe=False)
