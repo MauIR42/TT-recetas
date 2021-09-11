@@ -39,6 +39,9 @@ int has_users = 1;
 //scale info
 char * access_code;
 
+const char pendientes[11] = "Pendientes\0";
+const char vacio[1] = "\0";
+
 int main(){
 
 	/* LCD section*/
@@ -49,8 +52,7 @@ int main(){
 	current_user = get_first("last.txt");
 	user_id = get_user_id(current_user);
 	access_code = get_first("scale.txt");
-	printf("res:%d\n", strcmp(current_user,""));
-	if(strcmp(current_user,"") != 0){
+	if(strcmp(current_user,vacio) != 0){
 		printf("Ultimo usuario: %s\n", current_user);
 		writeWord("Bienvenido");
 		change_display_line(1);
@@ -91,6 +93,24 @@ int main(){
 }
 
 void start_menu(pthread_t thread_id){
+
+	int weight, check = 0;
+
+	enum ButtonStates b_l= DOWN, b_r=DOWN, b_a=DOWN, b_b=DOWN;
+	// struct datos *test;
+	struct datos *test = (struct datos* )malloc(sizeof(struct datos));
+
+	//test
+	test->segundos = 0x1;
+	test->minutos = 0x1;
+	test->horas = 0x1;
+	test->dia = 0x1;
+	test->mes = 0x1;
+	test->anio = 0x1;
+	test->temperatura = 0x1;
+	weight = 180;
+	//test end
+
 	struct node * menu = NULL;
 	struct node * head = NULL;
 	/* Menu section*/
@@ -98,21 +118,7 @@ void start_menu(pthread_t thread_id){
 	head = create_menu(1);
 	menu = head;
 
-	enum ButtonStates b_l= DOWN, b_r=DOWN, b_a=DOWN, b_b=DOWN;
-
-	int weight;
-	// struct datos *test;
-	struct datos test2;
-	struct datos *test = test;
-
-	test2.segundos = 0x1;
-	test2.minutos = 0x1;
-	test2.horas = 0x1;
-	test2.dia = 0x1;
-	test2.mes = 0x1;
-	test2.anio = 0x1;
-	test2.temperatura = 0x1;
-	weight = 180;
+	// check = 0;
 
 	printf("current = %s\n", menu->name);
 	clear_display();
@@ -143,7 +149,6 @@ void start_menu(pthread_t thread_id){
 		}
 		if(b_a == PRESS){
 			b_a = DOWN;
-			printf("tipo:%d", menu->type);
 			if(menu->type == 0){
 				clear_display();
 				if(menu->son != NULL){
@@ -184,7 +189,13 @@ void start_menu(pthread_t thread_id){
 				// printf("La hora es : %x:%x:%x\n", test->horas,test->minutos,test->segundos );
 				// printf("La fecha es : %x/%x/%x\n", test->dia,test->mes,test->anio);
 				// printf("%d\n", weight);
-				send_post(test, weight, menu->id, menu->name );
+				if(strcmp(pendientes,menu->father->name) == 0)
+					// printf("checar pendientes\n");
+					check = 1;
+				else
+					// printf("no checar pendientes\n");
+					check = 0;
+				send_post(test, weight, menu->id, menu->name, check );
 				// free(test);
 				sleep(2);
 				menu = NULL;
@@ -235,7 +246,7 @@ void start_menu(pthread_t thread_id){
 				current_user = get_until_delimiter("users.txt",',');
 				user_id = get_user_id(current_user);
 				set_last(current_user);
-				if(strcmp(current_user,"") != 0){
+				if(strcmp(current_user,vacio) != 0){
 					printf("Ultimo usuario: %s\n", current_user);
 					clear_display();
 					writeWord("Bienvenido");

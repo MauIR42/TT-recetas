@@ -10,7 +10,7 @@ char * read_response(int sockfd);
 
 //add an send_petition to wrap all these methods?
 
-void send_post(struct datos * time, int weight, int id, char* ingredient);
+void send_post(struct datos * time, int weight, int id, char* ingredient, int check);
 void send_get();
 
 void delete_users( char *  users);

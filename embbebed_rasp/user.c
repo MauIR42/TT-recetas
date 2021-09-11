@@ -61,7 +61,7 @@ char * get_first(char * file){
 char * get_until_delimiter(char * file, char delimiter){
 	printf("entra a la funcion\n");
 	FILE * fd;
-	char * result = (char*)malloc(1000 * sizeof(char));
+	char * result = (char*)malloc(20 * sizeof(char));
 	int aux;
 	int index = 0;
 	fd = fopen(file, "r");

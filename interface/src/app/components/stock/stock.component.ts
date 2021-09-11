@@ -171,7 +171,7 @@ export class StockComponent implements OnInit {
     this.spinner.show('loader');
     let form = new FormData();
     this.spinner.show("loader");
-    this.ss.restart_scale({"scale_id" : this.scale_id.toString()}).subscribe( (data : any)=>{
+    this.ss.restart_scale({"user_id" : this.user_id.toString()}).subscribe( (data : any)=>{
       if(data['error']){
         this.error_server = SERVER_MESSAGES[data['message']];
         this.spinner.hide("loader");

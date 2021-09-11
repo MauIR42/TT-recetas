@@ -5,5 +5,6 @@ export const SERVER_MESSAGES : any = {
 	"user_not_exists": "El usuario que busca no existe.",
 	"invalid_token" : "Ocurrió al autenticar.",
 	"email_already_registered":'El correo ya tiene asociada una cuenta.',
-	'scale_not_exists':'No hay una báscula con ese código de acceso.'
+	'scale_not_exists':'No hay una báscula con ese código de acceso.',
+	'user_not_administrator' : "Esta acción solo la puede hacer el administrador de la báscula."
 }

@@ -279,9 +279,15 @@ class ScaleView(APIView):
 
 	def delete(self, request, *args, **kwargs):
 		try:
-			scale_id_s = request.GET.get('scale_id','-1')
-			scale_id = int(scale_id_s)
-			User.objects.filter(scale_id = scale_id).update(scale_id = None, user_type_id = 1)
+			user_id_s = request.GET.get('user_id','-1')
+			user_id = int(user_id_s)
+			user = User.objects.filter(id = user_id).first()
+			print(user.user_type_id)
+			if user.user_type_id != 3 :
+				return JsonResponse(data={"error": True,  "message":"user_not_administrator"})
+			User.objects.filter(scale = user.scale).update(scale_id = None, user_type_id = 1)
+			ScaleUpdate.objects.filter(scale = user.scale, active = True).update(active = False)
+			ScaleUpdate.objects.create(scale = user.scale, user = user, update_type_id = 6)
 			return JsonResponse(data={'error': False }, safe=False)
 
 		except Exception as e:
@@ -408,6 +414,8 @@ class EmbebbedScaleView(APIView):
 			not_checked = []
 			for update in updates:
 				print(update['update_type_id'])
+				if update['update_type_id'] == 6:
+					return JsonResponse(data={"error": False,  "reset": True})
 				if update['update_type_id'] == 3:
 					format_updates['add'] += update['username'] + ',4,' +str(update['user_id']) + ' '
 				if update['update_type_id'] == 4:
@@ -442,10 +450,10 @@ class EmbebbedScaleView(APIView):
 			print(data)
 			is_pending = True
 			if not ( 'user_id' in data and 'access_code' in data and 'quantity' in data and 'ingredient_id' in data):
-					return JsonResponse(data={"error": True, "message": 'incomplete_data' })
+				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
 			scale = Scale.objects.filter(access_code= data['access_code'], active=True).first()
 			if not scale:
-					return JsonResponse(data={"error": True,  "message":"scale_not_exists"})
+				return JsonResponse(data={"error": True,  "message":"scale_not_exists"})
 			Inventory.objects.create(quantity=data['quantity'], ingredient_id=data['ingredient_id'], type_id=1, user_id = data['user_id'])
 			pending = Inventory.objects.filter(active = True, quantity__gt=0 ,ingredient_id=data['ingredient_id'], user_id= data['user_id']).first()
 			if pending:
@@ -460,5 +468,23 @@ class EmbebbedScaleView(APIView):
 		except Exception as e:
 			print(e)
 			return JsonResponse(data={"error": True,  "message":"internal_server_error"})
+
+	def put(self, request, *args, **kwargs):
+		try:
+			data = json.loads(request.body)
+			if not ('access_code' in data) :
+				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
+			scale = Scale.objects.filter(access_code= data['access_code'], active=True).first()
+			if not scale:
+				return JsonResponse(data={"error": True,  "message":"scale_not_exists"})
+			if 'reset' in data:
+				User.objects.filter(scale=scale, active=True).update(user_type_id=1, scale_id=None)
+				ScaleUpdate.objects.filter(scale=scale, active=True).update(active = False)
+				return JsonResponse(data={"error": False, "reset": True})
+		except Exception as e:
+			print(e)
+			return JsonResponse(data={"error": True,  "message":"internal_server_error"})
+
+
 
 

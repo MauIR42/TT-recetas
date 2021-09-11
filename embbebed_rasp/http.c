@@ -69,10 +69,10 @@ int send_petition(int sockfd, char * petition){
 	return 1;
 }
 
-void send_post(struct datos * time, int weight, int id, char* ingredient){
+void send_post(struct datos * time, int weight, int id, char* ingredient, int check){
 	char * petition_complete = format_post_request("/services/scale/stock", time, weight, id);
 	char * response;
-	char path[30];
+	char * path = (char*)malloc(100 * sizeof(char));
 	int delete_pending = 0;
 
 	int sockfd = connect_to_server(ip, puerto);
@@ -103,12 +103,13 @@ void send_post(struct datos * time, int weight, int id, char* ingredient){
 			response = read_response(sockfd);
 			printf("Entra aquí!!!!\n");
 			delete_pending = check_response( response );
-			if(delete_pending == 1){
+			if(delete_pending == 1 && check){
 				sprintf(path,"%s/pendientes.txt",current_user);
 				printf("a eliminar el pendiente %s, %s", path, ingredient);
 				copy_except(path,ingredient);
 			}
 		}
+		free(petition_complete);
 		printf("Información enviada.\n");
 		close(sockfd);
 	}
@@ -119,7 +120,6 @@ void send_get(){
 
 	char * petition_complete = format_get_request("/services/scale/update");
 	char * response;
-	int status;
 
 	int sockfd = connect_to_server(ip, puerto);
 
@@ -149,7 +149,7 @@ void send_get(){
 			printf("Recibir datos\n");
 			response = read_response(sockfd);
 			printf("Enviar datos\n");
-			status = check_response( response );
+			check_response( response );
 			printf("Finalizar datos\n");
 		}
 		printf("Información enviada.\n");
@@ -164,7 +164,7 @@ char * read_response(int sockfd){
 	// char complete[300]="";
 	char * complete = (char*)malloc(1000 * sizeof(char));
 	char column_name[40], next_c = '\r', previous = '\n', aux_char;
-	int n, aux, aux2 = 0,cont = 0, next = 0; //cont is just for testing
+	int n, aux, aux2 = 0, next = 0; //cont is just for testing
 	int add = 1, c_l = 0, returns = 0, content = 0;
 	while ((n = read (sockfd, response, sizeof(char)*50)) > 0)
 	{	
@@ -227,12 +227,12 @@ char * read_response(int sockfd){
 
 
 char * format_post_request(char * url, struct datos * data, int weight, int id){ //falta el scale_id y el current_user
-	static char petition_complete[500];
+	char  * petition_complete = (char*)malloc(500 * sizeof(char));
 	char petition[] = "POST %s%s HTTP/1.0%s\r\n\r\n %s";
 	char post_addition_bone[] = "\r\nContent-Length: %d\r\nContent-Type: application/json";
 	char post_addition[60];
 	char post_json_bone[] = "{\"time\" : \"%x:%x:%x_%x-%x-%x\", \"quantity\": %d, \"ingredient_id\": %d, \"access_code\": \"%s\", \"user_id\": \"%d\"}\0";
-	char post_json[300];
+	char post_json[500];
 	printf("user_id: %d", user_id);
 	printf("POST petition\n");
 	sprintf(post_json, post_json_bone, data->horas, data->minutos, data->segundos,data->dia,data->mes,data->anio,weight,id,access_code,user_id);
@@ -393,6 +393,8 @@ int check_response( char * response){
 		aux++;
 
 	}
+	free(key);
+	free(complete);
 	return 0;
 }
 
