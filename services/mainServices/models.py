@@ -124,3 +124,59 @@ class Inventory(models.Model):
 
 	class Meta:
 		db_table = 'inventory'
+
+class RecipieType(models.Model):
+	id = models.AutoField(auto_created=True, primary_key=True, serialize=False)
+	name = models.CharField(max_length=255)
+	active = models.BooleanField(default = True)
+
+	class Meta:
+		db_table = 'recipe_type'
+
+class Recipe(models.Model): #excel datos_recetas
+	id = models.AutoField(auto_created=True, primary_key=True, serialize=False)
+	name = models.CharField(max_length=255)
+	description = models.TextField(null=True)
+	image_url = models.TextField(null=True)
+	sodium = models.DecimalField(max_digits= 6, decimal_places= 2)
+	carbohydrates = models.DecimalField(max_digits= 6, decimal_places= 2)
+	cholesterol = models.DecimalField(max_digits= 6, decimal_places= 2)
+	total_time = models.IntegerField(null = False)
+	portions = models.IntegerField(null = False)
+	type = models.ForeignKey(RecipieType, on_delete=models.PROTECT, null = False)
+	active = models.BooleanField(default = True)
+
+	class Meta:
+		db_table = 'recipe'
+
+class RecipeIngredient(models.Model):
+	id = models.AutoField(auto_created=True, primary_key=True, serialize=False)
+	ingredient = models.ForeignKey(Ingredient, on_delete=models.PROTECT, null = False)
+	recipie = models.ForeignKey(Recipe, on_delete=models.PROTECT, null = False)
+	quantity = models.IntegerField(null = False)
+	active = models.BooleanField(default = True)
+	comment = models.CharField(max_length=255)
+	is_optional = models.BooleanField(default = False)
+
+	class Meta:
+		db_table = 'recipe_ingredient'
+
+class StepType(models.Model):
+	id = models.AutoField(auto_created=True, primary_key=True, serialize=False)
+	name = models.CharField(max_length=255)
+	active = models.BooleanField(default = True)
+
+	class Meta:
+		db_table = 'step_type'
+
+class RecipeStep(models.Model):
+	id = models.AutoField(auto_created=True, primary_key=True, serialize=False)
+	recipe = models.ForeignKey(Recipe, on_delete=models.PROTECT, null = False)
+	type =  models.ForeignKey(StepType, on_delete=models.PROTECT, null = False)
+	step_number = models.IntegerField(null = False)
+	description = models.TextField(null=False)
+
+	class Meta:
+		db_table = 'recipe_step'
+
+

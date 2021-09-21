@@ -17,4 +17,6 @@ int copy_file(char * original,char * copy);
 int get_user_id(char * current_user);
 
 void update_user_pending(char * user, char * pending);
+
+void restart_scale();
 #endif

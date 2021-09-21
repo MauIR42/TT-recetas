@@ -16,7 +16,7 @@ django.setup()
 from mainServices.models import *
 
 
-df = pd.read_excel('/home/mau/Documents/ESCOM/TT/TT-recetas/excel/ingredientes.xlsx')
+df = pd.read_excel('/home/mau/Documents/ESCOM/TT/TT-recetas/excel/ingredientes_2.xlsx')
 
 print(df)
 

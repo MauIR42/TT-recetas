@@ -193,7 +193,7 @@ int copy_file(char* original, char * copy){
 
 
 void delete_user(char * user_path){
-	int result = nftw(user_path, delete_file, 12, FTW_DEPTH | FTW_PHYS);
+	nftw(user_path, delete_file, 12, FTW_DEPTH | FTW_PHYS);
 	// printf("El resultado de eliminar fue %d\n", result );
 	copy_except("users.txt",user_path);
 
@@ -208,6 +208,28 @@ int delete_file(const char *f_path, const struct stat *sb, int typeflag, struct 
 	}
 	return rf;
 }
+
+void restart_scale(){
+	FILE *fd = fopen("users.txt","r");
+	char user[21];
+	char * username;
+	int res;
+	while( fgets(user,21,fd) != NULL){
+		printf("El usuario completo: %s\n", user);
+		 username = strtok(user, ",");
+		 printf("El nombre es: %s\n", username);
+		 res = nftw(username, delete_file, 12, FTW_DEPTH | FTW_PHYS);
+		 printf("respuesta: %d\n", res);
+	}
+	fclose(fd);
+	printf("Eliminando archivo users.txt");
+	fd = fopen("users.txt","w");
+	fclose(fd);
+	printf("Eliminando archivo last.txt");
+	fd = fopen("last.txt","w");
+	fclose(fd);
+}
+
 
 void copy_except(char * file,char * except){
 	printf("A eliminar: %s\n", except);

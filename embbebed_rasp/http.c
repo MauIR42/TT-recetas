@@ -124,11 +124,12 @@ void send_put(){
 	if(check_connection(sockfd) == 1){
 
 		if(send_petition(sockfd, petition_complete)){
-			printf("Recibir datos\n");
+			// printf("Recibir datos\n");
 			response = read_response(sockfd);
-			printf("Enviar datos\n");
+			printf("respuesta: %s\n", response);
+			// printf("Enviar datos\n");
 			check_response( response );
-			printf("Finalizar datos\n");
+			// printf("Finalizar datos\n");
 		}
 		printf("Información enviada.\n");
 		close(sockfd);
@@ -246,7 +247,7 @@ char * format_put_request(char * url){
 	char petition[] = "PUT %s%s HTTP/1.0%s\r\n\r\n %s";
 	char put_addition_bone[] = "\r\nContent-Length: %d\r\nContent-Type: application/json";
 	char put_addition[50];
-	char put_json_bone[] = "{ \"access_code\":%s, \"reset\":true }";
+	char put_json_bone[] = "{ \"access_code\":\"%s\", \"reset\":true }";
 	char put_json[150];
 	sprintf(put_json, put_json_bone, access_code);
 	sprintf(put_addition,put_addition_bone, strlen(put_json) + 1 );
@@ -360,16 +361,14 @@ int check_response( char * response){
 					key_found = 0;
 					restart_complete = 1;
 				}
-			}else if( strcmp("restart",key) == 0){
+			}else if( strcmp("reset",key) == 0){
 				if(response[aux] != ' ' && response[aux] != ',' && response[aux] != '}')
 					complete[aux2++] = response[aux];
 				else if(response[aux] == '}'){
 					printf("revisando si hay que reiniciar\n");
 					complete[aux2] = '\0';
 					if( strcmp("true", complete) == 0)
-						return 0;
-					else
-						return 1;
+						restart_scale();
 					key_found = 0;
 					restart_complete = 1;
 				}
