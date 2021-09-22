@@ -4,12 +4,11 @@
 	--grey: #efefef;
 }
 
-/*body {
+.body-component {
 	overflow: hidden;
 	font-family: 'Muli', sans-serif;
 	font-weight: 300;
-	color: var(--primary);
-}*/
+}
 
 #sidebar-container{
 	min-height: 100vh;
@@ -71,4 +70,31 @@ h5 {
 .blue-back > a{
 	color: var(--p-header);
 	text-decoration: none;
+}
+
+.blue-button {
+	color: var(--main-blue);
+  background-color: var(--main-blue);
+  border-color: var(--main-blue);
+  font-weight: bold;
+  border-radius: 0px;
+}
+
+.blue-button > img {
+	width: 25px; /* you can use % */
+  height: auto;
+}
+
+#content{
+	overflow-y: auto;
+	height: 100vh;
+	padding-bottom: 5rem;
+}
+
+.container-fluid h3, h4 {
+	color: var(--strong-blue);
+}
+
+.card-header > p {
+	display:inline;
 }

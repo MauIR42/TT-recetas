@@ -40,7 +40,7 @@ export class PlanningRecipeComponent implements OnInit {
 
   delete_img = 'x-circle-fill-orange.svg';
 
-  range_string : string = '';
+  range_string : string = 'arrow-left-white.svg';
 
   to_make_recipes = [
     [{'name':'abcde', 'id':15},{'name':'abcde', 'id':16},{'name':'abcde', 'id':17},{'name':'abcde', 'id':18}],
@@ -64,16 +64,23 @@ export class PlanningRecipeComponent implements OnInit {
 
   actual_modal : any;
 
+  show_modal : boolean = false;
+
+  side_bar_icon = "arrow-left-white.svg";
+
   constructor(private spinner: NgxSpinnerService) { }
 
   ngOnInit(): void {
     this.range_string = 'del ' + this.menu[ this.current ]['start'].format("DD") + ' al ' +this.menu[ this.current ]['end'].locale('es') .format("DD [de] MMMM  [del] YYYY");
-    $("#health_form").modal("show");
+    // $(document).ready(function() {
+    //   $("#planning_modal").modal("show");
+    // });
 
   }
 
-  get_recipe(event: any,element: any){
-    event.preventDefault();
+  get_recipe(element: any,event: any = null){
+    if(event)
+      event.preventDefault();
     console.log(element);
     this.current_recipe = element['id'];
   }
@@ -110,6 +117,21 @@ export class PlanningRecipeComponent implements OnInit {
         this.total_planned -= 1;
       }
     }
+  }
+
+  hide_bar(){
+    if(!$("#sidebar-container").is(":hidden")){
+      this.side_bar_icon = "arrow-right-white.svg";
+      $(document).ready(function() {
+        $("#sidebar-container").hide(1000);
+      } );
+    }
+    else{
+      this.side_bar_icon = "arrow-left-white.svg";
+      $("#sidebar-container").show();
+    }
+  }
+  show_bar(){
   }
 
 }
