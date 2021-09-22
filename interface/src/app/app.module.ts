@@ -20,6 +20,8 @@ import { FormModalComponent } from './components/modal/form-modal/form-modal.com
 import { HeathModalComponent } from './components/modal/heath-modal/heath-modal.component';
 import { IngredientModalComponent } from './components/modal/ingredient-modal/ingredient-modal.component';
 import { DatetimeOnePipe } from './pipes/datetime-one.pipe';
+import { PlanningRecipeComponent } from './components/planning-recipe/planning-recipe.component';
+import { WeekInfoModalComponent } from './components/modal/week-info-modal/week-info-modal.component';
 
 @NgModule({
   declarations: [
@@ -36,6 +38,8 @@ import { DatetimeOnePipe } from './pipes/datetime-one.pipe';
     HeathModalComponent,
     IngredientModalComponent,
     DatetimeOnePipe,
+    PlanningRecipeComponent,
+    WeekInfoModalComponent,
   ],
   imports: [
     BrowserModule,

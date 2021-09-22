@@ -44,6 +44,32 @@ a {
   
 }
 
+.btn-outline-strong {
+  color: var(--strong-blue);
+  background-color: #ffffff;
+  border-color: var(--strong-blue);
+  font-weight: bold;
+  letter-spacing: 0.05em;
+}
+
+.btn-outline-strong {
+  color: var(--strong-blue);
+  background-color: #ffffff;
+  border-color: var(--strong-blue);
+  font-weight: bold;
+  border-radius: 10px;
+}
+
+.btn-outline-strong:hover,
+.btn-outline-strong:active,
+.btn-outline-strong:focus,
+.btn-outline-strong.active {
+  background: var(--strong-blue);
+  color: #ffffff;
+  border-color: var(--strong-blue);
+  
+}
+
 
 .btn-outline-orange {
   color: var(--orange-light);

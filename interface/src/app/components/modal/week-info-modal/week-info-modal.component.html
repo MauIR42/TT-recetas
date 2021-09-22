@@ -1,0 +1,93 @@
+
+<div class="modal fade" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" id="health_form">
+  <ngx-spinner name="loader" [fullScreen]="false" type="ball-spin-clockwise-fade" size="medium" color = "#0AAFC6">
+    <p class="loading">Cargando...</p>
+  </ngx-spinner>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header orange-light-background">
+        <h5 class="modal-title ">Actualizar datos de semana</h5>
+      </div>
+      <div class="modal-body" *ngIf="current_step == 1">
+      	<h5 class="strong_blue_clor">Agregar datos de salud</h5>
+        <form class="row">
+          <div class="form-group col-12 col-lg-6">
+            <label for="weight" class="strong_blue_clor">Peso*</label>
+            <div class="input-group no-right-padding">
+              <input type="number" class="form-control holder-blue strong_blue_clor" id="weight" aria-describedby="weight" [(ngModel)]="form_info['weight']['value']" name="weight">
+              <div class="input-group-prepend">
+              <span class="input-group-text" id="basic-addon1">Kilogramos.</span>
+              </div>
+            </div>
+            <small class="form-text error-text strong_blue_clor" *ngIf="form_info['weight']['error'].length > 0">{{form_info['weight']['error']}}</small>
+          </div>
+          <div class="form-group col-12 col-lg-6">
+            <label for="diameter" class="strong_blue_clor">Diametro de la cintura*</label>
+            <div class="input-group no-right-padding">
+              <input type="number" class="form-control holder-blue strong_blue_clor" id="diameter" aria-describedby="diameter" [(ngModel)]="form_info['diameter']['value']" name="diameter">
+              <div class="input-group-prepend">
+              <span class="input-group-text" id="basic-addon1">centimetros.</span>
+              </div>
+            </div>
+            <small class="form-text error-text strong_blue_clor" *ngIf="form_info['diameter']['error'].length > 0">{{form_info['diameter']['error']}}</small>
+          </div>
+        </form>
+        <div class="row justify-content-center pt-3">
+          <div class="alert alert-danger col-12 text-center" role="alert" *ngIf="server_error.length > 0">
+              {{server_error}}
+          </div>
+        </div>	
+        <p class="text-right">{{current_step}} de {{total_steps}}</p>
+      </div>
+      <div class="modal-body" *ngIf="current_step == 2">
+      	<h5 class="strong_blue_clor">Actualizar los ingredientes disponibles</h5>
+        <div class="col-12 text-center pt-3 table-responsive" *ngIf="stock_items.length > 0">
+			<table id="stock" class="display">
+				<thead>
+					<tr class="blue-main-background">
+						<th><p>Ingrediente</p></th>
+						<th><p>Cantidad</p></th>
+						<th><p>Fecha de subida</p></th>
+						<th><p>Acciones</p></th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr *ngFor="let item of stock_items; let i = index">
+						<td>
+							{{item.ingredient_name}}
+						</td>
+						<td>
+							{{item.quantity}} {{item.unit}}.
+						</td>
+						<td>
+							{{item.created_at | datetimeOne}}
+						</td>
+
+						<td>
+							<a href="#" (click)="start_edit($event, item)" *ngIf="item.unit != 'gr' && item.unit != 'Kg'"><img src="assets/images/pencil-square-blue.svg" class="img-fluid mr-md-3 table-icon"></a>
+
+							<a href="#" (click)="open_modal('delete_item', $event ,i )"><img src="assets/images/x-square-fill-orange.svg" class="img-fluid table-icon"></a>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+        <div class="row justify-content-center pt-3">
+          <div class="alert alert-danger col-12 text-center" role="alert" *ngIf="server_error.length > 0">
+              {{server_error}}
+          </div>
+        </div>
+        <!-- <p class="text-right">{{current_step}} de {{total_steps}}</p> -->
+      </div>
+      <div class="modal-footer">
+      	<button type="button" class="btn btn-normal-blue" (click)="current_step = current_step + 1" *ngIf="current_step < total_steps">Siguiente</button>
+      	<button type="button" class="btn btn-normal-blue" (click)="current_step = current_step - 1" *ngIf="current_step > 1">Anterior</button>
+      	<button type="button" class="btn btn-normal-blue" (click)="send_data()" *ngIf="current_step == total_steps">Guardar</button>
+        <button type="button" class="btn btn-normal-orange" (click)="close_modal()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-confirmation-modal [modal_info]="actual_modal" (accepted)="check_action($event)"></app-confirmation-modal>
+<app-ingredient-modal (elements_edited)="reload_stock($event)" [edit_info]= edit_item></app-ingredient-modal>

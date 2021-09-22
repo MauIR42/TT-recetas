@@ -1,0 +1,74 @@
+: root {
+	--primary:  #111B54;
+	--light:  #ffffff;
+	--grey: #efefef;
+}
+
+/*body {
+	overflow: hidden;
+	font-family: 'Muli', sans-serif;
+	font-weight: 300;
+	color: var(--primary);
+}*/
+
+#sidebar-container{
+	min-height: 100vh;
+	background-color: var(--main-blue);
+	/*border*/
+
+}
+
+h5 {
+	color : var(--p-header);
+}
+
+#sidebar-container .logo{
+	padding: .875rem 1.25rem;
+
+}
+
+#sidebar-container .menu{
+	width: 18rem;
+
+}
+
+#white-text {
+	color: var(--p-header);
+}
+
+.menu > p {
+	color: var(--p-header);
+}
+
+.arrow {
+  width: 20px; /* you can use % */
+    height: auto;
+}
+
+.btn-cool{
+	padding: 0;
+	border: none;
+	background: none;
+  
+}
+
+.blue-back {
+	background-color: var(--main-blue);
+	color: var(--p-header);
+}
+
+.orange-back {
+	background-color: var(--orange-light);
+	color: var(--p-header);
+}
+
+.orange-back > a{
+	color: var(--strongest-blue);
+	text-decoration: none;
+}
+
+
+.blue-back > a{
+	color: var(--p-header);
+	text-decoration: none;
+}
