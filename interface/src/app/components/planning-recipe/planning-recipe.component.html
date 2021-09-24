@@ -31,7 +31,7 @@
 					</div>
 				</div>
 				<ul class="list-group list-group-flush ">
-				  <li class="list-group-item " (click)="get_recipe(recipe,$event)" *ngFor="let recipe of to_make_recipes[current_day]" [ngClass]="(current_recipe == recipe['id'])? 'orange-back' : 'blue-back'"><a href="#" >{{recipe['name']}}</a></li>
+				  <li class="list-group-item " (click)="get_recipe(recipe,$event)" *ngFor="let recipe of to_make_recipes[current_day]" [ngClass]="(current_recipe == recipe['id_user_recipe'])? 'orange-back' : 'blue-back'"><a href="#" >{{recipe['name']}}</a></li>
 				</ul>
 
 				<!-- <a href="#" (click)="get_recipe(recipe)" *ngFor="let recipe of to_make_recipes[current_day]" class="d-block ml-2">{{recipe['name']}}</a> -->
@@ -80,407 +80,46 @@
 								<p>También puedes ver las recetas de otros días y realizarlas cambiando el día en la barra lateral izquierda.</p>
 							</div>
 						</div>
-						<div class="row justify-content-center">
-							<div class="col-12">
-								<h4>Lunes</h4>
-							</div>
-							<div class="col-12 col-lg-3 mb-2 mb-lg-0">
-								<div class="card" style="width: 18rem;" >
-								  <img src="assets/images/test1.jpg" class="card-img-top" alt="...">
-								  <div class="card-header">
-								    <p class="mr-5">Receta 1</p> 
-								    <img src="assets/images/clock-blue.svg" class="img-fluid col-auto">
-								    <p class="strong_blue_clor">20 min.</p>
-								  </div>
-								  <div class="card-body">
-								    <p class="card-text text-justify">Esta es una breve descripción de la receta para que el usuario recuerde que había.</p>
-								    <a href="#" class="btn btn-normal-blue stretched-link text-center w-100" (click)="get_recipe(21,$event)">Ver Receta</a>
-								  </div>
+						<ng-container *ngIf="total > 0">
+							<div class="row justify-content-center" *ngFor="let day of days; let i = index">
+								<div class="col-12">
+									<h4>{{day}}</h4>
 								</div>
-							</div>
-							<div class="col-12 col-lg-3 mb-2 mb-lg-0">
-								<div class="card" style="width: 18rem;">
-								  <img src="assets/images/test1.jpg" class="card-img-top" alt="...">
-								  <div class="card-header">
-								    <p class="mr-5">Receta 2</p> 
-								    <img src="assets/images/clock-blue.svg" class="img-fluid col-auto">
-								    <p class="strong_blue_clor">20 min.</p>
-								  </div>
-								  <div class="card-body">
-								    <p class="card-text text-justify">Esta es una breve descripción de la receta para que el usuario recuerde que había.</p>
-								  </div>
+								<div class="col-12" *ngIf="to_make_recipes[i].length == 0">
+									<h5 class="strong_blue_clor text-center py-2">No hay recetas planeadas para este día.</h5>
 								</div>
-							</div>
-							<div class="col-12 col-lg-3 mb-2 mb-lg-0">
-								<div class="card" style="width: 18rem;">
-								  <img src="assets/images/test1.jpg" class="card-img-top" alt="...">
-								  <div class="card-header">
-								    <p class="mr-5">Receta 3</p> 
-								    <img src="assets/images/clock-blue.svg" class="img-fluid col-auto">
-								    <p class="strong_blue_clor">20 min.</p>
-								  </div>
-								  <div class="card-body">
-								    <p class="card-text text-justify">Esta es una breve descripción de la receta para que el usuario recuerde que había.</p>
-								  </div>
+								<div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-2 " *ngFor="let recipe of to_make_recipes[i]">
+									<div class="card h-100" style="width: 18rem;" >
+									  <img src="assets/images/test1.jpg" class="card-img-top" alt="...">
+									  <div class="card-header text-center">
+									    <p >{{recipe.name}}</p> 
+									    <br>
+									    <img src="assets/images/percent-blue.svg" class="img-fluid mr-2">
+									    <p class="strong_blue_clor mr-5" style="color:red;" *ngIf="recipe.ingredient_percentage <= 39">{{recipe.ingredient_percentage}} ingredientes</p>
+									    <p class="strong_blue_clor mr-5" style="color:orange;" *ngIf="recipe.ingredient_percentage >= 40 &&recipe.ingredient_percentage <= 59 ">{{recipe.ingredient_percentage}} ingr.</p>
+									    <p class="strong_blue_clor mr-5" style="color:brown;" *ngIf="recipe.ingredient_percentage >= 60 &&recipe.ingredient_percentage <= 79 ">{{recipe.ingredient_percentage}} ingr.</p>
+									    <p class="strong_blue_clor mr-5" style="color:green;" *ngIf="recipe.ingredient_percentage >= 80 &&recipe.ingredient_percentage <= 100 ">{{recipe.ingredient_percentage}} ingr.</p>
+									    <img src="assets/images/clock-blue.svg" class="img-fluid mr-2">
+									    <p class="strong_blue_clor">{{recipe.duration}} min.</p>
+									    <br>
+									    <p>realizados el último mes: <strong class="strong_blue_clor">{{recipe.cooked}}</strong></p>
+									  </div>
+									  <div class="card-body">
+									    <p class="card-text text-justify">{{recipe.description}}</p>
+									    <a href="#" class="btn btn-normal-blue stretched-link text-center w-100" (click)="get_recipe(21,$event)">Ver Receta</a>
+									  </div>
+									</div>
 								</div>
+							</div>	
+						</ng-container>
+						<div class="row text-center" *ngIf="total == 0">
+							<div class="col-12" >
+								<h4 class="my-5">No tienes una planeación para esta semana</h4>
+								<h5>¿Eres nuevo en recettario? realiza la planeación para la siguiente semana y comienza tu inventario</h5>
 							</div>
-							<div class="col-12 col-lg-3 mb-2 mb-lg-0">
-								<div class="card" style="width: 18rem;">
-								  <img src="assets/images/test1.jpg" class="card-img-top" alt="...">
-								  <div class="card-header">
-								    <p class="mr-5">Receta 4</p> 
-								    <img src="assets/images/clock-blue.svg" class="img-fluid col-auto">
-								    <p class="strong_blue_clor">20 min.</p>
-								  </div>
-								  <div class="card-body">
-								    <p class="card-text text-justify">Esta es una breve descripción de la receta para que el usuario recuerde que había.</p>
-								  </div>
-								</div>
-							</div>
-						</div>		
+						</div>
 						<!-- <div class="w-100 my-3"></div> -->
-						<div class="row justify-content-center my-3">
-							<div class="col-12">
-								<h4>Martes</h4>
-							</div>
-							<div class="col-12 col-lg-3">
-								<div class="card" style="width: 18rem;">
-								  <img src="assets/images/test1.jpg" class="card-img-top" alt="...">
-								  <div class="card-header">
-								    <p class="mr-5">Receta 1</p> 
-								    <img src="assets/images/clock-blue.svg" class="img-fluid col-auto">
-								    <p class="strong_blue_clor">20 min.</p>
-								  </div>
-								  <div class="card-body">
-								    <p class="card-text text-justify">Esta es una breve descripción de la receta para que el usuario recuerde que había.</p>
-								  </div>
-								</div>
-							</div>
-							<div class="col-12 col-lg-3">
-								<div class="card" style="width: 18rem;">
-								  <img src="assets/images/test1.jpg" class="card-img-top" alt="...">
-								  <div class="card-header">
-								    <p class="mr-5">Receta 2</p> 
-								    <img src="assets/images/clock-blue.svg" class="img-fluid col-auto">
-								    <p class="strong_blue_clor">20 min.</p>
-								  </div>
-								  <div class="card-body">
-								    <p class="card-text text-justify">Esta es una breve descripción de la receta para que el usuario recuerde que había.</p>
-								  </div>
-								</div>
-							</div>
-							<div class="col-12 col-lg-3">
-								<div class="card" style="width: 18rem;">
-								  <img src="assets/images/test1.jpg" class="card-img-top" alt="...">
-								  <div class="card-header">
-								    <p class="mr-5">Receta 3</p> 
-								    <img src="assets/images/clock-blue.svg" class="img-fluid col-auto">
-								    <p class="strong_blue_clor">20 min.</p>
-								  </div>
-								  <div class="card-body">
-								    <p class="card-text text-justify">Esta es una breve descripción de la receta para que el usuario recuerde que había.</p>
-								  </div>
-								</div>
-							</div>
-							<div class="col-12 col-lg-3">
-								<div class="card" style="width: 18rem;">
-								  <img src="assets/images/test1.jpg" class="card-img-top" alt="...">
-								  <div class="card-header">
-								    <p class="mr-5">Receta 4</p> 
-								    <img src="assets/images/clock-blue.svg" class="img-fluid col-auto">
-								    <p class="strong_blue_clor">20 min.</p>
-								  </div>
-								  <div class="card-body">
-								    <p class="card-text text-justify">Esta es una breve descripción de la receta para que el usuario recuerde que había.</p>
-								  </div>
-								</div>
-							</div>
-						</div>		
-						<div class="row justify-content-center my-3">
-							<div class="col-12">
-								<h4>Miércoles</h4>
-							</div>
-							<div class="col-12 col-lg-3">
-								<div class="card" style="width: 18rem;">
-								  <img src="assets/images/test1.jpg" class="card-img-top" alt="...">
-								  <div class="card-header">
-								    <p class="mr-5">Receta 1</p> 
-								    <img src="assets/images/clock-blue.svg" class="img-fluid col-auto">
-								    <p class="strong_blue_clor">20 min.</p>
-								  </div>
-								  <div class="card-body">
-								    <p class="card-text text-justify">Esta es una breve descripción de la receta para que el usuario recuerde que había.</p>
-								  </div>
-								</div>
-							</div>
-							<div class="col-12 col-lg-3">
-								<div class="card" style="width: 18rem;">
-								  <img src="assets/images/test1.jpg" class="card-img-top" alt="...">
-								  <div class="card-header">
-								    <p class="mr-5">Receta 2</p> 
-								    <img src="assets/images/clock-blue.svg" class="img-fluid col-auto">
-								    <p class="strong_blue_clor">20 min.</p>
-								  </div>
-								  <div class="card-body">
-								    <p class="card-text text-justify">Esta es una breve descripción de la receta para que el usuario recuerde que había.</p>
-								  </div>
-								</div>
-							</div>
-							<div class="col-12 col-lg-3">
-								<div class="card" style="width: 18rem;">
-								  <img src="assets/images/test1.jpg" class="card-img-top" alt="...">
-								  <div class="card-header">
-								    <p class="mr-5">Receta 3</p> 
-								    <img src="assets/images/clock-blue.svg" class="img-fluid col-auto">
-								    <p class="strong_blue_clor">20 min.</p>
-								  </div>
-								  <div class="card-body">
-								    <p class="card-text text-justify">Esta es una breve descripción de la receta para que el usuario recuerde que había.</p>
-								  </div>
-								</div>
-							</div>
-							<div class="col-12 col-lg-3">
-								<div class="card" style="width: 18rem;">
-								  <img src="assets/images/test1.jpg" class="card-img-top" alt="...">
-								  <div class="card-header">
-								    <p class="mr-5">Receta 4</p> 
-								    <img src="assets/images/clock-blue.svg" class="img-fluid col-auto">
-								    <p class="strong_blue_clor">20 min.</p>
-								  </div>
-								  <div class="card-body">
-								    <p class="card-text text-justify">Esta es una breve descripción de la receta para que el usuario recuerde que había.</p>
-								  </div>
-								</div>
-							</div>
-						</div>	
-						<div class="row justify-content-center my-3">
-							<div class="col-12">
-								<h4>Jueves</h4>
-							</div>
-							<div class="col-12 col-lg-3">
-								<div class="card" style="width: 18rem;">
-								  <img src="assets/images/test1.jpg" class="card-img-top" alt="...">
-								  <div class="card-header">
-								    <p class="mr-5">Receta 1</p> 
-								    <img src="assets/images/clock-blue.svg" class="img-fluid col-auto">
-								    <p class="strong_blue_clor">20 min.</p>
-								  </div>
-								  <div class="card-body">
-								    <p class="card-text text-justify">Esta es una breve descripción de la receta para que el usuario recuerde que había.</p>
-								  </div>
-								</div>
-							</div>
-							<div class="col-12 col-lg-3">
-								<div class="card" style="width: 18rem;">
-								  <img src="assets/images/test1.jpg" class="card-img-top" alt="...">
-								  <div class="card-header">
-								    <p class="mr-5">Receta 2</p> 
-								    <img src="assets/images/clock-blue.svg" class="img-fluid col-auto">
-								    <p class="strong_blue_clor">20 min.</p>
-								  </div>
-								  <div class="card-body">
-								    <p class="card-text text-justify">Esta es una breve descripción de la receta para que el usuario recuerde que había.</p>
-								  </div>
-								</div>
-							</div>
-							<div class="col-12 col-lg-3">
-								<div class="card" style="width: 18rem;">
-								  <img src="assets/images/test1.jpg" class="card-img-top" alt="...">
-								  <div class="card-header">
-								    <p class="mr-5">Receta 3</p> 
-								    <img src="assets/images/clock-blue.svg" class="img-fluid col-auto">
-								    <p class="strong_blue_clor">20 min.</p>
-								  </div>
-								  <div class="card-body">
-								    <p class="card-text text-justify">Esta es una breve descripción de la receta para que el usuario recuerde que había.</p>
-								  </div>
-								</div>
-							</div>
-							<div class="col-12 col-lg-3">
-								<div class="card" style="width: 18rem;">
-								  <img src="assets/images/test1.jpg" class="card-img-top" alt="...">
-								  <div class="card-header">
-								    <p class="mr-5">Receta 4</p> 
-								    <img src="assets/images/clock-blue.svg" class="img-fluid col-auto">
-								    <p class="strong_blue_clor">20 min.</p>
-								  </div>
-								  <div class="card-body">
-								    <p class="card-text text-justify">Esta es una breve descripción de la receta para que el usuario recuerde que había.</p>
-								  </div>
-								</div>
-							</div>
-						</div>	
-						<div class="row justify-content-center my-3">
-							<div class="col-12">
-								<h4>Viernes</h4>
-							</div>
-							<div class="col-12 col-lg-3">
-								<div class="card" style="width: 18rem;">
-								  <img src="assets/images/test1.jpg" class="card-img-top" alt="...">
-								  <div class="card-header">
-								    <p class="mr-5">Receta 1</p> 
-								    <img src="assets/images/clock-blue.svg" class="img-fluid col-auto">
-								    <p class="strong_blue_clor">20 min.</p>
-								  </div>
-								  <div class="card-body">
-								    <p class="card-text text-justify">Esta es una breve descripción de la receta para que el usuario recuerde que había.</p>
-								  </div>
-								</div>
-							</div>
-							<div class="col-12 col-lg-3">
-								<div class="card" style="width: 18rem;">
-								  <img src="assets/images/test1.jpg" class="card-img-top" alt="...">
-								  <div class="card-header">
-								    <p class="mr-5">Receta 2</p> 
-								    <img src="assets/images/clock-blue.svg" class="img-fluid col-auto">
-								    <p class="strong_blue_clor">20 min.</p>
-								  </div>
-								  <div class="card-body">
-								    <p class="card-text text-justify">Esta es una breve descripción de la receta para que el usuario recuerde que había.</p>
-								  </div>
-								</div>
-							</div>
-							<div class="col-12 col-lg-3">
-								<div class="card" style="width: 18rem;">
-								  <img src="assets/images/test1.jpg" class="card-img-top" alt="...">
-								  <div class="card-header">
-								    <p class="mr-5">Receta 3</p> 
-								    <img src="assets/images/clock-blue.svg" class="img-fluid col-auto">
-								    <p class="strong_blue_clor">20 min.</p>
-								  </div>
-								  <div class="card-body">
-								    <p class="card-text text-justify">Esta es una breve descripción de la receta para que el usuario recuerde que había.</p>
-								  </div>
-								</div>
-							</div>
-							<div class="col-12 col-lg-3">
-								<div class="card" style="width: 18rem;">
-								  <img src="assets/images/test1.jpg" class="card-img-top" alt="...">
-								  <div class="card-header">
-								    <p class="mr-5">Receta 4</p> 
-								    <img src="assets/images/clock-blue.svg" class="img-fluid col-auto">
-								    <p class="strong_blue_clor">20 min.</p>
-								  </div>
-								  <div class="card-body">
-								    <p class="card-text text-justify">Esta es una breve descripción de la receta para que el usuario recuerde que había.</p>
-								  </div>
-								</div>
-							</div>
-						</div>	
-						<div class="row justify-content-center my-3">
-							<div class="col-12">
-								<h4>Sábado</h4>
-							</div>
-							<div class="col-12 col-lg-3">
-								<div class="card" style="width: 18rem;">
-								  <img src="assets/images/test1.jpg" class="card-img-top" alt="...">
-								  <div class="card-header">
-								    <p class="mr-5">Receta 1</p> 
-								    <img src="assets/images/clock-blue.svg" class="img-fluid col-auto">
-								    <p class="strong_blue_clor">20 min.</p>
-								  </div>
-								  <div class="card-body">
-								    <p class="card-text text-justify">Esta es una breve descripción de la receta para que el usuario recuerde que había.</p>
-								  </div>
-								</div>
-							</div>
-							<div class="col-12 col-lg-3">
-								<div class="card" style="width: 18rem;">
-								  <img src="assets/images/test1.jpg" class="card-img-top" alt="...">
-								  <div class="card-header">
-								    <p class="mr-5">Receta 2</p> 
-								    <img src="assets/images/clock-blue.svg" class="img-fluid col-auto">
-								    <p class="strong_blue_clor">20 min.</p>
-								  </div>
-								  <div class="card-body">
-								    <p class="card-text text-justify">Esta es una breve descripción de la receta para que el usuario recuerde que había.</p>
-								  </div>
-								</div>
-							</div>
-							<div class="col-12 col-lg-3">
-								<div class="card" style="width: 18rem;">
-								  <img src="assets/images/test1.jpg" class="card-img-top" alt="...">
-								  <div class="card-header">
-								    <p class="mr-5">Receta 3</p> 
-								    <img src="assets/images/clock-blue.svg" class="img-fluid col-auto">
-								    <p class="strong_blue_clor">20 min.</p>
-								  </div>
-								  <div class="card-body">
-								    <p class="card-text text-justify">Esta es una breve descripción de la receta para que el usuario recuerde que había.</p>
-								  </div>
-								</div>
-							</div>
-							<div class="col-12 col-lg-3">
-								<div class="card" style="width: 18rem;">
-								  <img src="assets/images/test1.jpg" class="card-img-top" alt="...">
-								  <div class="card-header">
-								    <p class="mr-5">Receta 4</p> 
-								    <img src="assets/images/clock-blue.svg" class="img-fluid col-auto">
-								    <p class="strong_blue_clor">20 min.</p>
-								  </div>
-								  <div class="card-body">
-								    <p class="card-text text-justify">Esta es una breve descripción de la receta para que el usuario recuerde que había.</p>
-								  </div>
-								</div>
-							</div>
-						</div>	
-						<div class="row justify-content-center my-3">
-							<div class="col-12">
-								<h4>Domingo</h4>
-							</div>
-							<div class="col-12 col-lg-3">
-								<div class="card" style="width: 18rem;">
-								  <img src="assets/images/test1.jpg" class="card-img-top" alt="...">
-								  <div class="card-header">
-								    <p class="mr-5">Receta 1</p> 
-								    <img src="assets/images/clock-blue.svg" class="img-fluid col-auto">
-								    <p class="strong_blue_clor">20 min.</p>
-								  </div>
-								  <div class="card-body">
-								    <p class="card-text text-justify">Esta es una breve descripción de la receta para que el usuario recuerde que había.</p>
-								  </div>
-								</div>
-							</div>
-							<div class="col-12 col-lg-3">
-								<div class="card" style="width: 18rem;">
-								  <img src="assets/images/test1.jpg" class="card-img-top" alt="...">
-								  <div class="card-header">
-								    <p class="mr-5">Receta 2</p> 
-								    <img src="assets/images/clock-blue.svg" class="img-fluid col-auto">
-								    <p class="strong_blue_clor">20 min.</p>
-								  </div>
-								  <div class="card-body">
-								    <p class="card-text text-justify">Esta es una breve descripción de la receta para que el usuario recuerde que había.</p>
-								  </div>
-								</div>
-							</div>
-							<div class="col-12 col-lg-3">
-								<div class="card" style="width: 18rem;">
-								  <img src="assets/images/test1.jpg" class="card-img-top" alt="...">
-								  <div class="card-header">
-								    <p class="mr-5">Receta 3</p> 
-								    <img src="assets/images/clock-blue.svg" class="img-fluid col-auto">
-								    <p class="strong_blue_clor">20 min.</p>
-								  </div>
-								  <div class="card-body">
-								    <p class="card-text text-justify">Esta es una breve descripción de la receta para que el usuario recuerde que había.</p>
-								  </div>
-								</div>
-							</div>
-							<div class="col-12 col-lg-3">
-								<div class="card" style="width: 18rem;">
-								  <img src="assets/images/test1.jpg" class="card-img-top" alt="...">
-								  <div class="card-header">
-								    <p class="mr-5">Receta 4</p> 
-								    <img src="assets/images/clock-blue.svg" class="img-fluid col-auto">
-								    <p class="strong_blue_clor">20 min.</p>
-								  </div>
-								  <div class="card-body">
-								    <p class="card-text text-justify">Esta es una breve descripción de la receta para que el usuario recuerde que había.</p>
-								  </div>
-								</div>
-							</div>
-						</div>	
+							
 					</div>
 				</section>
 				<section [class.d-none]="current_recipe == 0">
@@ -551,7 +190,7 @@
 								<button type="button" class="btn btn-normal-blue  ">He realizado la receta</button>
 							</div>
 							<div class="col-6 text-center" *ngIf="current == 'Preparación'">
-								<button type="button" class="btn btn-normal-orange ">Ya no haré esta receta</button>
+								<button type="button" class="btn btn-normal-orange" >Ya no haré esta receta</button>
 							</div>
 							<div class="col-6 mb-3 text-center" *ngIf="current == 'Planeación'">
 								<button type="button" class="btn btn-normal-blue ">Agregar receta</button>

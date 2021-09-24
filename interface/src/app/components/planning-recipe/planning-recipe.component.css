@@ -91,7 +91,7 @@ h5 {
 	padding-bottom: 5rem;
 }
 
-.container-fluid h3, h4 {
+.container-fluid h3, h4, h5 {
 	color: var(--strong-blue);
 }
 
