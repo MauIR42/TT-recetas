@@ -72,6 +72,26 @@ h5 {
 	text-decoration: none;
 }
 
+.grey-back {
+	background-color: var(--grey-deactivate);
+	color: var(--p-header);
+}
+
+.grey-back > a {
+	color: var(--p-header);
+	text-decoration: none;
+}
+
+.done-back {
+	background-color: var(--strongest-blue);
+	color:  var(--p-header);
+}
+
+.done-back > a {
+	color:  var(--p-header);
+	text-decoration: none;
+}
+
 .blue-button {
 	color: var(--main-blue);
   background-color: var(--main-blue);

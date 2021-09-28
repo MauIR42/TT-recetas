@@ -9,12 +9,26 @@
 				<h5>{{current}} </h5>
 				<p class="white-text">{{range_string}}</p>
 				<button class="btn strong_blue_clor" (click)="change_menu(menu[ current]['next'])">cambiar a {{menu[ current]['next']}}</button>
+				<button class="btn strong_blue_clor" (click)="show_recommendation = !show_recommendation; recipe_index = -1;" *ngIf="current == 'Planeación' && !show_recommendation ">ver recomendaciones</button>
 			</div>
-			<div class="menu" *ngIf="current == 'Preparación'">
-				<p class="d-block text-center">preparados de la semana</p>
-				<h5 class="text-center">{{cooked}} de {{total}}</h5>
-				<p class="d-block text-center">preparados para hoy</p>
-				<h5 class="text-center">{{day_cooked}} de {{to_make_recipes[current_day].length}}</h5>
+			<div class="text-center">
+				<button class="btn strong_blue_clor" (click)="show_recommendation = false; recipe_index = -1;" *ngIf="current != 'Planeación' || show_recommendation ">mostrar todas las recetas</button>
+			</div>
+			<div class="menu" >
+				<ng-container *ngIf="current == 'Preparación'">
+					<p class="d-block text-center">preparados de la semana</p>
+					<h5 class="text-center">{{cooked}} de {{menu[current]['total']}}</h5>
+					<p class="d-block text-center">preparados para hoy</p>
+					<h5 class="text-center">{{day_cooked}} de {{menu[current]['recipe'][current_day].length}}</h5>
+				</ng-container>
+				<ng-container *ngIf="current == 'Planeación'">
+					<p class="d-block text-center">planeados para la semana</p>
+					<h5 class="text-center">{{menu[current]['total']}}</h5>
+
+					<div class="text-center my-3">
+						<button class="btn btn-outline-strong mx-auto">Guardar Cambios</button>
+					</div>
+				</ng-container>
 				<div class="row justify-content-center">
 					<div class="col-auto">
 						<button class="btn btn-cool" (mouseover)="current_left = 'caret-left-square-fill.svg'" (mouseout)="current_left = 'caret-left-square-fill-white.svg'" (click)="change_day(-1)">
@@ -31,37 +45,8 @@
 					</div>
 				</div>
 				<ul class="list-group list-group-flush ">
-				  <li class="list-group-item " (click)="get_recipe(recipe,$event)" *ngFor="let recipe of to_make_recipes[current_day]" [ngClass]="(current_recipe == recipe['id_user_recipe'])? 'orange-back' : 'blue-back'"><a href="#" >{{recipe['name']}}</a></li>
+					<li class="list-group-item " *ngFor="let recipe of menu[current]['recipe'][current_day]; let i = index" [ngClass]="(recipe_index != -1 && menu[current]['recipe'][current_day][recipe_index] == recipe)? ((is_recommended)? 'blue-back' : 'orange-back') : (recipe['active'] == true)? ((recipe['status'] == 'preparada') ? 'done-back' : 'blue-back' ) : 'grey-back'"><a href="#" class="mr-3" (click)="get_recipe(current_day,i,$event)" [class.stretched-link]="current == 'Preparación'">{{recipe['name']}} <ng-container *ngIf="recipe['status'] != 'pendiente' && recipe['status'] != 'planeada'"> - {{recipe['status']}}</ng-container></a> <button class="btn" (click)="delete_recipe(i)" [class.d-none]="current == 'Preparación'"><img [src]="'assets/images/' + delete_img" class="img-fluid arrow"></button></li>
 				</ul>
-
-				<!-- <a href="#" (click)="get_recipe(recipe)" *ngFor="let recipe of to_make_recipes[current_day]" class="d-block ml-2">{{recipe['name']}}</a> -->
-			</div>
-			<div class="menu" *ngIf="current == 'Planeación'">
-				<p class="d-block text-center">planeados para la semana</p>
-				<h5 class="text-center">{{total_planned}}</h5>
-
-				<div class="text-center my-3">
-					<button class="btn btn-outline-strong mx-auto">Guardar Cambios</button>
-				</div>
-				<div class="row justify-content-center">
-					<div class="col-auto">
-						<button class="btn btn-cool" (mouseover)="current_left = 'caret-left-square-fill.svg'" (mouseout)="current_left = 'caret-left-square-fill-white.svg'" (click)="change_day(-1)">
-						<img [src]="'assets/images/' + current_left" class="img-fluid arrow">
-						</button>
-					</div>
-					<div class="col-auto">
-						<h5 >{{days[current_day]}}</h5>
-						</div>
-					<div class="col-auto">
-						<button class="btn btn-cool">
-						<img [src]="'assets/images/' + current_right" class="img-fluid arrow" (mouseover)="current_right = 'caret-right-square-fill.svg'" (mouseout)="current_right = 'caret-right-square-fill-white.svg'" (click)="change_day(1)">
-						</button>
-					</div>
-				</div>
-				<ul class="list-group list-group-flush ">
-				  <li class="list-group-item " *ngFor="let recipe of planning_recipes[current_day]; let i = index" [ngClass]="(current_recipe == recipe['id'])? 'orange-back' : 'blue-back'"><a href="#" class="mr-3" (click)="get_recipe(recipe,$event)">{{recipe['name']}}</a> <button class="btn" (click)="delete_recipe(i)"><img [src]="'assets/images/' + delete_img" class="img-fluid arrow"></button></li>
-				</ul>
-				<!-- <a href="#" (click)="get_recipe(recipe)" *ngFor="let recipe of to_make_recipes[current_day]" class="d-block ml-2">{{recipe['name']}}</a> -->
 			</div>
 		</div>
 		<div >
@@ -69,7 +54,7 @@
 		</div>
 		<div class="w-100">
 			<div id="content">
-				<section [class.d-none]="current_recipe != 0">
+				<section *ngIf="recipe_index == -1 && !show_recommendation">
 					<div class="container-fluid mt-5">
 						<div class="row">
 							<div class="col-12">
@@ -80,17 +65,17 @@
 								<p>También puedes ver las recetas de otros días y realizarlas cambiando el día en la barra lateral izquierda.</p>
 							</div>
 						</div>
-						<ng-container *ngIf="total > 0">
+						<ng-container *ngIf="menu[current]['total'] > 0">
 							<div class="row justify-content-center" *ngFor="let day of days; let i = index">
 								<div class="col-12">
 									<h4>{{day}}</h4>
 								</div>
-								<div class="col-12" *ngIf="to_make_recipes[i].length == 0">
+								<div class="col-12" *ngIf="menu[current]['recipe'][i].length == 0">
 									<h5 class="strong_blue_clor text-center py-2">No hay recetas planeadas para este día.</h5>
 								</div>
-								<div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-2 " *ngFor="let recipe of to_make_recipes[i]">
+								<div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-2 " *ngFor="let recipe of menu[current]['recipe'][i]; let j = index">
 									<div class="card h-100" style="width: 18rem;" >
-									  <img src="assets/images/test1.jpg" class="card-img-top" alt="...">
+									  <img [src]="recipe.image" class="card-img-top" alt="...">
 									  <div class="card-header text-center">
 									    <p >{{recipe.name}}</p> 
 									    <br>
@@ -106,13 +91,13 @@
 									  </div>
 									  <div class="card-body">
 									    <p class="card-text text-justify">{{recipe.description}}</p>
-									    <a href="#" class="btn btn-normal-blue stretched-link text-center w-100" (click)="get_recipe(21,$event)">Ver Receta</a>
+									    <a href="#" class="btn btn-normal-blue stretched-link text-center w-100" (click)="get_recipe(i,j,$event)">Ver Receta</a>
 									  </div>
 									</div>
 								</div>
 							</div>	
 						</ng-container>
-						<div class="row text-center" *ngIf="total == 0">
+						<div class="row text-center" *ngIf="menu[current]['total'] == 0">
 							<div class="col-12" >
 								<h4 class="my-5">No tienes una planeación para esta semana</h4>
 								<h5>¿Eres nuevo en recettario? realiza la planeación para la siguiente semana y comienza tu inventario</h5>
@@ -122,7 +107,7 @@
 							
 					</div>
 				</section>
-				<section [class.d-none]="current_recipe == 0">
+				<section *ngIf="recipe_index != -1">
 					<div class="container-fluid mt-5">
 						<div class="row justify-content-center">
 							<div class="col-12">
@@ -186,21 +171,82 @@
 								  proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</li>
 								</ul>
 							</div>
-							<div class="col-6 mb-3 text-center" *ngIf="current == 'Preparación'">
+							<div class="col-6 mb-3 text-center" *ngIf="current == 'Preparación' && menu[current]['recipe'][current_day][recipe_index]['status'] == 'pendiente'">
 								<button type="button" class="btn btn-normal-blue  ">He realizado la receta</button>
 							</div>
-							<div class="col-6 text-center" *ngIf="current == 'Preparación'">
-								<button type="button" class="btn btn-normal-orange" >Ya no haré esta receta</button>
+							<div class="col-6 text-center" *ngIf="current == 'Preparación' && menu[current]['recipe'][current_day][recipe_index]['status'] == 'pendiente'">
+								<button type="button" class="btn btn-normal-orange" (click)="deactivate_recipe()">Ya no haré esta receta</button>
 							</div>
 							<div class="col-6 mb-3 text-center" *ngIf="current == 'Planeación'">
 								<button type="button" class="btn btn-normal-blue ">Agregar receta</button>
 							</div>
 							<div class="col-6 text-center" *ngIf="current == 'Planeación'">
-								<button class="btn btn-normal-orange ">Eliminar receta</button>
+								<button class="btn btn-normal-orange " (click)="delete_recipe(recipe_index)">Eliminar receta</button>
+							</div>
+							<div class="col-12 text-center" *ngIf="current == 'Preparación' && menu[current]['recipe'][current_day][recipe_index]['status'] == 'desactivada'">
+								<button type="button" class="btn btn-normal-orange" (click)="reactivate_recipe()">Cambié de parecer, haré la receta</button>
+							</div>
+							<div class="col-12 text-center" *ngIf="current == 'Preparación' && menu[current]['recipe'][current_day][recipe_index]['status'] == 'preparada'">
+								<h4> Ya has preparado esta receta ¡Hurra!</h4>
+								<h5> Revisa tus otras recetas del día de hoy, también puedes adelantar faltantes de la semana.</h5>
 							</div>
 						</div>
 					</div>
-					
+				</section>
+				<section *ngIf="recipe_index == -1 && show_recommendation">
+					<div class="container-fluid mt-5">
+						<div class="row">
+							<div class="col-12">
+								<h3>Recomendaciones</h3>
+							</div>
+							<div class="col-12">
+								<p>Busca tus recetas semanales en esta sección, se han acomodado según tu inventario y las evaluaciones que les has dado a las recetas.</p>
+							</div>
+						</div>
+						<ng-container *ngIf="menu[current]['total'] > 0">
+							<div class="row justify-content-center" *ngFor="let name of recomendation_sections; let i = index">
+								<div class="col-12">
+									<h4>{{name}}</h4>
+								</div>
+								<div class="col-12" *ngIf="recommendations[name]['recipe'].length == 0">
+									<h5 class="strong_blue_clor text-center py-2">No hay recetas por recomendar en esta sección.</h5>
+								</div>
+								<div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-2 " *ngFor="let recipe of recommendations[name]['recipe']; let j = index">
+									<div class="card h-100" style="width: 18rem;" >
+									  <img [src]="recipe.image" class="card-img-top" alt="...">
+									  <div class="card-header text-center">
+									    <p >{{recipe.name}}</p> 
+									    <br>
+									    <img src="assets/images/percent-blue.svg" class="img-fluid mr-2">
+									    <p class="strong_blue_clor mr-5" style="color:red;" *ngIf="recipe.ingredient_percentage <= 39">{{recipe.ingredient_percentage}} ingredientes</p>
+									    <p class="strong_blue_clor mr-5" style="color:orange;" *ngIf="recipe.ingredient_percentage >= 40 &&recipe.ingredient_percentage <= 59 ">{{recipe.ingredient_percentage}} ingr.</p>
+									    <p class="strong_blue_clor mr-5" style="color:brown;" *ngIf="recipe.ingredient_percentage >= 60 &&recipe.ingredient_percentage <= 79 ">{{recipe.ingredient_percentage}} ingr.</p>
+									    <p class="strong_blue_clor mr-5" style="color:green;" *ngIf="recipe.ingredient_percentage >= 80 &&recipe.ingredient_percentage <= 100 ">{{recipe.ingredient_percentage}} ingr.</p>
+									    <img src="assets/images/clock-blue.svg" class="img-fluid mr-2">
+									    <p class="strong_blue_clor">{{recipe.duration}} min.</p>
+									    <br>
+									    <p>realizados el último mes: <strong class="strong_blue_clor">{{recipe.cooked}}</strong></p>
+									  </div>
+									  <div class="card-body">
+									    <p class="card-text text-justify">{{recipe.description}}</p>
+									    <a href="#" class="btn btn-normal-blue stretched-link text-center w-100" (click)="get_recipe(i,j,$event, true)">Ver Receta</a>
+									  </div>
+									</div>
+								</div>
+								<div class="col-12 text-center">
+									<button class="btn btn-sm btn-outline mt-3" (click)="load_more_recommendations(name)"> Cargar más opciones</button>
+								</div>
+							</div>	
+						</ng-container>
+						<div class="row text-center" *ngIf="menu[current]['total'] == 0">
+							<div class="col-12" >
+								<h4 class="my-5">No tienes una planeación para esta semana</h4>
+								<h5>¿Eres nuevo en recettario? realiza la planeación para la siguiente semana y comienza tu inventario</h5>
+							</div>
+						</div>
+						<!-- <div class="w-100 my-3"></div> -->
+							
+					</div>
 				</section>
 			</div>
 		</div>
