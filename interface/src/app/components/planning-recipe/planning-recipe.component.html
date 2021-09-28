@@ -44,7 +44,8 @@
 						</button>
 					</div>
 				</div>
-				<ul class="list-group list-group-flush ">
+				<!-- revisar por user_id_recipe? -->
+				<ul class="list-group list-group-flush "> 
 					<li class="list-group-item " *ngFor="let recipe of menu[current]['recipe'][current_day]; let i = index" [ngClass]="(recipe_index != -1 && menu[current]['recipe'][current_day][recipe_index] == recipe)? ((is_recommended)? 'blue-back' : 'orange-back') : (recipe['active'] == true)? ((recipe['status'] == 'preparada') ? 'done-back' : 'blue-back' ) : 'grey-back'"><a href="#" class="mr-3" (click)="get_recipe(current_day,i,$event)" [class.stretched-link]="current == 'Preparación'">{{recipe['name']}} <ng-container *ngIf="recipe['status'] != 'pendiente' && recipe['status'] != 'planeada'"> - {{recipe['status']}}</ng-container></a> <button class="btn" (click)="delete_recipe(i)" [class.d-none]="current == 'Preparación'"><img [src]="'assets/images/' + delete_img" class="img-fluid arrow"></button></li>
 				</ul>
 			</div>
@@ -178,7 +179,7 @@
 								<button type="button" class="btn btn-normal-orange" (click)="deactivate_recipe()">Ya no haré esta receta</button>
 							</div>
 							<div class="col-6 mb-3 text-center" *ngIf="current == 'Planeación'">
-								<button type="button" class="btn btn-normal-blue ">Agregar receta</button>
+								<button type="button" class="btn btn-normal-blue " (click)="add_recipe()">Agregar receta</button>
 							</div>
 							<div class="col-6 text-center" *ngIf="current == 'Planeación'">
 								<button class="btn btn-normal-orange " (click)="delete_recipe(recipe_index)">Eliminar receta</button>
@@ -208,10 +209,10 @@
 								<div class="col-12">
 									<h4>{{name}}</h4>
 								</div>
-								<div class="col-12" *ngIf="recommendations[name]['recipe'].length == 0">
+								<div class="col-12" *ngIf="recommendations[i]['recipe'].length == 0">
 									<h5 class="strong_blue_clor text-center py-2">No hay recetas por recomendar en esta sección.</h5>
 								</div>
-								<div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-2 " *ngFor="let recipe of recommendations[name]['recipe']; let j = index">
+								<div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-2 " *ngFor="let recipe of recommendations[i]['recipe']; let j = index">
 									<div class="card h-100" style="width: 18rem;" >
 									  <img [src]="recipe.image" class="card-img-top" alt="...">
 									  <div class="card-header text-center">
