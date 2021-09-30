@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { NgxSpinnerService } from 'ngx-spinner';
+import { LocalStorageService } from '../../services/local-storage.service';
+import { Router } from '@angular/router';
 import * as moment from 'moment';
 declare const $ : any;
 @Component({
@@ -12,16 +14,19 @@ export class PlanningRecipeComponent implements OnInit {
   loader_message : string = "Cargando...";
   current : string = "Preparación";
 
+  user_id : number = -1;
+
   menu : any = {
     'Planeación': {
       'start': moment().startOf('week').add(7 ,'d'),
       'end'  : moment().endOf('week').add(7 ,'d'),
       'next' : 'Preparación',
       'date_string' : '',
-      'total': 1,
+      'total': 2,
       'recipe': [
-        [ {'status':'planeada', 'active':true,'name':'receta 1', 'id_recipe':15, 'duration':20, 'cooked':5, 'ingredient_percentage':100, 'image':"assets/images/test1.jpg", 'id_user_recipe':15, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que habíadsuiwEVBWEUBVUEOWVBWVBDBDSBVODSBBhhrpvfibnvifbnibnsdvvwebvebnhml.,mhnbgfvdc"},
-        {'status':'planeada', 'active':true,'name':'receta 2', 'id_recipe':15, 'duration':30, 'cooked':3, 'ingredient_percentage':80, 'image':"assets/images/test1.jpg", 'id_user_recipe':16, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
+        [ 
+        {'status': 4, 'active':true, 'id_recipe':1, 'id_user_recipe':46, 'ingredient_percentage':100},
+          {'status': 4, 'active':true, 'id_recipe':2, 'id_user_recipe':47, 'ingredient_percentage':90},
         ],
         [],
         [],
@@ -39,41 +44,41 @@ export class PlanningRecipeComponent implements OnInit {
       'total': 1,
       'recipe' : [
         [
-          {'status':'desactivada', 'active':false,'name':'receta 1', 'id_recipe':15, 'duration':20, 'cooked':5, 'ingredient_percentage':100, 'image':"assets/images/test1.jpg", 'id_user_recipe':15, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que habíadsuiwEVBWEUBVUEOWVBWVBDBDSBVODSBBhhrpvfibnvifbnibnsdvvwebvebnhml.,mhnbgfvdc"},
-          {'status':'preparada', 'active':true,'name':'receta 2', 'id_recipe':15, 'duration':30, 'cooked':3, 'ingredient_percentage':80, 'image':"assets/images/test1.jpg", 'id_user_recipe':16, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-          {'status':'pendiente', 'active':true,'name':'receta 3', 'id_recipe':15, 'duration':40, 'cooked':2, 'ingredient_percentage':75, 'image':"assets/images/test1.jpg", 'id_user_recipe':17, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-          {'status':'desactivada', 'active':false,'name':'receta 4', 'id_recipe':15, 'duration':70, 'cooked':18, 'ingredient_percentage':60, 'image':"assets/images/test1.jpg", 'id_user_recipe':18, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-          {'status':'preparada', 'active':true,'name':'receta 5', 'id_recipe':15, 'duration':70, 'cooked':18, 'ingredient_percentage':58, 'image':"assets/images/test1.jpg", 'id_user_recipe':19, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
+          {'status': 3, 'active':false, 'id_recipe':1, 'id_user_recipe':15, 'ingredient_percentage':100, 'quantity': 1},
+          {'status': 1, 'active':true, 'id_recipe':2, 'id_user_recipe':16, 'ingredient_percentage':90, 'quantity': 1},
+          {'status': 1, 'active':true, 'id_recipe':3, 'id_user_recipe':17, 'ingredient_percentage':80, 'quantity': 1},
+          {'status': 2, 'active':true, 'id_recipe':4, 'id_user_recipe':18, 'ingredient_percentage':70, 'quantity': 1},
+          {'status': 3, 'active':false, 'id_recipe':5, 'id_user_recipe':19, 'ingredient_percentage':60, 'quantity': 1},
         ],[
-          {'status':'desactivada', 'active':false,'name':'receta 6', 'id_recipe':15, 'duration':20, 'cooked':5, 'ingredient_percentage':59, 'image':"assets/images/test1.jpg", 'id_user_recipe':20, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-          {'status':'preparada', 'active':true,'name':'receta 7', 'id_recipe':15, 'duration':30, 'cooked':3, 'ingredient_percentage':38, 'image':"assets/images/test1.jpg", 'id_user_recipe':21, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-          {'status':'pendiente', 'active':true,'name':'receta 8', 'id_recipe':15, 'duration':40, 'cooked':2, 'ingredient_percentage':20, 'image':"assets/images/test1.jpg", 'id_user_recipe':22, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-          {'status':'desactivada', 'active':false,'name':'receta 9', 'id_recipe':15, 'duration':70, 'cooked':18, 'ingredient_percentage':15, 'image':"assets/images/test1.jpg", 'id_user_recipe':23, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-          {'status':'preparada', 'active':true,'name':'receta 10', 'id_recipe':15, 'duration':70, 'cooked':18, 'ingredient_percentage':0, 'image':"assets/images/test1.jpg", 'id_user_recipe':24, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
+          {'status': 3, 'active':false, 'id_recipe':6, 'id_user_recipe':20, 'ingredient_percentage':50, 'quantity': 1},
+          {'status': 1, 'active':true, 'id_recipe':7, 'id_user_recipe':21, 'ingredient_percentage':40, 'quantity': 1},
+          {'status': 1, 'active':true, 'id_recipe':8, 'id_user_recipe':22, 'ingredient_percentage':30, 'quantity': 1},
+          {'status': 2, 'active':true, 'id_recipe':9, 'id_user_recipe':23, 'ingredient_percentage':20, 'quantity': 1},
+          {'status': 3, 'active':false, 'id_recipe':10, 'id_user_recipe':24, 'ingredient_percentage':10, 'quantity': 1},
         ],[
-          {'status':'desactivada', 'active':false,'name':'receta 1', 'id_recipe':15, 'duration':20, 'cooked':5, 'ingredient_percentage':100, 'image':"assets/images/test1.jpg", 'id_user_recipe':25, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-          {'status':'preparada', 'active':true,'name':'receta 2', 'id_recipe':15, 'duration':30, 'cooked':3, 'ingredient_percentage':80, 'image':"assets/images/test1.jpg", 'id_user_recipe':26, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-          {'status':'pendiente', 'active':true,'name':'receta 3', 'id_recipe':15, 'duration':40, 'cooked':2, 'ingredient_percentage':75, 'image':"assets/images/test1.jpg", 'id_user_recipe':27, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-          {'status':'desactivada', 'active':false,'name':'receta 4', 'id_recipe':15, 'duration':70, 'cooked':18, 'ingredient_percentage':60, 'image':"assets/images/test1.jpg", 'id_user_recipe':28, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-          {'status':'preparada', 'active':true,'name':'receta 5', 'id_recipe':15, 'duration':70, 'cooked':18, 'ingredient_percentage':58, 'image':"assets/images/test1.jpg", 'id_user_recipe':29, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
+          {'status': 3, 'active':false, 'id_recipe':1, 'id_user_recipe':25, 'ingredient_percentage':100, 'quantity': 1},
+          {'status': 1, 'active':true, 'id_recipe':2, 'id_user_recipe':26, 'ingredient_percentage':90, 'quantity': 1},
+          {'status': 1, 'active':true, 'id_recipe':3, 'id_user_recipe':27, 'ingredient_percentage':80, 'quantity': 1},
+          {'status': 2, 'active':true, 'id_recipe':4, 'id_user_recipe':28, 'ingredient_percentage':70, 'quantity': 1},
+          {'status': 3, 'active':false, 'id_recipe':5, 'id_user_recipe':29, 'ingredient_percentage':60, 'quantity': 1},
         ],[
-          {'status':'desactivada', 'active':false,'name':'receta 6', 'id_recipe':15, 'duration':20, 'cooked':5, 'ingredient_percentage':59, 'image':"assets/images/test1.jpg", 'id_user_recipe':30, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-          {'status':'preparada', 'active':true,'name':'receta 7', 'id_recipe':15, 'duration':30, 'cooked':3, 'ingredient_percentage':38, 'image':"assets/images/test1.jpg", 'id_user_recipe':31, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-          {'status':'pendiente', 'active':true,'name':'receta 8', 'id_recipe':15, 'duration':40, 'cooked':2, 'ingredient_percentage':20, 'image':"assets/images/test1.jpg", 'id_user_recipe':32, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-          {'status':'desactivada', 'active':false,'name':'receta 9', 'id_recipe':15, 'duration':70, 'cooked':18, 'ingredient_percentage':15, 'image':"assets/images/test1.jpg", 'id_user_recipe':33, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-          {'status':'preparada', 'active':true,'name':'receta 10', 'id_recipe':15, 'duration':70, 'cooked':18, 'ingredient_percentage':0, 'image':"assets/images/test1.jpg", 'id_user_recipe':34, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
+          {'status': 3, 'active':false, 'id_recipe':6, 'id_user_recipe':30, 'ingredient_percentage':50, 'quantity': 1},
+          {'status': 1, 'active':true, 'id_recipe':7, 'id_user_recipe':31, 'ingredient_percentage':40, 'quantity': 1},
+          {'status': 1, 'active':true, 'id_recipe':8, 'id_user_recipe':32, 'ingredient_percentage':30, 'quantity': 1},
+          {'status': 2, 'active':true, 'id_recipe':9, 'id_user_recipe':33, 'ingredient_percentage':20, 'quantity': 1},
+          {'status': 3, 'active':false, 'id_recipe':10, 'id_user_recipe':34, 'ingredient_percentage':10, 'quantity': 1},
         ],[
-          {'status':'desactivada', 'active':false,'name':'receta 1', 'id_recipe':15, 'duration':20, 'cooked':5, 'ingredient_percentage':100, 'image':"assets/images/test1.jpg", 'id_user_recipe':35, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-          {'status':'preparada', 'active':true,'name':'receta 2', 'id_recipe':15, 'duration':30, 'cooked':3, 'ingredient_percentage':80, 'image':"assets/images/test1.jpg", 'id_user_recipe':36, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-          {'status':'pendiente', 'active':true,'name':'receta 3', 'id_recipe':15, 'duration':40, 'cooked':2, 'ingredient_percentage':75, 'image':"assets/images/test1.jpg", 'id_user_recipe':37, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-          {'status':'desactivada', 'active':false,'name':'receta 4', 'id_recipe':15, 'duration':70, 'cooked':18, 'ingredient_percentage':60, 'image':"assets/images/test1.jpg", 'id_user_recipe':38, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-          {'status':'preparada', 'active':true,'name':'receta 5', 'id_recipe':15, 'duration':70, 'cooked':18, 'ingredient_percentage':58, 'image':"assets/images/test1.jpg", 'id_user_recipe':39, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
+          {'status': 3, 'active':false, 'id_recipe':1, 'id_user_recipe':35, 'ingredient_percentage':100, 'quantity': 1},
+          {'status': 1, 'active':true, 'id_recipe':2, 'id_user_recipe':36, 'ingredient_percentage':90, 'quantity': 1},
+          {'status': 1, 'active':true, 'id_recipe':3, 'id_user_recipe':37, 'ingredient_percentage':80, 'quantity': 1},
+          {'status': 2, 'active':true, 'id_recipe':4, 'id_user_recipe':38, 'ingredient_percentage':70, 'quantity': 1},
+          {'status': 3, 'active':false, 'id_recipe':5, 'id_user_recipe':39, 'ingredient_percentage':60, 'quantity': 1},
         ],[
-          {'status':'desactivada', 'active':false,'name':'receta 6', 'id_recipe':15, 'duration':20, 'cooked':5, 'ingredient_percentage':59, 'image':"assets/images/test1.jpg", 'id_user_recipe':40, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-          {'status':'preparada', 'active':true,'name':'receta 7', 'id_recipe':15, 'duration':30, 'cooked':3, 'ingredient_percentage':38, 'image':"assets/images/test1.jpg", 'id_user_recipe':41, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-          {'status':'pendiente', 'active':true,'name':'receta 8', 'id_recipe':15, 'duration':40, 'cooked':2, 'ingredient_percentage':20, 'image':"assets/images/test1.jpg", 'id_user_recipe':42, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-          {'status':'desactivada', 'active':false,'name':'receta 9', 'id_recipe':15, 'duration':70, 'cooked':18, 'ingredient_percentage':15, 'image':"assets/images/test1.jpg", 'id_user_recipe':43, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-          {'status':'preparada', 'active':true,'name':'receta 10', 'id_recipe':15, 'duration':70, 'cooked':18, 'ingredient_percentage':0, 'image':"assets/images/test1.jpg", 'id_user_recipe':44, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
+          {'status': 3, 'active':false, 'id_recipe':6, 'id_user_recipe':41, 'ingredient_percentage':50, 'quantity': 1},
+          {'status': 1, 'active':true, 'id_recipe':7, 'id_user_recipe':42, 'ingredient_percentage':40, 'quantity': 1},
+          {'status': 1, 'active':true, 'id_recipe':8, 'id_user_recipe':43, 'ingredient_percentage':30, 'quantity': 1},
+          {'status': 2, 'active':true, 'id_recipe':9, 'id_user_recipe':44, 'ingredient_percentage':20, 'quantity': 1},
+          {'status': 3, 'active':false, 'id_recipe':10, 'id_user_recipe':45, 'ingredient_percentage':10, 'quantity': 1},
         ],[
         ],
       ]
@@ -93,56 +98,72 @@ export class PlanningRecipeComponent implements OnInit {
   recommendations : any = [
     {
       recipe: [
-        {'status':'desactivada', 'active':false,'name':'receta 1', 'id_recipe':15, 'duration':20, 'cooked':5, 'ingredient_percentage':100, 'image':"assets/images/test1.jpg", 'id_user_recipe':15, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que habíadsuiwEVBWEUBVUEOWVBWVBDBDSBVODSBBhhrpvfibnvifbnibnsdvvwebvebnhml.,mhnbgfvdc"},
-        {'status':'preparada', 'active':true,'name':'receta 2', 'id_recipe':15, 'duration':30, 'cooked':3, 'ingredient_percentage':80, 'image':"assets/images/test1.jpg", 'id_user_recipe':16, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-        {'status':'pendiente', 'active':true,'name':'receta 3', 'id_recipe':15, 'duration':40, 'cooked':2, 'ingredient_percentage':75, 'image':"assets/images/test1.jpg", 'id_user_recipe':17, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
+        {'id_recipe':10, 'ingredient_percentage':10},
+        {'id_recipe':9, 'ingredient_percentage':10},
+        {'id_recipe':8, 'ingredient_percentage':10},
       ],
       has_more : true,
       offset : 0
     },{
       recipe: [
-        {'status':'desactivada', 'active':false,'name':'receta 6', 'id_recipe':15, 'duration':20, 'cooked':5, 'ingredient_percentage':59, 'image':"assets/images/test1.jpg", 'id_user_recipe':20, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-        {'status':'preparada', 'active':true,'name':'receta 7', 'id_recipe':15, 'duration':30, 'cooked':3, 'ingredient_percentage':38, 'image':"assets/images/test1.jpg", 'id_user_recipe':21, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-        {'status':'pendiente', 'active':true,'name':'receta 8', 'id_recipe':15, 'duration':40, 'cooked':2, 'ingredient_percentage':20, 'image':"assets/images/test1.jpg", 'id_user_recipe':22, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
+        {'id_recipe':10, 'ingredient_percentage':10},
+        {'id_recipe':9, 'ingredient_percentage':10},
+        {'id_recipe':8, 'ingredient_percentage':10},
       ],
       has_more : true,
       offset : 0
     },{
       recipe: [
-        {'status':'desactivada', 'active':false,'name':'receta 6', 'id_recipe':15, 'duration':20, 'cooked':5, 'ingredient_percentage':59, 'image':"assets/images/test1.jpg", 'id_user_recipe':20, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-        {'status':'preparada', 'active':true,'name':'receta 7', 'id_recipe':15, 'duration':30, 'cooked':3, 'ingredient_percentage':38, 'image':"assets/images/test1.jpg", 'id_user_recipe':21, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-        {'status':'pendiente', 'active':true,'name':'receta 8', 'id_recipe':15, 'duration':40, 'cooked':2, 'ingredient_percentage':20, 'image':"assets/images/test1.jpg", 'id_user_recipe':22, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
+        {'id_recipe':10, 'ingredient_percentage':10},
+        {'id_recipe':9, 'ingredient_percentage':10},
+        {'id_recipe':8, 'ingredient_percentage':10},
       ],
       has_more : true,
       offset : 0
     },{
       recipe: [
-        {'status':'desactivada', 'active':false,'name':'receta 6', 'id_recipe':15, 'duration':20, 'cooked':5, 'ingredient_percentage':59, 'image':"assets/images/test1.jpg", 'id_user_recipe':20, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-        {'status':'preparada', 'active':true,'name':'receta 7', 'id_recipe':15, 'duration':30, 'cooked':3, 'ingredient_percentage':38, 'image':"assets/images/test1.jpg", 'id_user_recipe':21, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-        {'status':'pendiente', 'active':true,'name':'receta 8', 'id_recipe':15, 'duration':40, 'cooked':2, 'ingredient_percentage':20, 'image':"assets/images/test1.jpg", 'id_user_recipe':22, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
+        {'id_recipe':10, 'ingredient_percentage':10},
+        {'id_recipe':9, 'ingredient_percentage':10},
+        {'id_recipe':8, 'ingredient_percentage':10},
       ],
       has_more : true,
       offset : 0
     },{
       recipe: [
-        {'status':'desactivada', 'active':false,'name':'receta 6', 'id_recipe':15, 'duration':20, 'cooked':5, 'ingredient_percentage':59, 'image':"assets/images/test1.jpg", 'id_user_recipe':20, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-        {'status':'preparada', 'active':true,'name':'receta 7', 'id_recipe':15, 'duration':30, 'cooked':3, 'ingredient_percentage':38, 'image':"assets/images/test1.jpg", 'id_user_recipe':21, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-        {'status':'pendiente', 'active':true,'name':'receta 8', 'id_recipe':15, 'duration':40, 'cooked':2, 'ingredient_percentage':20, 'image':"assets/images/test1.jpg", 'id_user_recipe':22, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
+        {'id_recipe':10, 'ingredient_percentage':10},
+        {'id_recipe':9, 'ingredient_percentage':10},
+        {'id_recipe':8, 'ingredient_percentage':10},
       ],
       has_more : true,
       offset : 0
     },{
       recipe: [
-        {'status':'desactivada', 'active':false,'name':'receta 6', 'id_recipe':15, 'duration':20, 'cooked':5, 'ingredient_percentage':59, 'image':"assets/images/test1.jpg", 'id_user_recipe':20, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-        {'status':'preparada', 'active':true,'name':'receta 7', 'id_recipe':15, 'duration':30, 'cooked':3, 'ingredient_percentage':38, 'image':"assets/images/test1.jpg", 'id_user_recipe':21, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-        {'status':'pendiente', 'active':true,'name':'receta 8', 'id_recipe':15, 'duration':40, 'cooked':2, 'ingredient_percentage':20, 'image':"assets/images/test1.jpg", 'id_user_recipe':22, 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
+        {'id_recipe':10, 'ingredient_percentage':10},
+        {'id_recipe':9, 'ingredient_percentage':10},
+        {'id_recipe':8, 'ingredient_percentage':10},
       ],
       has_more : true,
       offset : 0
     }
   ];
 
+
+  recipes_info : any = {
+    1 : {'name':'receta 1', 'duration':20, 'cooked':5, 'image':"assets/images/test1.jpg", 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que habíadsuiwEVBWEUBVUEOWVBWVBDBDSBVODSBBhhrpvfibnvifbnibnsdvvwebvebnhml.,mhnbgfvdc"},
+    2 : {'name':'receta 2', 'duration':20, 'cooked':5, 'image':"assets/images/test1.jpg", 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
+    3 : {'name':'receta 3', 'duration':20, 'cooked':5, 'image':"assets/images/test1.jpg", 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
+    4 : {'name':'receta 4', 'duration':20, 'cooked':5, 'image':"assets/images/test1.jpg", 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
+    5 : {'name':'receta 5', 'duration':20, 'cooked':5, 'image':"assets/images/test1.jpg", 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
+    6 : {'name':'receta 6', 'duration':20, 'cooked':5, 'image':"assets/images/test1.jpg", 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
+    7 : {'name':'receta 7', 'duration':20, 'cooked':5, 'image':"assets/images/test1.jpg", 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
+    8 : {'name':'receta 8', 'duration':20, 'cooked':5, 'image':"assets/images/test1.jpg", 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
+    9 : {'name':'receta 9', 'duration':20, 'cooked':5, 'image':"assets/images/test1.jpg", 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
+    10 : {'name':'receta 10', 'duration':20, 'cooked':5, 'image':"assets/images/test1.jpg", 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
+  }
+
   current_day : number = 0;
+  recommendation_list: number = -1;
+
   current_left : string = 'caret-left-square-fill-white.svg';
   current_right : string = 'caret-right-square-fill-white.svg';
 
@@ -153,20 +174,31 @@ export class PlanningRecipeComponent implements OnInit {
   actual_modal : any;
 
   show_modal : boolean = false;
+  has_recommendations: boolean = true;
+  is_recommended = false;
 
   side_bar_icon = "arrow-left-white.svg";
 
   // day_recipe : number = 0;
   recipe_index : number = -1;
-  recommendation_list: number = -1;
 
-  show_recommendation: boolean = false;
+  show : any = {
+    'recommendation' : false,
+    'recipe' : false,
+    'user_recipes': true,
+  }
 
-  is_recommended : boolean = false;
+  selected_index : number = 0;
+
+  status_type: any = {
+    1 : 'pendiente',
+    2 : 'realizada',
+    3 : 'desactivada',
+    4 : 'planeada',
+  }
 
 
-
-  constructor(private spinner: NgxSpinnerService) { }
+  constructor(private router: Router, private spinner: NgxSpinnerService, private ls : LocalStorageService) { }
 
   ngOnInit(): void {
 
@@ -175,6 +207,10 @@ export class PlanningRecipeComponent implements OnInit {
     this.menu['Preparación']['date_string'] = 'del ' + this.menu[ 'Preparación' ]['start'].format("DD") + ' al ' +this.menu[ 'Preparación' ]['end'].locale('es') .format("DD [de] MMMM  [del] YYYY");
 
     this.range_string = this.menu[this.current]['date_string'];
+
+    this.user_id = this.ls.getItem("TT_id");
+    if(! this.user_id)
+      this.router.navigate([""]);
     // $(document).ready(function() {
     //   $("#planning_modal").modal("show");
     // });
@@ -182,39 +218,46 @@ export class PlanningRecipeComponent implements OnInit {
   }
 
   get_recipe(day: number, index: number,event: any, is_recommended: boolean = false){
-    this.is_recommended = is_recommended;
     event.preventDefault();
     console.log(day,index);
-    if(is_recommended)
+    if(is_recommended){
+      this.is_recommended = true;
       this.recommendation_list = day;
-    else
-      this.current_day = day;
+      // this.selected_index = -1;
+    }
+    else{
+      this.is_recommended = false;
+      // this.current_day = day;
+      this.selected_index = day;
+      // this.recommendation_list = -1;
+    }
     this.recipe_index = index;
+    this.change_view('recipe')
   }
 
   change_day(type: number){
     this.current_day =  (this.current_day + type) % 7;
     if( this.current_day < 0)
       this.current_day = 6;
-    // this.recipe_index = -1;
   }
 
   change_menu(next : string){
     // let aux = this.current;
     this.current = next;
     this.range_string = this.menu[this.current]['date_string'];
-    this.show_recommendation = false;
-    this.recipe_index = -1;
+    if(!this.show['user_recipes'])
+      this.change_view("user_recipes");
     // this.next = aux;
   }
 
-  delete_recipe(index : number){
-    let text = '¿Estás seguro que deseas eliminar la receta ' + this.menu[this.current]['recipe'][this.current_day][index]['name'] + '?';
-    console.log(text)
+  delete_recipe(day:number,index : number){
+    let recipe = this.menu[this.current]['recipe'][day][index];
+    let text = '¿Estás seguro que deseas eliminar la receta ' + this.recipes_info[ recipe['id_recipe'] ]['name'] + '?';
+    console.log(day, index);
     this.actual_modal = {
       'type' : 'delete_planned_recipe',
       'text' : text,
-      'info' : index
+      'info' : {'day': day, 'index':index}
     };
     $('#conf_modal').modal("show");
   }
@@ -222,13 +265,15 @@ export class PlanningRecipeComponent implements OnInit {
   check_action(event: any){
     if(event['accepted']){
       if(event['action'] == 'delete_planned_recipe'){
-        this.menu[this.current]['recipe'][this.current_day].splice(event['info'],1);
+        this.menu[this.current]['recipe'][event['info']['day']].splice(event['info']['index'],1);
         this.menu[this.current]['total'] -= 1;
         this.recipe_index = -1;
+        this.change_view('user_recipes');
       }else if( event['action'] == 'delete_prepare_recipe'){
         console.log("agregar función de desactivar");
-        this.menu[this.current]['recipe'][this.current_day][ this.recipe_index ]['active'] = false;
-        this.recipe_index = -1;
+        this.menu[this.current]['recipe'][this.selected_index][ this.recipe_index ]['active'] = false;
+        this.menu[this.current]['recipe'][this.selected_index][ this.recipe_index ]['status'] = 3;
+        // this.recipe_index = -1;
       }
     }
   }
@@ -247,8 +292,8 @@ export class PlanningRecipeComponent implements OnInit {
   }
 
   deactivate_recipe(){
-    console.log( this.current_day, this.recipe_index)
-    let recipe = this.menu[ this.current ]['recipe'][ this.current_day ][ this.recipe_index ]['name'];
+    console.log( this.selected_index, this.recipe_index)
+    let recipe = this.menu[ this.current ]['recipe'][ this.selected_index ][ this.recipe_index ]['name'];
     console.log("a eliminar", recipe);
     let text = '¿Estás seguro que deseas desactivar la receta ' + recipe + '?\n Puedes reactivarlo en otro momento si cambias de parecer';
     console.log(text)
@@ -262,7 +307,8 @@ export class PlanningRecipeComponent implements OnInit {
 
   reactivate_recipe(){
     //mostrar loader, acomodar ingredientes.
-    this.menu[this.current]['recipe'][this.current_day][ this.recipe_index ]['active'] = true;
+    this.menu[this.current]['recipe'][this.selected_index][ this.recipe_index ]['active'] = true;
+    this.menu[this.current]['recipe'][this.selected_index][ this.recipe_index ]['status'] = 1;
   }
 
   load_more_recommendations(name : string){
@@ -272,32 +318,55 @@ export class PlanningRecipeComponent implements OnInit {
   add_recipe(){
     console.log("agregar receta");
     let recipe : any;
-    if(this.is_recommended){
-      console.log(this.recommendation_list, this.recipe_index)
-      console.log(this.recommendations[this.recommendation_list]['recipe'][this.recipe_index]);
+    console.log("lista de recomendación: ", this.recommendation_list);
+    if(this.recommendation_list != -1){
       recipe = this.recommendations[this.recommendation_list]['recipe'][this.recipe_index];
+      let week_view = this.menu[this.current]['recipe'][this.current_day];
+      let found = false;
+      for(let i = 0; i < week_view.length; i++){
+        if(week_view[i]['id_recipe'] == recipe['id_recipe']){
+          console.log("se agrega una nueva porción");
+          found = true;
+        }
+      }
+      if(!found){
+        week_view.push({'status': 4, 
+                        'active':true, 
+                        'id_recipe': recipe['id_recipe'], 
+                        'ingredient_percentage': recipe['ingredient_percentage']
+                      });
+        this.menu[ this.current ]['total'] += 1;
+      }
     }
     else{
-      console.log(this.current_day, this.recipe_index);
-      console.log(this.menu[ this.current ]['recipe'][this.current_day][ this.recipe_index ]);
-      recipe = this.menu[ this.current ]['recipe'][this.current_day][ this.recipe_index ];
+      recipe = this.menu[ this.current ]['recipe'][this.selected_index][ this.recipe_index ];
     }
-    let identifier = recipe['id_recipe'].toString() + '_' + this.current_day.toString();
-    // if(identifier in this.delete){
-    //   delete this.delete[identifier];
-    //   this.menu[ this.current ]['recipe'][ this.current_day ].push(recipe);
-    // }
-    // else if(identifier in this.add){
-    //   this.add[identifier]['quantity'] +=1
-    // }
-    // else{
-    //   this.add[identifier] = {
-    //     'quantity' : 1,
-    //     'recipe_id' : recipe['id_recipe'],
-    //     'day': this.current_day
-    //   }
-    //   this.menu[ this.current ]['recipe'][ this.current_day ].push(recipe);
-    // }
+    console.log(recipe);
+  }
+
+  change_view(element : string){
+    console.log("entra a change");
+    if(element != 'recipe'){
+      this.is_recommended = false;
+      this.recommendation_list = -1;
+      this.recipe_index = -1;
+      this.selected_index = -1;
+    }
+
+    for(let key in this.show){
+      if(key == element)
+        this.show[key] = true;
+      else
+        this.show[key] = false;
+    }
+  }
+
+  open_rate_modal(){
+    $("#rate_modal").modal('show')
+  }
+
+  complete_recipe(){
+    this.menu[ this.current ]['recipe'][this.selected_index][ this.recipe_index ]['status'] = 2;
   }
 
 }

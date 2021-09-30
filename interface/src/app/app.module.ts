@@ -22,6 +22,7 @@ import { IngredientModalComponent } from './components/modal/ingredient-modal/in
 import { DatetimeOnePipe } from './pipes/datetime-one.pipe';
 import { PlanningRecipeComponent } from './components/planning-recipe/planning-recipe.component';
 import { WeekInfoModalComponent } from './components/modal/week-info-modal/week-info-modal.component';
+import { ModalRateRecipeComponent } from './components/modal/modal-rate-recipe/modal-rate-recipe.component';
 
 @NgModule({
   declarations: [
@@ -40,6 +41,7 @@ import { WeekInfoModalComponent } from './components/modal/week-info-modal/week-
     DatetimeOnePipe,
     PlanningRecipeComponent,
     WeekInfoModalComponent,
+    ModalRateRecipeComponent,
   ],
   imports: [
     BrowserModule,

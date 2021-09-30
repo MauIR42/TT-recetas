@@ -51,43 +51,50 @@ h5 {
   
 }
 
-.blue-back {
-	background-color: var(--main-blue);
-	color: var(--p-header);
-}
 
 .orange-back {
 	background-color: var(--orange-light);
 	color: var(--p-header);
 }
 
-.orange-back > a{
-	color: var(--strongest-blue);
+.orange-back > a {
+	color:  var(--p-header);
 	text-decoration: none;
 }
 
 
-.blue-back > a{
+.pendiente, .planeada {
+	background-color: var(--main-blue);
 	color: var(--p-header);
-	text-decoration: none;
 }
 
-.grey-back {
+
+.desactivada {
 	background-color: var(--grey-deactivate);
 	color: var(--p-header);
 }
 
-.grey-back > a {
-	color: var(--p-header);
-	text-decoration: none;
-}
-
-.done-back {
+.realizada {
 	background-color: var(--strongest-blue);
 	color:  var(--p-header);
 }
 
-.done-back > a {
+.realizada > a {
+	color:  var(--p-header);
+	text-decoration: none;
+}
+
+.desactivada > a {
+	color:  var(--p-header);
+	text-decoration: none;
+}
+
+.planeada > a {
+	color:  var(--p-header);
+	text-decoration: none;
+}
+
+.pendiente > a {
 	color:  var(--p-header);
 	text-decoration: none;
 }

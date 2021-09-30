@@ -289,3 +289,12 @@ a {
 .error-text {
   color : red;
 }
+
+.modal-body > .img-responsive {
+
+    width:200px; /* you can use % */
+    height: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
