@@ -3,11 +3,11 @@ from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.hashers import make_password, check_password
 # Create your views here.
 from mainServices.models import *
-
+from django.forms.models import model_to_dict
 from rest_framework.views import APIView
 from rest_framework.response import Response
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import hashlib
 import random
 from django.template.loader import render_to_string
@@ -19,6 +19,8 @@ import json
 import unidecode
 
 import traceback
+
+import simpful as sf
 
 class AuthUserView(APIView):
 	def get(self, request, *args, **kwargs):
@@ -106,12 +108,15 @@ class passwordView(APIView):
 	def post(self, request, *args, **kwargs):
 		try:
 			data = request.POST.dict()
+			print(data)
 			if not 'email' in data:
 				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
 			user = User.objects.filter(username = data['email']).first()
+			print(user)
 			if not user:
 				return JsonResponse(data={ "error": True, "message":"user_not_exists" })
 			user_token = UserRecoveryToken.objects.filter(user=user.id, active = True).first()
+			print(user_token)
 			if  user_token and ((user_token.created_at + timedelta( days = 1)).timestamp()	 > datetime.now().timestamp()):
 				self.send_mail(user,user_token)
 				return JsonResponse(data={"error": False})	
@@ -156,7 +161,8 @@ class UserStatView(APIView):
 				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
 			user = User.objects.filter(id= user_id, active = True)
 			if user:
-				user_stats = UserStat.objects.filter(user_id = user_id);
+				user
+				user_stats = WeekStat.objects.filter(week__user_id = user_id, active = True).annotate(week_number= F("week__week_number"));
 				if( user_stats):
 					return JsonResponse(data={"error": False, 'data':  { 'info':list(user_stats.values()), 'has_data': True} })
 				stats = list(Stat.objects.all().values())
@@ -169,7 +175,7 @@ class UserStatView(APIView):
 	def post(self, request, *args, **kwargs):
 		try:
 			data = request.POST.dict()
-			week = 1
+			# week = 1
 
 			data['weight'] = round(float(data['weight']), 2)
 			data['imc'] = round(float(data['imc']), 2)
@@ -178,15 +184,22 @@ class UserStatView(APIView):
 			if not ( data['user_id'] and data['imc'] and data['weight'] and data['diameter']):
 				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
 
-			last_week = UserStat.objects.filter(user_id=data['user_id'], active=True)
-			print(last_week)
-			if last_week['week_number__max'] :
-				week = last_week['week_number__max'] + 1
+			week_day = date.today().isocalendar()
+			current_start = date.today() - timedelta(days=(week_day[2]) - 1)
+			current_week = UserWeek.objects.filter(active = True, week_start= current_start).first()
+
+			if not current_week :
+				last_week =  UserWeek.objects.filter(active = True).order_by('-week_number').first()
+				if not last_week :
+					current_week = UserWeek.objects.create(user_id = data['user_id'], week_number = 1, week_start = current_start,has_stats = True)
+				else:
+					current_week = UserWeek.objects.create(user_id = data['user_id'], week_number = last_week.week_number + 1, week_start = current_start,has_stats = True)
 			stats = []
-			stats.append(UserStat(value=data['imc'], week_number=week, stat_type_id=2, user_id=data['user_id']))
-			stats.append(UserStat(value=data['weight'], week_number=week, stat_type_id=3, user_id=data['user_id']))
-			stats.append(UserStat(value=data['diameter'], week_number=week, stat_type_id=4, user_id=data['user_id']))
-			UserStat.objects.bulk_create( stats )
+
+			stats.append(WeekStat(value=data['imc'],stat_type_id=2, week = current_week))
+			stats.append(WeekStat(value=data['weight'], stat_type_id=3, week = current_week))
+			stats.append(WeekStat(value=data['diameter'], stat_type_id=4, week = current_week))
+			WeekStat.objects.bulk_create( stats )
 
 			return JsonResponse(data={"error": False})
 
@@ -461,7 +474,9 @@ class EmbebbedScaleView(APIView):
 			scale = Scale.objects.filter(access_code= data['access_code'], active=True).first()
 			if not scale:
 				return JsonResponse(data={"error": True,  "message":"scale_not_exists"})
-			Inventory.objects.create(quantity=data['quantity'], ingredient_id=data['ingredient_id'], type_id=1, user_id = data['user_id'])
+			print(data['quantity'])
+			upload = Inventory.objects.create(quantity=int(data['quantity']), ingredient_id=data['ingredient_id'], type_id=1, user_id = data['user_id'])
+			print(upload.quantity)
 			pending = Inventory.objects.filter(active = True, quantity__gt=0 ,ingredient_id=data['ingredient_id'], user_id= data['user_id']).first()
 			if pending:
 				pending.quantity -= float(data["quantity"])
@@ -470,6 +485,7 @@ class EmbebbedScaleView(APIView):
 					is_pending = False
 			else:
 				is_pending = False
+			upload.save()
 
 			return JsonResponse(data={"error": False, "pending": is_pending})
 		except Exception as e:
@@ -495,3 +511,144 @@ class EmbebbedScaleView(APIView):
 
 
 
+class TestSED(APIView):
+	def get(self, request, *args, **kwargs):
+
+		try:
+			time = float( request.GET.get('time','0') )
+			taste = float( request.GET.get('taste','0') )
+			difficulty = float( request.GET.get('difficulty','0') )
+			print(time,taste,difficulty)
+			if time < 0 and taste < 0 and difficulty < 0:
+				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
+			FS = sf.FuzzySystem()
+
+			print("configurando sabor")
+			taste_bad = sf.TrapezoidFuzzySet(a= 0, b=0, c=3.21, d= 6.23, term="bad")
+			taste_ok = sf.TriangleFuzzySet(a=4,b=6,c=8, term="ok")
+			taste_good = sf.TrapezoidFuzzySet(a= 6.3, b=8.5, c=10, d=10, term="good")
+
+			FS.add_linguistic_variable("taste", sf.LinguisticVariable([taste_bad, taste_ok, taste_good], universe_of_discourse=[0,10]))
+
+			print("configurando dificultad")
+			difficult_easy = sf.TrapezoidFuzzySet(a= 0, b=0, c=3, d=5, term="easy")
+			difficult_normal = sf.TriangleFuzzySet(a=3,b=5,c=7, term="normal")
+			difficult_hard = sf.TrapezoidFuzzySet(a= 5, b=7, c=10, d=10, term="hard")
+
+			FS.add_linguistic_variable("difficulty", sf.LinguisticVariable([difficult_easy, difficult_normal, difficult_hard], universe_of_discourse=[0,10]))
+
+			print("configurando tiempo")
+			time_good = sf.TrapezoidFuzzySet(a= 0, b=0, c=15, d=45, term="little")
+			time_average = sf.TriangleFuzzySet(a=20,b=45,c=70, term="average")
+			time_bad = sf.TrapezoidFuzzySet(a= 45, b=75, c=120, d=120, term="much")
+
+			FS.add_linguistic_variable("time", sf.LinguisticVariable([time_good, time_average, time_bad], universe_of_discourse=[0,120]))
+
+			print("configurando salida")
+			little = sf.TrapezoidFuzzySet(a= 0, b=0, c=10, d=25, term="little")
+			regular = sf.TriangleFuzzySet(a=10,b=27.5,c=45, term="regular")
+			ok = sf.TriangleFuzzySet(a=25,b=50,c=75, term="ok")
+			much = sf.TriangleFuzzySet(a=55,b=72.5,c=90, term="much")
+			pretty = sf.TrapezoidFuzzySet(a= 75, b=90, c=100, d=100, term="pretty")
+
+
+			FS.add_linguistic_variable("recommendation", sf.LinguisticVariable([little, regular, ok, much, pretty], universe_of_discourse=[0,100]))
+
+			FS.add_rules([
+				"IF (taste IS good) AND (time IS little) THEN (recommendation IS pretty)",
+				"IF (taste IS good) AND (difficulty IS easy) AND (time IS average) THEN (recommendation IS pretty)",
+				"IF (taste IS good) AND (difficulty IS normal) AND (time IS average) THEN (recommendation IS much)",
+				"IF (taste IS good) AND (difficulty IS hard) AND (time IS average) THEN (recommendation IS much)",
+				"IF (taste IS good) AND (difficulty IS easy) AND (time IS much) THEN (recommendation IS much)",
+				"IF (taste IS good) AND (time IS much) THEN (recommendation IS ok)",
+				"IF (taste IS ok) AND (time IS little) THEN (recommendation IS ok)",
+				"IF (taste IS ok) AND (difficulty IS easy) AND (time IS average) THEN (recommendation IS ok)",
+				"IF (taste IS ok) AND (difficulty IS normal) AND (time IS average) THEN (recommendation IS regular)",
+				"IF (taste IS ok) AND (difficulty IS hard) AND (time IS average) THEN (recommendation IS regular)",
+				"IF (taste IS ok) AND (difficulty IS easy) AND (time IS much) THEN (recommendation IS regular)",
+				"IF (taste IS ok) AND (time IS much) THEN (recommendation IS little)",
+				"IF (taste IS bad) AND (time IS little) THEN (recommendation IS regular)",
+				"IF (taste IS bad) THEN (recommendation IS little)",
+				])
+
+			FS.set_variable("time", time)
+			FS.set_variable("taste", taste)
+			FS.set_variable("difficulty", difficulty)
+
+			response = FS.inference()
+			return JsonResponse(data={'error': False, 'evaluation': response }, safe=False)
+		except Exception as e:
+			print(e)
+			return JsonResponse(data={"error": True,  "message":"internal_server_error"})
+
+
+class PlanningView(APIView):
+	def get(self, request, *args, **kwargs):
+		week_start =  request.GET.get('week_start',None) 
+		user_id =  request.GET.get('user_id',None)
+		create = request.GET.get('create', False) == 'True'
+
+		if not week_start or not user_id:
+			return JsonResponse(data={"error": True, "message": 'incomplete_data' })
+		
+
+
+		print("datos recibidos:")
+		print("week: ", week_start)
+		print("user: ", user_id)
+		print('Create: ', create)
+		print(type(create))
+
+		current_week = UserWeek.objects.filter(user_id= user_id, week_start = week_start, active = True)
+		recipes = [
+			[],
+			[],
+			[],
+			[],
+			[],
+			[],
+			[]
+		]
+		if not current_week :
+			if create :
+				print("crear la semana")
+				last_week =  UserWeek.objects.filter(active = True).order_by('-week_number').first()
+				week_day = date.today().isocalendar()
+				# current_start = date.today() - timedelta(days=(week_day[2]) - 1)
+				if not last_week :
+					current_week = UserWeek.objects.create(user_id = user_id, week_number = 1, week_start = week_start)
+				else:
+					current_week = UserWeek.objects.create(user_id = user_id, week_number = last_week.week_number + 1, week_start = week_start)
+				
+				to_return = {
+					"active": True,
+					"has_stats": current_week.has_stats,
+					"id": current_week.id,
+					"inventory_updated": current_week.inventory_updated,
+					"week_number": current_week.week_number,
+					'total' : 0
+				}
+				return JsonResponse( data = {'week_info': to_return, 'week_recipes' : recipes})
+			else :
+				return JsonResponse(data={"error": True, "message": 'week_not_exists' })
+
+		current_week = list(current_week.values("has_stats","id","inventory_updated","week_number"))[0]
+		week_recipes = list(WeekRecipe.objects.filter(week_id = current_week['id'], active=True).values())
+
+		recipes_to_collect = []
+		total = 0
+		for recipe in week_recipes :
+			week_date = (recipe['preparation_date'].isocalendar()[2]) -1
+			total += 1
+			recipes[ week_date ].append(recipe)
+			if not ( recipe['recipe_id'] in recipes_to_collect):
+				recipes_to_collect.append( recipe['recipe_id'] )
+		recipes_data =  Recipe.objects.filter(active = True, id__in=recipes_to_collect)#faltan los ingredientes necesarios
+		if recipes_data:
+			recipes_data = list( recipes_data.values() )
+		else:
+			recipes_data = []
+
+		current_week['total'] = total
+
+		return JsonResponse( data = {'week_info': current_week, 'week_recipes' : recipes, 'recipes':recipes_data})

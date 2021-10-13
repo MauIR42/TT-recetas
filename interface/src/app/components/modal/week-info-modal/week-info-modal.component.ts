@@ -13,11 +13,23 @@ declare const $: any;
 })
 export class WeekInfoModalComponent implements OnInit {
 
-  @Input() set show_modal(val: any){
+  @Input() set to_show(val: any){
     if(val){
-    }
-    else{
-      $('#planning_modal').modal('hide');
+      console.log(val)
+
+      for(let key in val){
+        if(!val[key]){
+          this.steps.push(key)
+        }
+      }
+
+      console.log(this.steps);
+
+      if(this.steps.length > 0){
+        $(document).ready(function() {
+         $("#planning_modal").modal("show");
+        });
+      }
     }
   }
 
@@ -30,8 +42,11 @@ export class WeekInfoModalComponent implements OnInit {
 
   server_error : string = '';
 
-  current_step = 1;
-  total_steps = 2;
+  current_step = 0;
+
+  steps : any = [];
+
+  // current_step = 'charts';
 
   language : any = {
     "emptyTable":     "No hay ingredientes en la tabla",
@@ -92,7 +107,6 @@ export class WeekInfoModalComponent implements OnInit {
 
   send_data(){
     console.log("entra");
-    return;
       let imc = this.form_info['weight']['value'] / (2);
       let form = new FormData();
       form.append('imc', imc.toString());
@@ -115,13 +129,21 @@ export class WeekInfoModalComponent implements OnInit {
 
   }
 
-  check_info(){
-    let add = false;
-    if( this.current_step == 1 && this.check_health_data()){
-      this.current_step = this.current_step + 1;
+  check_info( last : boolean = false){
+    let valid = false;
+    if( this.steps[this.current_step] == 'charts'){
+        valid = this.check_health_data();
     }
-    else if( this.current_step == 2 && this.check_stock_data() ){
-      this.send_data();
+    else if( this.steps[this.current_step] == 'inventory'){
+      valid = this.check_stock_data();
+    }
+
+    if(valid){
+      if(last)
+        this.send_data();
+      else
+        this.current_step += 1;
+      console.log(this.current_step);
     }
   }
 

@@ -4,11 +4,11 @@
     <p class="loading">Cargando...</p>
   </ngx-spinner>
   <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content">
+    <div class="modal-content" *ngIf="steps.length > 0">
       <div class="modal-header orange-light-background">
         <h5 class="modal-title ">Actualizar datos de semana</h5>
       </div>
-      <div class="modal-body" [class.d-none]="current_step != 1">
+      <div class="modal-body" [class.d-none]="steps[current_step] != 'charts'">
       	<h5 class="strong_blue_clor">Agregar datos de salud</h5>
         <form class="row">
           <div class="form-group col-12 col-lg-6">
@@ -32,9 +32,9 @@
             <small class="form-text error-text strong_blue_clor" *ngIf="form_info['diameter']['error'].length > 0">{{form_info['diameter']['error']}}</small>
           </div>
         </form>
-        <p class="text-right">paso {{current_step}} de {{total_steps}}</p>
+        <p class="text-right">paso {{current_step + 1}} de {{steps.length}}</p>
       </div>
-      <div class="modal-body" [class.d-none]="current_step != 2">
+      <div class="modal-body" [class.d-none]="steps[current_step] != 'inventory'">
       <div class="container">
         <div class="row">
           <h5 class="strong_blue_clor">Actualizar los ingredientes disponibles</h5>
@@ -72,20 +72,20 @@
           </div>
         </div>
         <div>
-          <p class="text-right mt-2">paso {{current_step}} de {{total_steps}}</p>
+          <p class="text-right mt-2">paso {{current_step + 1}} de {{steps.length}}</p>
         </div>
         <div class="row justify-content-center pt-3">
           <div class="alert alert-warning col-12 text-center" role="alert" *ngIf="stock_warning && !confirm_send">
-              <strong>Sin modificaciones.</strong> No has modificado ingredientes, ¿Estás seguro de esta acción? <button class="btn" (click)="confirm_send = true; check_info()"><img src="assets/images/check-square-fill-blue.svg" class="img-fluid"> Sí, continuar</button>
+              <strong>Sin modificaciones.</strong> No has modificado ingredientes, ¿Estás seguro de esta acción? <button class="btn" (click)="confirm_send = true"><img src="assets/images/check-square-fill-blue.svg" class="img-fluid"> Sí, continuar</button>
           </div>
         </div>
       </div>
         <!-- <p class="text-right">{{current_step}} de {{total_steps}}</p> -->
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-normal-blue" (click)="check_info()" *ngIf="current_step == total_steps">Guardar</button>
-        <button type="button" class="btn btn-normal-blue" (click)="current_step = current_step - 1" *ngIf="current_step > 1">Anterior</button>
-      	<button type="button" class="btn btn-normal-blue" (click)="check_info()" *ngIf="current_step < total_steps">Siguiente</button>
+        <button type="button" class="btn btn-normal-blue" (click)="check_info(true)" *ngIf="current_step == (steps.length - 1)">Guardar</button>
+        <button type="button" class="btn btn-normal-blue" (click)="current_step = current_step - 1" *ngIf="current_step > 0">Anterior</button>
+      	<button type="button" class="btn btn-normal-blue" (click)="check_info()" *ngIf="current_step < (steps.length - 1)">Siguiente</button>
         <button type="button" class="btn btn-normal-orange" (click)="close_modal()">Cancelar</button>
       </div>
     </div>

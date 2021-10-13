@@ -44,18 +44,29 @@ class Stat(models.Model):
 	class Meta:
 		db_table = "stat"
 
+class UserWeek(models.Model):
+	id = models.AutoField(auto_created=True, primary_key=True, serialize=False)
+	user = models.ForeignKey(User, on_delete=models.PROTECT)
+	week_number = models.IntegerField(null = False)
+	week_start = models.DateField(auto_now=False, null=True)
+	inventory_updated = models.BooleanField(default = False)
+	has_stats = models.BooleanField(default = False)
+	active = models.BooleanField(default = True)
 
-class UserStat(models.Model):
+	class Meta:
+		db_table = "user_week"
+
+
+class WeekStat(models.Model):
 	id = models.AutoField(auto_created=True, primary_key=True, serialize=False)
 	created_at = models.DateTimeField(default=timezone.now, verbose_name='created at')
 	value = models.DecimalField(max_digits= 4, decimal_places= 2)
 	stat_type = models.ForeignKey(Stat, on_delete=models.PROTECT)
-	user = models.ForeignKey(User, on_delete=models.PROTECT)
-	week_number = models.IntegerField(null = False)
+	week = models.ForeignKey(UserWeek, on_delete=models.PROTECT, null = False)
 	active = models.BooleanField(default= True)
 
 	class Meta:
-		db_table = "user_stat"
+		db_table = "week_stat"
 
 
 class UserRecoveryToken(models.Model):
@@ -125,7 +136,7 @@ class Inventory(models.Model):
 	class Meta:
 		db_table = 'inventory'
 
-class RecipieType(models.Model):
+class RecipeType(models.Model):
 	id = models.AutoField(auto_created=True, primary_key=True, serialize=False)
 	name = models.CharField(max_length=255)
 	active = models.BooleanField(default = True)
@@ -143,7 +154,7 @@ class Recipe(models.Model): #excel datos_recetas
 	cholesterol = models.DecimalField(max_digits= 6, decimal_places= 2)
 	total_time = models.IntegerField(null = False)
 	portions = models.IntegerField(null = False)
-	type = models.ForeignKey(RecipieType, on_delete=models.PROTECT, null = False)
+	type = models.ForeignKey(RecipeType, on_delete=models.PROTECT, null = False)
 	active = models.BooleanField(default = True)
 
 	class Meta:
@@ -152,7 +163,7 @@ class Recipe(models.Model): #excel datos_recetas
 class RecipeIngredient(models.Model):
 	id = models.AutoField(auto_created=True, primary_key=True, serialize=False)
 	ingredient = models.ForeignKey(Ingredient, on_delete=models.PROTECT, null = False)
-	recipie = models.ForeignKey(Recipe, on_delete=models.PROTECT, null = False)
+	recipe = models.ForeignKey(Recipe, on_delete=models.PROTECT, null = False)
 	quantity = models.IntegerField(null = False)
 	active = models.BooleanField(default = True)
 	comment = models.CharField(max_length=255)
@@ -179,4 +190,22 @@ class RecipeStep(models.Model):
 	class Meta:
 		db_table = 'recipe_step'
 
+class WeekRecipeType(models.Model):
+	id = models.AutoField(auto_created=True, primary_key=True, serialize=False)
+	name = models.CharField(max_length=255)
+	active = models.BooleanField(default = True)
 
+	class Meta:
+		db_table = 'week_recipe_type'
+
+class WeekRecipe(models.Model):
+	id = models.AutoField(auto_created=True, primary_key=True, serialize=False)
+	week = models.ForeignKey(UserWeek, on_delete=models.PROTECT, null = False)
+	recipe = models.ForeignKey(Recipe, on_delete=models.PROTECT, null = False)
+	preparation_date = models.DateField(auto_now=False, null=True)
+	quantity = models.IntegerField(null = False)
+	user_evaluation = models.DecimalField(max_digits= 5, decimal_places= 2)
+	active = models.BooleanField(default = True)
+	status = models.ForeignKey(WeekRecipeType, on_delete=models.PROTECT, null = False)
+	class Meta:
+		db_table = 'week_recipe'

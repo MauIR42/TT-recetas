@@ -33,7 +33,7 @@ export class UserInfoComponent implements OnInit {
 
   show_success : boolean = false;
 
-  graphs: any = [];
+  graphs: any = [{'id':'peso'},{'id':'abdomen'},{'id':'IMC'}];
   graphs_empty: boolean = false;
 
   health_type : any = {};
@@ -81,52 +81,53 @@ export class UserInfoComponent implements OnInit {
       }
 
     });
+    $(document).ready(function() {
+      let ctx = $("#IMC");
+      const labels = ["Semana 1", "Semana 2", "Semana 3", "Semana 4", "Semana 5", "Semana 6", "Semana 7"]
+      const data = {
+        labels: labels,
+        datasets: [{
+          label: 'Indice de masa corporal',
+          data: [40, 39, 35, 34, 30, 29, 25],
+          fill: false,
+          borderColor: '#0AAFC6',
+          tension: 0.1
+        }],
+      };
+      let IMC = new Chart(ctx, {type: 'line',
+          data: data
+        });
 
-    // let ctx = $("#IMC");
-    // const labels = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio"]
-    // const data = {
-    //   labels: labels,
-    //   datasets: [{
-    //     label: 'Indice de masa corporal',
-    //     data: [40, 39, 35, 34, 30, 29, 25],
-    //     fill: false,
-    //     borderColor: '#FDC216',
-    //     tension: 0.1
-    //   }],
-    // };
-    // let IMC = new Chart(ctx, {type: 'line',
-    //     data: data
-    //   });
+      let ctx_peso = $("#peso");
+      const data_peso = {
+        labels: labels,
+        datasets: [{
+          label: 'Pesos registrados',
+          data: [40, 39, 80, 81, 56, 55, 40],
+          fill: false,
+          borderColor: '#0AAFC6',
+          tension: 0.1
+        }],
+      };
+      let peso = new Chart(ctx_peso, {type: 'line',
+          data: data_peso
+        });
 
-    // let ctx_peso = $("#peso");
-    // const data_peso = {
-    //   labels: labels,
-    //   datasets: [{
-    //     label: 'Pesos registrados',
-    //     data: [40, 39, 80, 81, 56, 55, 40],
-    //     fill: false,
-    //     borderColor: '#0AAFC6',
-    //     tension: 0.1
-    //   }],
-    // };
-    // let peso = new Chart(ctx_peso, {type: 'line',
-    //     data: data_peso
-    //   });
-
-    // let ctx_abdomen = $("#abdomen");
-    // const data_abdomen = {
-    //   labels: labels,
-    //   datasets: [{
-    //     label: 'Pesos registrados',
-    //     data: [40, 39, 80, 81, 56, 55, 40],
-    //     fill: false,
-    //     borderColor: '#0AAFC6',
-    //     tension: 0.1
-    //   }],
-    // };
-    // let abdomen = new Chart(ctx_abdomen, {type: 'line',
-    //     data: data_abdomen
-    // });
+      let ctx_abdomen = $("#abdomen");
+      const data_abdomen = {
+        labels: labels,
+        datasets: [{
+          label: 'Diametro de la cintura',
+          data: [40, 39, 80, 81, 56, 55, 40],
+          fill: false,
+          borderColor: '#FDC216',
+          tension: 0.1
+        }],
+      };
+      let abdomen = new Chart(ctx_abdomen, {type: 'line',
+          data: data_abdomen
+      });
+    });
 }
 
 

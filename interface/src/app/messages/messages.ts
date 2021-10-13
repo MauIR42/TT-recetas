@@ -9,4 +9,5 @@ export const SERVER_MESSAGES : any = {
 	'user_not_administrator' : "Esta acción solo la puede hacer el administrador de la báscula.",
 	"scale_name_repeated": "El nombre ingresado ya está en uso.",
 	"scale_must_restart": "La báscula debe reiniciarse manualmente antes de permitir nuevos usuarios",
+	"week_not_exists" : "La semana que busca no existe",
 }

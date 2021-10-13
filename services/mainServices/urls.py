@@ -12,4 +12,6 @@ urlpatterns = [
 	path('stock', views.StockView.as_view(), name='StockView'),
 	path('scale/update', views.EmbebbedScaleView.as_view(), name='EmbebbedScaleView'),
 	path('scale/stock', views.EmbebbedScaleView.as_view(), name='EmbebbedScaleView'),
+	path('test_sed', views.TestSED.as_view(), name="TestSED"),
+	path('planning', views.PlanningView.as_view(), name="PlanningView"),
 ]
