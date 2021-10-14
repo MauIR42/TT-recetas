@@ -19,14 +19,14 @@
 					<p class="d-block text-center">preparados de la semana</p>
 					<h5 class="text-center">{{cooked}} de {{menu[current]['total']}}</h5>
 					<p class="d-block text-center">preparados para hoy</p>
-					<h5 class="text-center">{{day_cooked}} de {{menu[current]['recipe'][current_day].length}}</h5>
+					<h5 class="text-center">{{menu[current]['week_done'][current_day]}} de {{menu[current]['recipe'][current_day].length}}</h5>
 				</ng-container>
 				<ng-container *ngIf="current == 'Planeación'">
 					<p class="d-block text-center">planeados para la semana</p>
 					<h5 class="text-center">{{menu[current]['total']}}</h5>
 
 					<div class="text-center my-3">
-						<button class="btn btn-outline-strong mx-auto">Guardar Cambios</button>
+						<button class="btn btn-outline-strong mx-auto" (click)="save_changes()">Guardar Cambios</button>
 					</div>
 				</ng-container>
 				<div class="row justify-content-center">
@@ -113,17 +113,12 @@
 					<div class="container-fluid mt-5">
 						<div class="row justify-content-center">
 							<div class="col-12">
-								<h3>Receta 1</h3>
+								<h3>{{recipes_info[ current_recipe['id'] ]['name'] }}</h3>
 							</div>
 							<div class="col-12 col-lg-8">
 								<img src="assets/images/clock-blue.svg" class="img-fluid mr-2">
-								<p style="display:inline;" class="mb-2">Tiempo aproximado: 20min.</p>
-								<p class="text-justify">Descripción: Esta es una breve descripción de la receta para que el usuario recuerde que había. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-								tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-								quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-								consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-								cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-								proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+								<p style="display:inline;" class="mb-2">Tiempo aproximado: {{recipes_info[ current_recipe['id'] ]['total_time'] }} min.</p>
+								<p class="text-justify">Descripción: {{recipes_info[ current_recipe['id'] ]['description'] }}</p>
 							</div>
 							<div class="col-12 col-lg-4">
 								<img src="assets/images/test1.jpg" class="card-img-top" alt="...">
@@ -131,17 +126,28 @@
 							<div class="col-12 pr-5">
 								<p><strong> Ingredientes:</strong></p>
 								<ul class="list-group list-group-flush">
-								  <li class="list-group-item">Ingrediente 1 x ml.</li>
+								  <!-- <li class="list-group-item">Ingrediente 1 x ml.</li>
 								  <li class="list-group-item">Ingrediente 2 x ml.</li>
 								  <li class="list-group-item">Ingrediente 3 x piezas. (opcional)</li>
 								  <li class="list-group-item">Ingrediente 4 x gr.</li>
-								  <li class="list-group-item">Ingrediente 5 x ml. (2 cucharadas)</li>
+								  <li class="list-group-item">Ingrediente 5 x ml. (2 cucharadas)</li> -->
+								  <li class="list-group-item" *ngFor="let ingredient of current_recipe['ingredients']">
+								  	<p>
+								  		{{ingredient['ingredient_name']}} 
+									  	<ng-container *ngIf="ingredient['quantity'] > 0">
+									  		{{ingredient['quantity']}} {{ingredient['unit']}} 
+									  	</ng-container> 
+									  	<ng-container *ngIf="ingredient['comment'].length > 0">
+									  		 o {{ingredient['comment']}}
+									  	</ng-container> 
+								  	</p>
+								  </li>
 								</ul>
 							</div>
 							<div class="col-12 pr-5">
 								<p><strong> Pasos:</strong></p>
 								<ul class="list-group list-group-flush">
-								  <li class="list-group-item">1. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+								 <!--  <li class="list-group-item">1. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
 								  tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
 								  quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
 								  consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
@@ -170,7 +176,10 @@
 								  quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
 								  consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
 								  cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-								  proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</li>
+								  proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</li> -->
+								  <li class="list-group-item" *ngFor="let step of current_recipe['steps']; let i = index">
+								  	 <p>{{i + 1}}. {{step['type_name']}} {{step['description']}}</p>
+								  </li>
 								</ul>
 							</div>
 							<div class="col-6 mb-3 text-center" *ngIf="current == 'Preparación' && menu[current]['recipe'][selected_index][recipe_index]['status_id'] == 1">
@@ -236,7 +245,7 @@
 									  </div>
 									</div>
 								</div>
-								<div class="col-12 text-center">
+								<div class="col-12 text-center" *ngIf="recommendations[i]['recipe'].length == 0">
 									<button class="btn btn-sm btn-outline mt-3" (click)="load_more_recommendations(name)"> Cargar más opciones</button>
 								</div>
 							</div>	
@@ -251,5 +260,5 @@
 
 <app-confirmation-modal [modal_info]="actual_modal" (accepted)="check_action($event)"></app-confirmation-modal>
 <app-week-info-modal [to_show]="to_show"></app-week-info-modal>
-<app-modal-rate-recipe (done)="complete_recipe()"></app-modal-rate-recipe>
+<app-modal-rate-recipe (done)="complete_recipe($event)"></app-modal-rate-recipe>
 <!-- id user_recipe, valores -->

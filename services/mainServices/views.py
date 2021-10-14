@@ -14,6 +14,7 @@ from django.template.loader import render_to_string
 from django.core.mail import send_mail
 from services.settings import EMAIL_HOST, ANGULAR_DIR
 from django.db.models import F, Q, Case, When, Value, Max
+from django.db import transaction
 from ast import literal_eval
 import json
 import unidecode
@@ -21,6 +22,60 @@ import unidecode
 import traceback
 
 import simpful as sf
+
+class SED:
+	def __init__(self):
+		self.FS = sf.FuzzySystem()
+
+		print("configurando sabor")
+		taste_bad = sf.TrapezoidFuzzySet(a= 0, b=0, c=3.21, d= 6.23, term="bad")
+		taste_ok = sf.TriangleFuzzySet(a=4,b=6,c=8, term="ok")
+		taste_good = sf.TrapezoidFuzzySet(a= 6.3, b=8.5, c=10, d=10, term="good")
+
+		self.FS.add_linguistic_variable("taste", sf.LinguisticVariable([taste_bad, taste_ok, taste_good], universe_of_discourse=[0,10]))
+
+		print("configurando dificultad")
+		difficult_easy = sf.TrapezoidFuzzySet(a= 0, b=0, c=3, d=5, term="easy")
+		difficult_normal = sf.TriangleFuzzySet(a=3,b=5,c=7, term="normal")
+		difficult_hard = sf.TrapezoidFuzzySet(a= 5, b=7, c=10, d=10, term="hard")
+
+		self.FS.add_linguistic_variable("difficulty", sf.LinguisticVariable([difficult_easy, difficult_normal, difficult_hard], universe_of_discourse=[0,10]))
+
+		print("configurando tiempo")
+		time_good = sf.TrapezoidFuzzySet(a= 0, b=0, c=15, d=45, term="little")
+		time_average = sf.TriangleFuzzySet(a=20,b=45,c=70, term="average")
+		time_bad = sf.TrapezoidFuzzySet(a= 45, b=75, c=120, d=120, term="much")
+
+		self.FS.add_linguistic_variable("time", sf.LinguisticVariable([time_good, time_average, time_bad], universe_of_discourse=[0,120]))
+
+		print("configurando salida")
+		little = sf.TrapezoidFuzzySet(a= 0, b=0, c=10, d=25, term="little")
+		regular = sf.TriangleFuzzySet(a=10,b=27.5,c=45, term="regular")
+		ok = sf.TriangleFuzzySet(a=25,b=50,c=75, term="ok")
+		much = sf.TriangleFuzzySet(a=55,b=72.5,c=90, term="much")
+		pretty = sf.TrapezoidFuzzySet(a= 75, b=90, c=100, d=100, term="pretty")
+
+
+		self.FS.add_linguistic_variable("recommendation", sf.LinguisticVariable([little, regular, ok, much, pretty], universe_of_discourse=[0,100]))
+
+		self.FS.add_rules([
+			"IF (taste IS good) AND (time IS little) THEN (recommendation IS pretty)",
+			"IF (taste IS good) AND (difficulty IS easy) AND (time IS average) THEN (recommendation IS pretty)",
+			"IF (taste IS good) AND (difficulty IS normal) AND (time IS average) THEN (recommendation IS much)",
+			"IF (taste IS good) AND (difficulty IS hard) AND (time IS average) THEN (recommendation IS much)",
+			"IF (taste IS good) AND (difficulty IS easy) AND (time IS much) THEN (recommendation IS much)",
+			"IF (taste IS good) AND (time IS much) THEN (recommendation IS ok)",
+			"IF (taste IS ok) AND (time IS little) THEN (recommendation IS ok)",
+			"IF (taste IS ok) AND (difficulty IS easy) AND (time IS average) THEN (recommendation IS ok)",
+			"IF (taste IS ok) AND (difficulty IS normal) AND (time IS average) THEN (recommendation IS regular)",
+			"IF (taste IS ok) AND (difficulty IS hard) AND (time IS average) THEN (recommendation IS regular)",
+			"IF (taste IS ok) AND (difficulty IS easy) AND (time IS much) THEN (recommendation IS regular)",
+			"IF (taste IS ok) AND (time IS much) THEN (recommendation IS little)",
+			"IF (taste IS bad) AND (time IS little) THEN (recommendation IS regular)",
+			"IF (taste IS bad) THEN (recommendation IS little)",
+			])
+
+sed = SED()
 
 class AuthUserView(APIView):
 	def get(self, request, *args, **kwargs):
@@ -186,7 +241,7 @@ class UserStatView(APIView):
 
 			week_day = date.today().isocalendar()
 			current_start = date.today() - timedelta(days=(week_day[2]) - 1)
-			current_week = UserWeek.objects.filter(active = True, week_start= current_start).first()
+			current_week = UserWeek.objects.filter(active = True, week_start= current_start)
 
 			if not current_week :
 				last_week =  UserWeek.objects.filter(active = True).order_by('-week_number').first()
@@ -194,11 +249,13 @@ class UserStatView(APIView):
 					current_week = UserWeek.objects.create(user_id = data['user_id'], week_number = 1, week_start = current_start,has_stats = True)
 				else:
 					current_week = UserWeek.objects.create(user_id = data['user_id'], week_number = last_week.week_number + 1, week_start = current_start,has_stats = True)
+			else:
+				current_week.update(has_stats = True)
 			stats = []
 
-			stats.append(WeekStat(value=data['imc'],stat_type_id=2, week = current_week))
-			stats.append(WeekStat(value=data['weight'], stat_type_id=3, week = current_week))
-			stats.append(WeekStat(value=data['diameter'], stat_type_id=4, week = current_week))
+			stats.append(WeekStat(value=data['imc'],stat_type_id=2, week = current_week[0]))
+			stats.append(WeekStat(value=data['weight'], stat_type_id=3, week = current_week[0]))
+			stats.append(WeekStat(value=data['diameter'], stat_type_id=4, week = current_week[0]))
 			WeekStat.objects.bulk_create( stats )
 
 			return JsonResponse(data={"error": False})
@@ -411,6 +468,41 @@ class StockView(APIView):
 		except Exception as e:
 			print(e)
 			return JsonResponse(data={"error": True,  "message":"internal_server_error"})
+	def delete(self, request, *args, **kwargs):
+		try:
+			user_id = int(request.GET.get('user_id','0'))
+			to_delete = literal_eval(request.GET.get('to_delete', "[]"))
+
+			if user_id <= 0 or len(to_delete) <= 0:
+				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
+			deactivated = Inventory.objects.filter(user_id = user_id, id__in=to_delete)
+
+			to_check = []
+			to_modify = {}
+			for item in deactivated:
+				to_check.append(item.ingredient_id)
+				to_modify[item.ingredient_id] = item.quantity
+			deactivated.update(active = False)
+			pending = Inventory.objects.filter(user_id = user_id, ingredient_id__in = to_check, type_id = 2)
+			for item in pending :
+				print(item)
+				if item.ingredient_id in to_modify:
+					item.quantity +=  to_modify[ item.ingredient_id ]
+					print("hecho")
+					del to_modify[ item.ingredient_id ]
+			print("termina")
+			Inventory.objects.bulk_update( pending, ['quantity'])
+
+			week_day = date.today().isocalendar()
+			current_start = date.today() - timedelta(days=(week_day[2]) - 1)
+			UserWeek.objects.filter(active = True, week_start= current_start).update(inventory_updated = True)
+
+			print(user_id)
+			print(to_delete)
+			return JsonResponse(data={"error": False, 'to_delete':to_delete })
+		except Exception as e:
+			print(e)
+			return JsonResponse(data={"error": True,  "message":"internal_server_error"})
 
 class EmbebbedScaleView(APIView):
 
@@ -590,14 +682,6 @@ class PlanningView(APIView):
 
 		if not week_start or not user_id:
 			return JsonResponse(data={"error": True, "message": 'incomplete_data' })
-		
-
-
-		print("datos recibidos:")
-		print("week: ", week_start)
-		print("user: ", user_id)
-		print('Create: ', create)
-		print(type(create))
 
 		current_week = UserWeek.objects.filter(user_id= user_id, week_start = week_start, active = True)
 		recipes = [
@@ -613,7 +697,7 @@ class PlanningView(APIView):
 			if create :
 				print("crear la semana")
 				last_week =  UserWeek.objects.filter(active = True).order_by('-week_number').first()
-				week_day = date.today().isocalendar()
+				# week_day = date.today().isocalendar()
 				# current_start = date.today() - timedelta(days=(week_day[2]) - 1)
 				if not last_week :
 					current_week = UserWeek.objects.create(user_id = user_id, week_number = 1, week_start = week_start)
@@ -628,7 +712,7 @@ class PlanningView(APIView):
 					"week_number": current_week.week_number,
 					'total' : 0
 				}
-				return JsonResponse( data = {'week_info': to_return, 'week_recipes' : recipes})
+				return JsonResponse( data = {'error': False, 'week_info': to_return, 'week_recipes' : recipes})
 			else :
 				return JsonResponse(data={"error": True, "message": 'week_not_exists' })
 
@@ -636,13 +720,18 @@ class PlanningView(APIView):
 		week_recipes = list(WeekRecipe.objects.filter(week_id = current_week['id'], active=True).values())
 
 		recipes_to_collect = []
+		done = [0,0,0,0,0,0,0]
 		total = 0
+		total_done = 0
 		for recipe in week_recipes :
 			week_date = (recipe['preparation_date'].isocalendar()[2]) -1
 			total += 1
 			recipes[ week_date ].append(recipe)
 			if not ( recipe['recipe_id'] in recipes_to_collect):
 				recipes_to_collect.append( recipe['recipe_id'] )
+			if recipe['status_id'] == 2:
+				total_done += 1
+				done[ week_date ] += 1
 		recipes_data =  Recipe.objects.filter(active = True, id__in=recipes_to_collect)#faltan los ingredientes necesarios
 		if recipes_data:
 			recipes_data = list( recipes_data.values() )
@@ -650,5 +739,134 @@ class PlanningView(APIView):
 			recipes_data = []
 
 		current_week['total'] = total
+		current_week['total_done'] = total_done
+		current_week['week_done'] = done
 
-		return JsonResponse( data = {'week_info': current_week, 'week_recipes' : recipes, 'recipes':recipes_data})
+		return JsonResponse( data = {'error': False, 'week_info': current_week, 'week_recipes' : recipes, 'recipes':recipes_data})
+
+	def post(self, request, *args, **kwargs):
+		try:	
+			data = request.data
+			# data = json.dumps(data)
+			# data = json.loads(data)
+
+			if not ('to_add' in data and 'to_delete' in data):
+				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
+			print(data)
+
+			to_add = json.loads(data['to_add'])
+			to_delete = json.loads(data['to_delete'])
+			bulk_create = []
+			bulk_update = []
+			print(to_add)
+			print(to_delete)
+			for add in to_add :
+				new = WeekRecipe(recipe_id = add['recipe_id'], week_id = add['week_id'], status_id=add['status_id'], quantity = add['quantity'], preparation_date = add['preparation_date'] )
+				bulk_create.append(new)
+			WeekRecipe.objects.bulk_create(bulk_create)
+			if len(to_delete) > 0: #checar algun dia la eficencia de buscar todos y luego solo actualizar los necesarios o buscar uno por uno
+				with transaction.atomic():
+					for delete in to_delete:
+						WeekRecipe.objects.filter(id =delete['id']).update(status_id=delete['status_id'], quantity = delete['quantity'], preparation_date = delete['preparation_date'], active=delete['active'])
+			return JsonResponse( data = {'error': False } )
+		except Exception as e:
+			print(e)
+			return JsonResponse(data={"error": True,  "message":"internal_server_error"})
+	def put(self, request, *args, **kwargs):
+		try:
+			print("entra")
+			data = request.POST.dict()
+			print(data)
+			if not ('user_recipe' in data  and  'quantity' in data  and 'status_id' in data):
+				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
+			WeekRecipe.objects.filter(id=data['user_recipe'], active=True).update(status_id=data['status_id'], quantity=data['quantity'])
+			return JsonResponse(data={"error": False})
+		except Exception as e:
+			print(e)
+			return JsonResponse(data={"error": True,  "message":"internal_server_error"})
+
+
+class RecipeEvaluationView(APIView):
+	def post(self, request, *args, **kwargs):
+		try:
+
+			data =  request.POST.dict()
+			print(data)
+
+			if not ('time' in data  and  'taste' in data  and 'difficulty' in data  and 'user_recipe' in data):
+				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
+
+			sed.FS.set_variable("time", data['time'])
+			sed.FS.set_variable("taste", data['taste'])
+			sed.FS.set_variable("difficulty", data['difficulty'])
+
+			evaluation = sed.FS.inference()['recommendation']
+			print("resultado: ", evaluation)
+			WeekRecipe.objects.filter(id=data['user_recipe'], active= True).update(user_evaluation=round(evaluation,2), status_id=2)
+			print("resultado: ", evaluation)
+			return JsonResponse( data = {'error': False, 'evaluation':evaluation})
+		except Exception as e:
+
+			print(e)
+			return JsonResponse(data={"error": True,  "message":"internal_server_error"})
+
+class RecommendationView(APIView):
+	def get(self, request, *args, **kwargs):
+		try:
+			# Recipe
+			are_all =  request.GET.get('all','False')  == 'True'
+			user_id =  int( request.GET.get('user_id', '0') )
+			ingredients = literal_eval(request.GET.get('ingredients', "[]"))
+
+			print("!!!!!!!!!",user_id)
+
+			if user_id <= 0:
+				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
+			if are_all:
+				print("!!!!!!!!! eran todos")
+				recipes = list( Recipe.objects.filter(active = True).order_by('id').values() )#faltan los ingredientes necesarios
+				recipes_len = len(recipes)
+				to_return = []
+				recipe_info = {}
+				recipe_container = []
+				for i in range(7) :
+					has_more = (recipes_len - 3) > 0
+					aux = []
+					for i in range(3):
+						aux.append({'recipe_id':recipes[i]['id'], 'ingredient_percentage':0})
+						if(recipes[i]['id'] not in recipe_info):
+							recipe_info[ recipes[i]['id'] ] = 1
+							recipe_container.append( recipes[i])
+					to_return.append({'recipe':aux,'has_more':has_more, 'offset':3})
+				return JsonResponse(data={"error": False,  "recommendations":to_return, 'recipes': recipe_container})
+			return JsonResponse(data={"error": False,  "recommendations":[]})
+
+		except Exception as e:
+			print(e)
+			return JsonResponse(data={"error": True,  "message":"internal_server_error"})
+
+class RecipeView(APIView):
+	def get(self, request, *args, **kwargs):
+		try:
+			recipe_id =  int( request.GET.get('recipe_id', '0') )
+
+			if recipe_id <= 0:
+				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
+			# pasos, ingredientes, (informacion basica ya esta en la receta)
+			ingredients = list(RecipeIngredient.objects.filter(recipe_id= recipe_id, active = True).annotate(unit=Case(
+					When(ingredient__type_id = 1, then=Value('pzs')),
+					When(ingredient__type_id = 3, then=Value('ml')),
+					When(ingredient__type_id = 2, then=Value('gr')),), ingredient_name=F('ingredient__name')).values())
+			units = {
+				'gr' : 'Kg',
+				'ml' : 'L',
+			}
+			for element in ingredients :
+				if element['quantity'] >= 1000 and element['unit'] in units:
+					element['quantity'] = element['quantity'] / 1000
+					element['unit'] = units[ element['unit'] ]
+			steps = list(RecipeStep.objects.filter(recipe_id= recipe_id).annotate(type_name=F('type__name')).order_by('step_number').values() )
+			return JsonResponse(data={"error": False,  'ingredients': ingredients, 'steps':steps})
+		except Exception as e:
+			print(e)
+			return JsonResponse(data={"error": True,  "message":"internal_server_error"})

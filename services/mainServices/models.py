@@ -204,7 +204,7 @@ class WeekRecipe(models.Model):
 	recipe = models.ForeignKey(Recipe, on_delete=models.PROTECT, null = False)
 	preparation_date = models.DateField(auto_now=False, null=True)
 	quantity = models.IntegerField(null = False)
-	user_evaluation = models.DecimalField(max_digits= 5, decimal_places= 2)
+	user_evaluation = models.DecimalField(max_digits= 5, decimal_places= 2, default = 0.00)
 	active = models.BooleanField(default = True)
 	status = models.ForeignKey(WeekRecipeType, on_delete=models.PROTECT, null = False)
 	class Meta:

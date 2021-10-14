@@ -12,7 +12,7 @@ export class ModalRateRecipeComponent implements OnInit {
   data : any = {
     'taste' : 5,
     'difficulty' : 5,
-    'time' : 0
+    'time' : 1
   }
 
   time_error: string = '';
@@ -34,9 +34,18 @@ export class ModalRateRecipeComponent implements OnInit {
   }
 
   save(){
-    console.log("mandar");
-    this.close_modal();
-    this.done.emit(true);
+    this.time_error = '';
+    if( !Number.isInteger(this.data['time'])  )
+      this.time_error = 'El tiempo debe ser en minutos y sin decimales.';
+    else if(this.data['time'] <= 0 )
+      this.time_error = 'Debe agregar un tiempo en minutos, si no recuerda el tiempo use un aproximado.';
+    else{
+      console.log("mandar");
+      console.log(this.data);
+      this.close_modal();
+      this.done.emit(this.data);  
+    }
+    
   }
 
 }

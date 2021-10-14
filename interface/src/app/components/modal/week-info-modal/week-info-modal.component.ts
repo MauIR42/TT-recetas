@@ -4,6 +4,7 @@ import { LocalStorageService } from '../../../services/local-storage.service';
 import { StockService } from '../../../services/stock.service';
 import { SERVER_MESSAGES } from '../../../messages/messages';
 import { NgxSpinnerService } from 'ngx-spinner';
+import { forkJoin  } from 'rxjs';
 
 declare const $: any;
 @Component({
@@ -15,7 +16,7 @@ export class WeekInfoModalComponent implements OnInit {
 
   @Input() set to_show(val: any){
     if(val){
-      console.log(val)
+      // console.log(val)
 
       for(let key in val){
         if(!val[key]){
@@ -23,7 +24,7 @@ export class WeekInfoModalComponent implements OnInit {
         }
       }
 
-      console.log(this.steps);
+      // console.log(this.steps);
 
       if(this.steps.length > 0){
         $(document).ready(function() {
@@ -106,25 +107,41 @@ export class WeekInfoModalComponent implements OnInit {
   }
 
   send_data(){
-    console.log("entra");
-      let imc = this.form_info['weight']['value'] / (2);
-      let form = new FormData();
-      form.append('imc', imc.toString());
-      form.append('weight', this.form_info['weight']['value']);
-      form.append('diameter', this.form_info['diameter']['value']);
-      form.append('user_id', '0');
-      this.spinner.show("loader");
-      this.us.post_stat_info(form).subscribe( (data: any)=>{
-        console.log(data);
-        if(data['error']){
-          this.spinner.hide("loader");
-          this.server_error = SERVER_MESSAGES[data['message']];
-          return;
-        }
-
+    // console.log("entra");
+    let imc = this.form_info['weight']['value'] / (2);
+    let form = new FormData();
+    form.append('imc', imc.toString());
+    form.append('weight', this.form_info['weight']['value']);
+    form.append('diameter', this.form_info['diameter']['value']);
+    form.append('user_id', '0');
+    let to_delete = [];
+    for(let key in this.to_delete){
+      to_delete.push(key)
+    }
+    // console.log(to_delete);
+    //return;
+    this.spinner.show("loader");
+    let services = [
+      this.ss.delete_stock({'user_id': this.user_id, 'to_delete':JSON.stringify(to_delete)}),
+      this.us.post_stat_info(form)
+    ];
+    forkJoin(services).subscribe( (data: any)=>{
+      // console.log(data);
+      if(data[0]['error']){
         this.spinner.hide("loader");
-        this.close_modal();
-      });
+        this.server_error = SERVER_MESSAGES[data['message']];
+        return;
+      }
+
+      if(data[1]['error']){
+        this.spinner.hide("loader");
+        this.server_error = SERVER_MESSAGES[data['message']];
+        return;
+      }
+
+      this.spinner.hide("loader");
+      this.close_modal();
+    });
     
 
   }
@@ -143,7 +160,7 @@ export class WeekInfoModalComponent implements OnInit {
         this.send_data();
       else
         this.current_step += 1;
-      console.log(this.current_step);
+      // console.log(this.current_step);
     }
   }
 
@@ -152,12 +169,12 @@ export class WeekInfoModalComponent implements OnInit {
     let correct = true;
 
     for(let key in this.form_info ){
-      console.log(key)
+      // console.log(key)
       let value = this.form_info[key];
-      console.log(value)
+      // console.log(value)
       value['error'] = '';
       for(let i=0; i< value['validations'].length; i++ ){
-        console.log(value['validations'][i])
+        // console.log(value['validations'][i])
         if(value['validations'][i] == 'not_null' && value['value'] == null )
           value['error'] = "Este campo no puede estar vacío";
         if(value['validations'][i] == 'positive_number' && !(Number.isFinite(value['value']) && value['value'] > 0 ) )
@@ -191,13 +208,13 @@ export class WeekInfoModalComponent implements OnInit {
         this.spinner.hide("loader");
         return;
       }
-      console.log( stock_data);
+      // console.log( stock_data);
       this.stock_items = stock_data['subidos'];
       // this.pending_items = stock_data['pendientes'];
       let that = this;
       $( document ).ready(function() {
         // setTimeout(function () {
-          console.log( "ready!" );
+          // console.log( "ready!" );
           $('#stock').DataTable({ "language": that.language });
           // $('#example2').DataTable();
         // }, 2000);
@@ -211,12 +228,12 @@ export class WeekInfoModalComponent implements OnInit {
 
   check_delete(index: any){
     this.stock_warning = false;
-    console.log(index);
+    // console.log(index);
     if(index in this.to_delete){
       delete this.to_delete[ index ];
     }else
       this.to_delete[ index ] = true;
-    console.log(this.to_delete);
+    // console.log(this.to_delete);
   }
 
 }

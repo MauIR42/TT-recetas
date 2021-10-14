@@ -13,28 +13,28 @@
       	<p class="text-justify">Para mandarte las recetas que más te gustan es necesario que evalues la receta que realizaste, toma muy poco tiempo, solo califica en estos puntos la receta</p>
         <form >
 	      	<div class=" form-row form-group">
-			    <label for="formControlRange" class="strong_blue_clor">¿Qué te pareció <b>el sabor</b> de la receta?</label>
-			    <input type="range" class="form-control-range" id="formControlRange" min="0" max="10" name="taste" [(ngModel)]="data.taste">
-			    <small class="strong_blue_clor">calificación: {{data.taste}}</small>
-			</div>
-			<div class=" form-row form-group">
-			    <label for="formControlRange" class="strong_blue_clor">¿Qué te pareció <b>la dificultad</b> de la receta?</label>
-			    <input type="range" class="form-control-range" id="formControlRange" min="0" max="10" name="difficulty" [(ngModel)]="data.difficulty">
-			    <small class="strong_blue_clor">calificación: {{data.difficulty}}</small>
-			</div>
-			<div class="form-group form-row">
-			    <label for="time" class="strong_blue_clor">¿Cuánto <b>tiempo</b> te tomó realizar esta receta?</label>
-			    <input type="number" class="form-control holder-blue strong_blue_clor" id="time" aria-describedby="time" placeholder="0" [(ngModel)]="data.time" name="time">
-			</div>
+					    <label for="formControlRange" class="strong_blue_clor">¿Qué te pareció <b>el sabor</b> de la receta?</label>
+					    <input type="range" class="form-control-range" id="formControlRange" min="0" max="10" name="taste" [(ngModel)]="data.taste">
+					    <small class="strong_blue_clor">calificación: {{data.taste}}</small>
+					</div>
+					<div class=" form-row form-group">
+					    <label for="formControlRange" class="strong_blue_clor">¿Qué te pareció <b>la dificultad</b> de la receta?</label>
+					    <input type="range" class="form-control-range" id="formControlRange" min="0" max="10" name="difficulty" [(ngModel)]="data.difficulty">
+					    <small class="strong_blue_clor">calificación: {{data.difficulty}}</small>
+					</div>
+					<div class="form-group form-row">
+					    <label for="time" class="strong_blue_clor">¿Cuánto <b>tiempo en minutos</b> te tomó realizar esta receta?</label>
+					    <input type="number" class="form-control holder-blue strong_blue_clor" id="time" aria-describedby="time" placeholder="0" min="1" [(ngModel)]="data.time" name="time">
+					</div>
 			<!-- <div class="form-group form-row">
 				<input type="range" class="form-control-range" id="formControlRange" min="0" max="10" name="time"  disabled>
 			    <small class="form-text error-text strong_blue_clor" *ngIf="time_error.length > 0">{{time_error}}</small>
 			</div> -->
         </form>
         <div class="row justify-content-center pt-3">
-        	<!-- <div class="alert alert-danger col-12 text-center" role="alert" *ngIf="server_error.length > 0"> -->
-				<!-- {{server_error}} -->
-			<!-- </div> -->
+        	<div class="alert alert-danger col-12 text-center" role="alert" *ngIf="time_error.length > 0">
+						{{time_error}}
+					</div>
         </div>
       </div>
       <div class="modal-footer">

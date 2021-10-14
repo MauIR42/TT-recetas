@@ -14,4 +14,8 @@ urlpatterns = [
 	path('scale/stock', views.EmbebbedScaleView.as_view(), name='EmbebbedScaleView'),
 	path('test_sed', views.TestSED.as_view(), name="TestSED"),
 	path('planning', views.PlanningView.as_view(), name="PlanningView"),
+	path('recipe_evaluation', views.RecipeEvaluationView.as_view(), name="RecipeEvaluationView"),
+	path('recommendation', views.RecommendationView.as_view(), name="RecommendationView"),
+	path('recipe', views.RecipeView.as_view(), name="RecipeView"),
+
 ]

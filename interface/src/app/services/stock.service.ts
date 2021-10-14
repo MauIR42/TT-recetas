@@ -10,7 +10,7 @@ export class StockService {
   url : string = '';
   url_scale : string = 'scale';
   url_ingredients : string = 'ingredient';
-  url_stock : string = 'stock'
+  url_stock : string = 'stock';
 
   constructor(private http: HttpClient) {
     this.url = environment.server_direction;
@@ -55,5 +55,9 @@ export class StockService {
 
   put_stock(form : any){
     return this.http.put(this.url + this.url_stock, form, {});
+  }
+
+  delete_stock(form : any){
+     return this.http.delete(this.url + this.url_stock, {params:form});
   }
 }
