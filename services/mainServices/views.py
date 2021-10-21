@@ -13,7 +13,8 @@ import random
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
 from services.settings import EMAIL_HOST, ANGULAR_DIR
-from django.db.models import F, Q, Case, When, Value, Max
+from django.db.models import F, Q, Case, When, Value, Max, Sum, OuterRef, Subquery
+
 from django.db import transaction
 from ast import literal_eval
 import json
@@ -163,15 +164,15 @@ class passwordView(APIView):
 	def post(self, request, *args, **kwargs):
 		try:
 			data = request.POST.dict()
-			print(data)
+			# print(data)
 			if not 'email' in data:
 				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
 			user = User.objects.filter(username = data['email']).first()
-			print(user)
+			# print(user)
 			if not user:
 				return JsonResponse(data={ "error": True, "message":"user_not_exists" })
 			user_token = UserRecoveryToken.objects.filter(user=user.id, active = True).first()
-			print(user_token)
+			# print(user_token)
 			if  user_token and ((user_token.created_at + timedelta( days = 1)).timestamp()	 > datetime.now().timestamp()):
 				self.send_mail(user,user_token)
 				return JsonResponse(data={"error": False})	
@@ -359,7 +360,7 @@ class ScaleView(APIView):
 			user_id_s = request.GET.get('user_id','-1')
 			user_id = int(user_id_s)
 			user = User.objects.filter(id = user_id).first()
-			print(user.user_type_id)
+			# print(user.user_type_id)
 			if user.user_type_id != 3 :
 				return JsonResponse(data={"error": True,  "message":"user_not_administrator"})
 			User.objects.filter(scale = user.scale).update(scale_id = None, user_type_id = 1)
@@ -391,11 +392,12 @@ class StockView(APIView):
 	def get(self, request, *args, **kwargs):
 		try:
 			user_id = request.GET.get('user_id','')
+			is_planning = int(request.GET.get('planning','0'))
 			user_stock = Inventory.objects.filter(user_id = user_id, active= True, quantity__gt=0).annotate(unit = Case(
 					When(ingredient__type_id = 1, then=Value('pzs')),
 					When(ingredient__type_id = 3, then=Value('ml')),
 					When(ingredient__type_id = 2, then=Value('gr')),
-					), ingredient_name=F('ingredient__name')).values()
+					), ingredient_name=F('ingredient__name')).order_by('type_id','created_at').values()
 			user_stock = list(user_stock)
 			subidos = []
 			pendientes = []
@@ -403,14 +405,51 @@ class StockView(APIView):
 				'gr' : 'Kg',
 				'ml' : 'L',
 			}
+
+			current_items = {}
+			# if is_planning :
+			pending_items = {}
+			# print("entra")
+			for element in user_stock:
+				# print(element)
+				if element['type_id'] == 1:
+					if not is_planning:
+						subidos.append(element)
+					if not element['ingredient_id'] in current_items:
+						current_items[ element['ingredient_id'] ] = element['quantity']
+					else:
+						current_items[ element['ingredient_id'] ] += element['quantity']
+				else:
+					if element['ingredient_id'] in current_items:
+						aux = current_items[ element['ingredient_id'] ]
+						if aux == element['quantity']:
+							del current_items[ element['ingredient_id'] ]
+						elif aux > element['quantity']:
+							aux = aux - element['quantity']
+						else :
+							element['quantity'] -= aux	
+							del current_items[ element['ingredient_id'] ]	
+							if not is_planning:					
+								pendientes.append(element)
+							else:
+								if not element['ingredient_id'] in pending_items:
+									pending_items[ element['ingredient_id'] ] = element['quantity']
+								else:
+									pending_items[ element['ingredient_id'] ] += element['quantity']
+					else: 
+						if not is_planning:
+							pendientes.append(element)
+						else:
+							if not element['ingredient_id'] in pending_items:
+								pending_items[ element['ingredient_id'] ] = element['quantity']
+							else:
+								pending_items[ element['ingredient_id'] ] += element['quantity']
+			if is_planning :
+				return JsonResponse(data={'error': False, 'subidos' : current_items, 'pendientes': pending_items }, safe=False)
 			for element in user_stock:
 				if element['quantity'] >= 1000 and element['unit'] in units:
 					element['quantity'] = element['quantity'] / 1000
 					element['unit'] = units[ element['unit'] ]
-				if element['type_id'] == 1:
-					subidos.append(element)
-				else:
-					pendientes.append(element)
 
 			return JsonResponse(data={'error': False, 'subidos' : subidos, 'pendientes': pendientes }, safe=False)
 
@@ -424,21 +463,21 @@ class StockView(APIView):
 			if not ( 'user_id' in data and 'ingredients' in data ):
 				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
 			data['ingredients'] = literal_eval(data['ingredients'])
-			pending = Inventory.objects.filter(active= True, type_id=2, user_id= data['user_id'])
+			# pending = Inventory.objects.filter(active= True, type_id=2, user_id= data['user_id'])
 
-			index_pending = {}
-			for pen in pending:
-				index_pending[ pen.ingredient_id ] = pen
+			# index_pending = {}
+			# for pen in pending:
+				# index_pending[ pen.ingredient_id ] = pen
 			to_bulk = []
-			to_update = []
+			# to_update = []
 			for ing in data['ingredients']:
-				if ing['id'] in index_pending:
-					index_pending[ ing['id'] ].quantity -= ing['quantity']
-					to_update.append( index_pending[ ing['id'] ] )
+				# if ing['id'] in index_pending:
+					# index_pending[ ing['id'] ].quantity -= ing['quantity']
+					# to_update.append( index_pending[ ing['id'] ] )
 				to_bulk.append( Inventory(quantity=ing['quantity'], ingredient_id=ing['id'], user_id=data['user_id'], type_id=ing['type']) )
 			Inventory.objects.bulk_create( to_bulk )
-			if len(to_update) > 0 :
-				Inventory.objects.bulk_update( to_update, ['quantity'] )
+			# if len(to_update) > 0 :
+				# Inventory.objects.bulk_update( to_update, ['quantity'] )
 			return JsonResponse(data={'error': False}, safe=False)
 		except Exception as e:
 			print(e)
@@ -450,19 +489,19 @@ class StockView(APIView):
 			if not ('item_id' in data) :
 				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
 			if 'deactivate' in data:
-				print(data)
+				# print(data)
 				updated = Inventory.objects.filter(id= data['item_id']).first()
-				pending = Inventory.objects.filter(active = True, ingredient_id = data['item_id'], type_id = 2 ).first()
-				if pending:
-					pending.quantity += updated.quantity
-					pending.save()
+				# pending = Inventory.objects.filter(active = True, ingredient_id = data['item_id'], type_id = 2 ).first()
+				# if pending:
+					# pending.quantity += updated.quantity
+					# pending.save()
 				updated.active = False
 				updated.save()
 				return JsonResponse(data={'error': False}, safe=False)
-			pending = Inventory.objects.filter(active = True, ingredient_id = data['ingredient_id'], type_id = 2 ).first()
-			if pending:
-				pending.quantity += float(data['difference'])
-				pending.save()
+			# pending = Inventory.objects.filter(active = True, ingredient_id = data['ingredient_id'], type_id = 2 ).first()
+			# if pending:
+				# pending.quantity += float(data['difference'])
+				# pending.save()
 			Inventory.objects.filter(id= data['item_id']).update(quantity=data['quantity'], ingredient_id=data['ingredient_id'], type_id=data['type'])
 			return JsonResponse(data={'error': False}, safe=False)
 		except Exception as e:
@@ -477,28 +516,28 @@ class StockView(APIView):
 				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
 			deactivated = Inventory.objects.filter(user_id = user_id, id__in=to_delete)
 
-			to_check = []
-			to_modify = {}
-			for item in deactivated:
-				to_check.append(item.ingredient_id)
-				to_modify[item.ingredient_id] = item.quantity
+			# to_check = []
+			# to_modify = {}
+			# for item in deactivated:
+				# to_check.append(item.ingredient_id)
+				# to_modify[item.ingredient_id] = item.quantity
 			deactivated.update(active = False)
-			pending = Inventory.objects.filter(user_id = user_id, ingredient_id__in = to_check, type_id = 2)
-			for item in pending :
-				print(item)
-				if item.ingredient_id in to_modify:
-					item.quantity +=  to_modify[ item.ingredient_id ]
-					print("hecho")
-					del to_modify[ item.ingredient_id ]
-			print("termina")
-			Inventory.objects.bulk_update( pending, ['quantity'])
+			# pending = Inventory.objects.filter(user_id = user_id, ingredient_id__in = to_check, type_id = 2)
+			# for item in pending :
+				# print(item)
+				# if item.ingredient_id in to_modify:
+					# item.quantity +=  to_modify[ item.ingredient_id ]
+					# print("hecho")
+					# del to_modify[ item.ingredient_id ]
+			# print("termina")
+			# Inventory.objects.bulk_update( pending, ['quantity'])
 
 			week_day = date.today().isocalendar()
 			current_start = date.today() - timedelta(days=(week_day[2]) - 1)
 			UserWeek.objects.filter(active = True, week_start= current_start).update(inventory_updated = True)
 
-			print(user_id)
-			print(to_delete)
+			# print(user_id)
+			# print(to_delete)
 			return JsonResponse(data={"error": False, 'to_delete':to_delete })
 		except Exception as e:
 			print(e)
@@ -509,7 +548,7 @@ class EmbebbedScaleView(APIView):
 	def get(self, request, *args, **kwargs):
 		try:
 			access_code = request.GET.get('access_code','')
-			print(access_code)
+			# print(access_code)
 			if not access_code:
 				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
 			scale = Scale.objects.filter(access_code= access_code, active=True).first()
@@ -525,8 +564,9 @@ class EmbebbedScaleView(APIView):
 			}
 			not_checked = []
 			for update in updates:
-				print(update['update_type_id'])
+				# print(update['update_type_id'])
 				if update['update_type_id'] == 6:
+					ScaleUpdate.objects.filter(scale=scale, active=True).update(active = False)	
 					return JsonResponse(data={"error": False,  "reset": True})
 				if update['update_type_id'] == 3:
 					format_updates['add'] += update['username'] + ',4,' +str(update['user_id']) + ' '
@@ -536,8 +576,8 @@ class EmbebbedScaleView(APIView):
 					if update['username'] in format_updates['delete']:
 						continue
 					else:
-						print("obteniendo ingredientes")
-						print("id_usuario: ",update['user_id'])
+						# print("obteniendo ingredientes")
+						# print("id_usuario: ",update['user_id'])
 						pending = Inventory.objects.filter(user_id = update['user_id'], active = True, type_id=2, ingredient_id__type_id=2, quantity__gt= 0)\
 						.annotate(ingredient_name=F('ingredient_id__name')).order_by('ingredient_name').values()
 						if len(pending) > 0:
@@ -545,7 +585,7 @@ class EmbebbedScaleView(APIView):
 							# user_ingr = format_updates['ingredients'][update['username']]
 
 							for pen in pending:
-								print(pen['ingredient_name'])
+								# print(pen['ingredient_name'])
 								format_updates['ingredients'] += unidecode.unidecode(pen['ingredient_name']) + ',1,' + str(pen['ingredient_id']) + '#'
 							format_updates['ingredients'] += ';'
 			ScaleUpdate.objects.filter(scale=scale, active=True).update(active = False)			
@@ -556,27 +596,31 @@ class EmbebbedScaleView(APIView):
 
 	def post(self, request, *args, **kwargs):
 		try:
-			print(request.body)
-			data =  json.loads(request.body)
-			print("entra para tomar datos");
-			print(data)
-			is_pending = True
+			# data =  json.loads(request.body)
+			data =  request.POST.dict()
+			is_pending = False
 			if not ( 'user_id' in data and 'access_code' in data and 'quantity' in data and 'ingredient_id' in data):
 				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
 			scale = Scale.objects.filter(access_code= data['access_code'], active=True).first()
 			if not scale:
 				return JsonResponse(data={"error": True,  "message":"scale_not_exists"})
-			print(data['quantity'])
+			others_created = Inventory.objects.filter(ingredient_id = data['ingredient_id'], active = True, type_id= 1).aggregate(Sum('quantity'))
 			upload = Inventory.objects.create(quantity=int(data['quantity']), ingredient_id=data['ingredient_id'], type_id=1, user_id = data['user_id'])
-			print(upload.quantity)
-			pending = Inventory.objects.filter(active = True, quantity__gt=0 ,ingredient_id=data['ingredient_id'], user_id= data['user_id']).first()
-			if pending:
-				pending.quantity -= float(data["quantity"])
-				pending.save()
-				if pending.quantity <= 0:
-					is_pending = False
-			else:
-				is_pending = False
+			total = int(data['quantity']) + others_created['quantity__sum']
+			all_pending = Inventory.objects.filter(ingredient_id = data['ingredient_id'], active= True, type_id= 2).aggregate(Sum('quantity'))
+			if all_pending['quantity__sum'] > total :
+				is_pending = True
+			# print(all_pending['quantity__sum'])
+			# print(total)
+			# pending = Inventory.objects.filter(active = True, quantity__gt=0 ,ingredient_id=data['ingredient_id'], user_id= data['user_id'], type_id= 2).first()
+			# if pending:
+				# pending.quantity -= float(data["quantity"])
+				# pending.save()
+				# if pending.quantity <= 0:
+					# is_pending = False
+			# else:
+
+			### falta obtener si ya se cumplió con la cantidad requerida
 			upload.save()
 
 			return JsonResponse(data={"error": False, "pending": is_pending})
@@ -679,6 +723,7 @@ class PlanningView(APIView):
 		week_start =  request.GET.get('week_start',None) 
 		user_id =  request.GET.get('user_id',None)
 		create = request.GET.get('create', False) == 'True'
+		is_current_week = int(request.GET.get('current_week', '0'))
 
 		if not week_start or not user_id:
 			return JsonResponse(data={"error": True, "message": 'incomplete_data' })
@@ -696,7 +741,7 @@ class PlanningView(APIView):
 		if not current_week :
 			if create :
 				print("crear la semana")
-				last_week =  UserWeek.objects.filter(active = True).order_by('-week_number').first()
+				last_week =  UserWeek.objects.filter(active = True,user_id= user_id).order_by('-week_number').first()
 				# week_day = date.today().isocalendar()
 				# current_start = date.today() - timedelta(days=(week_day[2]) - 1)
 				if not last_week :
@@ -712,11 +757,17 @@ class PlanningView(APIView):
 					"week_number": current_week.week_number,
 					'total' : 0
 				}
+				WeekRecipe.objects.filter(week_id = last_week.id).update(status_id = 1)
 				return JsonResponse( data = {'error': False, 'week_info': to_return, 'week_recipes' : recipes})
 			else :
 				return JsonResponse(data={"error": True, "message": 'week_not_exists' })
 
 		current_week = list(current_week.values("has_stats","id","inventory_updated","week_number"))[0]
+		if is_current_week:
+			has_from_past_week = WeekRecipe.objects.filter(week_id = current_week['id'], active=True, status_id = 4)
+			print(has_from_past_week)
+			if has_from_past_week:
+				has_from_past_week.update(status_id = 1)
 		week_recipes = list(WeekRecipe.objects.filter(week_id = current_week['id'], active=True).values())
 
 		recipes_to_collect = []
@@ -732,11 +783,21 @@ class PlanningView(APIView):
 			if recipe['status_id'] == 2:
 				total_done += 1
 				done[ week_date ] += 1
-		recipes_data =  Recipe.objects.filter(active = True, id__in=recipes_to_collect)#faltan los ingredientes necesarios
+		# recipe_ingredient = RecipeIngredient.objects.filter(recipe_id = OuterRef('pk'))
+		recipes_data =  Recipe.objects.filter(active = True, id__in=recipes_to_collect)
+		# recipes_data =  Recipe.objects.filter(active = True, id__in=recipes_to_collect).annotate(ingredients_list = Subquery(recipe_ingredient.values()[:1] ) )
 		if recipes_data:
 			recipes_data = list( recipes_data.values() )
 		else:
 			recipes_data = []
+
+		for recipe_in in recipes_data :
+			dict_ingredient = {}
+			ingredients = list(RecipeIngredient.objects.filter(recipe_id = recipe_in['id']).values('ingredient_id','recipe_id', 'is_optional','quantity'))
+			for ingredient in ingredients :
+				dict_ingredient[ ingredient['ingredient_id'] ] = ingredient
+
+			recipe_in['ingredient_list'] = dict_ingredient
 
 		current_week['total'] = total
 		current_week['total_done'] = total_done
@@ -752,14 +813,14 @@ class PlanningView(APIView):
 
 			if not ('to_add' in data and 'to_delete' in data):
 				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
-			print(data)
+			# print(data)
 
 			to_add = json.loads(data['to_add'])
 			to_delete = json.loads(data['to_delete'])
 			bulk_create = []
 			bulk_update = []
-			print(to_add)
-			print(to_delete)
+			# print(to_add)
+			# print(to_delete)
 			for add in to_add :
 				new = WeekRecipe(recipe_id = add['recipe_id'], week_id = add['week_id'], status_id=add['status_id'], quantity = add['quantity'], preparation_date = add['preparation_date'] )
 				bulk_create.append(new)
@@ -774,12 +835,37 @@ class PlanningView(APIView):
 			return JsonResponse(data={"error": True,  "message":"internal_server_error"})
 	def put(self, request, *args, **kwargs):
 		try:
-			print("entra")
+			# print("entra")
 			data = request.POST.dict()
-			print(data)
+			# print(data)
 			if not ('user_recipe' in data  and  'quantity' in data  and 'status_id' in data):
 				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
-			WeekRecipe.objects.filter(id=data['user_recipe'], active=True).update(status_id=data['status_id'], quantity=data['quantity'])
+			recipe_id = WeekRecipe.objects.filter(id=data['user_recipe'], active=True)
+			ingredients = RecipeIngredient.objects.filter( recipe_id = recipe_id[0].recipe_id, active=True ).values()
+			to_update = {}
+			# print(to_update)
+			for  ingredient in ingredients:
+				to_update[ ingredient['ingredient_id'] ] = ingredient['quantity']
+			new_inventory = []
+			if data['status_id'] == '1':
+				inventory = Inventory.objects.filter(active = True, type_id = 2).order_by("created_at")
+			else:
+				inventory = Inventory.objects.filter(active = True, type_id = 2, quantity__gt=0).order_by("created_at")
+			print('inicia')
+			for ingredient in inventory :
+				print(to_update)
+				if ingredient.ingredient_id in to_update :
+					# print(ingredient.quantity)
+					if data['status_id'] == '3':
+						ingredient.quantity -= to_update[  ingredient.ingredient_id ]
+					else:
+						ingredient.quantity += to_update[  ingredient.ingredient_id ]
+					# print(ingredient.quantity)
+					new_inventory.append( ingredient )
+					del to_update[  ingredient.ingredient_id ]
+			print("termina")
+			Inventory.objects.bulk_update( new_inventory, ['quantity'])
+			recipe_id.update(status_id=data['status_id'], quantity=data['quantity'])
 			return JsonResponse(data={"error": False})
 		except Exception as e:
 			print(e)
@@ -791,7 +877,7 @@ class RecipeEvaluationView(APIView):
 		try:
 
 			data =  request.POST.dict()
-			print(data)
+			# print(data)
 
 			if not ('time' in data  and  'taste' in data  and 'difficulty' in data  and 'user_recipe' in data):
 				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
@@ -801,9 +887,9 @@ class RecipeEvaluationView(APIView):
 			sed.FS.set_variable("difficulty", data['difficulty'])
 
 			evaluation = sed.FS.inference()['recommendation']
-			print("resultado: ", evaluation)
+			# print("resultado: ", evaluation)
 			WeekRecipe.objects.filter(id=data['user_recipe'], active= True).update(user_evaluation=round(evaluation,2), status_id=2)
-			print("resultado: ", evaluation)
+			# print("resultado: ", evaluation)
 			return JsonResponse( data = {'error': False, 'evaluation':evaluation})
 		except Exception as e:
 
@@ -818,12 +904,12 @@ class RecommendationView(APIView):
 			user_id =  int( request.GET.get('user_id', '0') )
 			ingredients = literal_eval(request.GET.get('ingredients', "[]"))
 
-			print("!!!!!!!!!",user_id)
+			# print("!!!!!!!!!",user_id)
 
 			if user_id <= 0:
 				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
 			if are_all:
-				print("!!!!!!!!! eran todos")
+				# print("!!!!!!!!! eran todos")
 				recipes = list( Recipe.objects.filter(active = True).order_by('id').values() )#faltan los ingredientes necesarios
 				recipes_len = len(recipes)
 				to_return = []

@@ -125,3 +125,11 @@ h5 {
 .card-header > p {
 	display:inline;
 }
+
+.text-inline > p {
+	display:inline;
+}
+
+.warning {
+	color: var(--orange-light);
+}

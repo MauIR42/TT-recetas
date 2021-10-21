@@ -34,7 +34,7 @@ export class WeekInfoModalComponent implements OnInit {
     }
   }
 
-  @Output() reload_stats = new EventEmitter<any>();
+  @Output() update_completed = new EventEmitter<any>();
 
   form_info : any = {
     'diameter': {'value': 0, 'validations': ['not_null', 'positive_number'], 'error':''},
@@ -110,36 +110,35 @@ export class WeekInfoModalComponent implements OnInit {
     // console.log("entra");
     let imc = this.form_info['weight']['value'] / (2);
     let form = new FormData();
-    form.append('imc', imc.toString());
-    form.append('weight', this.form_info['weight']['value']);
-    form.append('diameter', this.form_info['diameter']['value']);
-    form.append('user_id', '0');
-    let to_delete = [];
-    for(let key in this.to_delete){
-      to_delete.push(key)
+    let services = [];
+    if( this.steps.includes("charts") ){
+      form.append('imc', imc.toString());
+      form.append('weight', this.form_info['weight']['value']);
+      form.append('diameter', this.form_info['diameter']['value']);
+      form.append('user_id', '0');
+      services.push(this.us.post_stat_info(form))
     }
-    // console.log(to_delete);
-    //return;
-    this.spinner.show("loader");
-    let services = [
-      this.ss.delete_stock({'user_id': this.user_id, 'to_delete':JSON.stringify(to_delete)}),
-      this.us.post_stat_info(form)
-    ];
-    forkJoin(services).subscribe( (data: any)=>{
-      // console.log(data);
-      if(data[0]['error']){
-        this.spinner.hide("loader");
-        this.server_error = SERVER_MESSAGES[data['message']];
-        return;
+    if( this.steps.includes("inventory") ){
+      let to_delete = [];
+      for(let key in this.to_delete){
+        to_delete.push(key)
       }
+      services.push(this.ss.delete_stock({'user_id': this.user_id, 'to_delete':JSON.stringify(to_delete)}))
+    }
 
-      if(data[1]['error']){
-        this.spinner.hide("loader");
-        this.server_error = SERVER_MESSAGES[data['message']];
-        return;
+    this.spinner.show("loader");
+    forkJoin(services).subscribe( (data: any)=>{
+      console.log(data);
+      for(let i=0; i<data.length; i++){
+        if(data[i]['error']){
+          this.spinner.hide("loader");
+          this.server_error = SERVER_MESSAGES[data[0]['message']];
+          return;
+        }
       }
 
       this.spinner.hide("loader");
+      this.update_completed.emit(this.steps.includes("inventory"));
       this.close_modal();
     });
     
