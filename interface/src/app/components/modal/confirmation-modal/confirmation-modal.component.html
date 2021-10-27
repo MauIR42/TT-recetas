@@ -8,7 +8,9 @@
         <p class="strong_blue_clor">{{text}}</p>
       </div>
       <div class="modal-footer">
-      	<button type="button" class="btn btn-normal-blue" (click)="close_modal(true)">Aceptar</button>
+      	<button type="button" class="btn btn-normal-blue" (click)="close_modal(true)" *ngIf="extra['buttons'].length == 0">Aceptar</button>
+        <button type="button" class="btn btn-normal-blue" (click)="close_modal(true,button['value'])" *ngFor="let button of extra['buttons']">{{button['text']}}</button>
+
         <button type="button" class="btn btn-normal-orange" (click)="close_modal(false)">Rechazar</button>
       </div>
     </div>

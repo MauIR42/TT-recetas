@@ -411,7 +411,6 @@ class StockView(APIView):
 			pending_items = {}
 			# print("entra")
 			for element in user_stock:
-				# print(element)
 				if element['type_id'] == 1:
 					if not is_planning:
 						subidos.append(element)
@@ -425,7 +424,7 @@ class StockView(APIView):
 						if aux == element['quantity']:
 							del current_items[ element['ingredient_id'] ]
 						elif aux > element['quantity']:
-							aux = aux - element['quantity']
+							current_items[ element['ingredient_id'] ] = current_items[ element['ingredient_id'] ] - element['quantity']
 						else :
 							element['quantity'] -= aux	
 							del current_items[ element['ingredient_id'] ]	
@@ -445,6 +444,8 @@ class StockView(APIView):
 							else:
 								pending_items[ element['ingredient_id'] ] += element['quantity']
 			if is_planning :
+				print(current_items)
+				print(pending_items)
 				return JsonResponse(data={'error': False, 'subidos' : current_items, 'pendientes': pending_items }, safe=False)
 			for element in user_stock:
 				if element['quantity'] >= 1000 and element['unit'] in units:
@@ -512,8 +513,13 @@ class StockView(APIView):
 			user_id = int(request.GET.get('user_id','0'))
 			to_delete = literal_eval(request.GET.get('to_delete', "[]"))
 
-			if user_id <= 0 or len(to_delete) <= 0:
+			if user_id <= 0 :
 				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
+			if len(to_delete) == 0:
+				week_day = date.today().isocalendar()
+				current_start = date.today() - timedelta(days=(week_day[2]) - 1)
+				UserWeek.objects.filter(active = True, week_start= current_start).update(inventory_updated = True)
+				return JsonResponse(data={"error": False, 'to_delete':to_delete })
 			deactivated = Inventory.objects.filter(user_id = user_id, id__in=to_delete)
 
 			# to_check = []
@@ -722,7 +728,7 @@ class PlanningView(APIView):
 	def get(self, request, *args, **kwargs):
 		week_start =  request.GET.get('week_start',None) 
 		user_id =  request.GET.get('user_id',None)
-		create = request.GET.get('create', False) == 'True'
+		# create = request.GET.get('create', False) == 'True'
 		is_current_week = int(request.GET.get('current_week', '0'))
 
 		if not week_start or not user_id:
@@ -739,28 +745,39 @@ class PlanningView(APIView):
 			[]
 		]
 		if not current_week :
-			if create :
-				print("crear la semana")
-				last_week =  UserWeek.objects.filter(active = True,user_id= user_id).order_by('-week_number').first()
-				# week_day = date.today().isocalendar()
-				# current_start = date.today() - timedelta(days=(week_day[2]) - 1)
-				if not last_week :
-					current_week = UserWeek.objects.create(user_id = user_id, week_number = 1, week_start = week_start)
-				else:
-					current_week = UserWeek.objects.create(user_id = user_id, week_number = last_week.week_number + 1, week_start = week_start)
-				
-				to_return = {
-					"active": True,
-					"has_stats": current_week.has_stats,
-					"id": current_week.id,
-					"inventory_updated": current_week.inventory_updated,
-					"week_number": current_week.week_number,
-					'total' : 0
-				}
-				WeekRecipe.objects.filter(week_id = last_week.id).update(status_id = 1)
-				return JsonResponse( data = {'error': False, 'week_info': to_return, 'week_recipes' : recipes})
-			else :
-				return JsonResponse(data={"error": True, "message": 'week_not_exists' })
+			# if create :
+			print("crear la semana")
+			last_week =  UserWeek.objects.filter(active = True,user_id= user_id).order_by('-week_number').first()
+			# week_day = date.today().isocalendar()
+			# current_start = date.today() - timedelta(days=(week_day[2]) - 1)
+			if not last_week :
+				num = 1
+				if not is_current_week:
+					num = 2
+				current_week = UserWeek.objects.create(user_id = user_id, week_number = num, week_start = week_start)
+			else: #todas los registros anteriores se desactivan
+				# WeekRecipe.objects.filter(week_id = last_week.id).update(status_id = 1)
+				current_week = UserWeek.objects.create(user_id = user_id, week_number = last_week.week_number + 1, week_start = week_start)
+				#se deben desactivar, semanas, pendientes y recetas pasadas
+				if last_week.week_number > 1:
+					WeekRecipe.objects.filter(active=True, week__user_id= user_id, week__week_number__lt = last_week.week_number).update(active=False)
+					Inventory.objects.filter(active=True, user_id= user_id, week__week_number__lt = last_week.week_number, type_id=2).update(active = False)
+					UserWeek.objects.filter(active=True, user_id= user_id, week_number__lt = last_week.week_number).update(active = False)
+
+
+			
+			to_return = {
+				"active": True,
+				"has_stats": current_week.has_stats,
+				"id": current_week.id,
+				"inventory_updated": current_week.inventory_updated,
+				"week_number": current_week.week_number,
+				'total' : 0,
+				'id': current_week.id
+			}
+			return JsonResponse( data = {'error': False, 'week_info': to_return, 'week_recipes' : recipes})
+			# else :
+				# return JsonResponse(data={"error": True, "message": 'week_not_exists' })
 
 		current_week = list(current_week.values("has_stats","id","inventory_updated","week_number"))[0]
 		if is_current_week:
@@ -808,27 +825,46 @@ class PlanningView(APIView):
 	def post(self, request, *args, **kwargs):
 		try:	
 			data = request.data
-			# data = json.dumps(data)
-			# data = json.loads(data)
 
-			if not ('to_add' in data and 'to_delete' in data):
+			if not ('to_add' in data and 'to_delete' in data and 'quantity' in data and 'user_id' in data and 'week_id' in data):
 				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
-			# print(data)
 
 			to_add = json.loads(data['to_add'])
 			to_delete = json.loads(data['to_delete'])
+			quantity = json.loads(data['quantity'])
+
 			bulk_create = []
 			bulk_update = []
-			# print(to_add)
-			# print(to_delete)
+			
 			for add in to_add :
-				new = WeekRecipe(recipe_id = add['recipe_id'], week_id = add['week_id'], status_id=add['status_id'], quantity = add['quantity'], preparation_date = add['preparation_date'] )
+				new = WeekRecipe(recipe_id = add['recipe_id'], week_id = data['week_id'], status_id=add['status_id'], quantity = add['quantity'], preparation_date = add['preparation_date'] )
 				bulk_create.append(new)
 			WeekRecipe.objects.bulk_create(bulk_create)
 			if len(to_delete) > 0: #checar algun dia la eficencia de buscar todos y luego solo actualizar los necesarios o buscar uno por uno
 				with transaction.atomic():
 					for delete in to_delete:
 						WeekRecipe.objects.filter(id =delete['id']).update(status_id=delete['status_id'], quantity = delete['quantity'], preparation_date = delete['preparation_date'], active=delete['active'])
+			item_update = []
+			item_create = []
+			if len(quantity) > 0:
+				items = Inventory.objects.filter(active = True, week_id= data['week_id'], type_id = 2)
+				print("!!!!!!!!!!!!!!!!!1!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+				print(items)
+				if items:
+					for item in items:
+						key = str(item.ingredient_id)
+						if key in quantity :
+							item.quantity += quantity[ key ]
+							del quantity[ key ]
+							item_update.append( item )
+				print(quantity)
+				for ingredient in quantity :
+					item_create.append( Inventory( ingredient_id = ingredient, quantity= quantity[ingredient], 
+													user_id = data['user_id'], type_id = 2, week_id = data['week_id']) )
+
+				Inventory.objects.bulk_update(item_update, ['quantity'])
+				Inventory.objects.bulk_create(item_create)
+
 			return JsonResponse( data = {'error': False } )
 		except Exception as e:
 			print(e)
@@ -877,18 +913,52 @@ class RecipeEvaluationView(APIView):
 		try:
 
 			data =  request.POST.dict()
-			# print(data)
+			print(data)
 
-			if not ('time' in data  and  'taste' in data  and 'difficulty' in data  and 'user_recipe' in data):
+			if not ( ( ('time' in data  and  'taste' in data  and 'difficulty' in data ) or 'no_evaluation' in data)  and 'user_recipe' in data and 'recipe_id' in data and 'user_id' in data and 'items_used' in data):
 				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
 
-			sed.FS.set_variable("time", data['time'])
-			sed.FS.set_variable("taste", data['taste'])
-			sed.FS.set_variable("difficulty", data['difficulty'])
-
-			evaluation = sed.FS.inference()['recommendation']
-			# print("resultado: ", evaluation)
-			WeekRecipe.objects.filter(id=data['user_recipe'], active= True).update(user_evaluation=round(evaluation,2), status_id=2)
+			items_used = json.loads(data['items_used'])
+			if 'time' in data:
+				sed.FS.set_variable("time", data['time'])
+				sed.FS.set_variable("taste", data['taste'])
+				sed.FS.set_variable("difficulty", data['difficulty'])
+				evaluation = sed.FS.inference()['recommendation']
+			else:
+				evaluation = 0.00
+			print("resultado: ", evaluation)
+			has_evaluation = UserRecipe.objects.filter(user_id=data['user_id'], recipe_id = data['recipe_id'])
+			if has_evaluation:
+				has_evaluation.update( count = F('count') + 1, last_evaluation= round(evaluation,2), updated_at= datetime.now() )
+			else:
+				UserRecipe.objects.create( count = 1, last_evaluation = round(evaluation,2), recipe_id = data['recipe_id'], user_id= data['user_id'] )
+			recipe = WeekRecipe.objects.filter(id=data['user_recipe'], active= True)
+			week_id = recipe[0].week_id			
+			recipe.update( status_id=2 )
+			to_update = []
+			ingredients = Inventory.objects.filter( Q(active= True, user_id=data['user_id']) & ( Q(week_id= week_id, type_id = 2) | Q(type_id = 1) ) )
+			print("antes")
+			for ingredient in ingredients :
+				print(ingredient)
+				key = str(ingredient.ingredient_id)
+				if key in items_used :
+					if(ingredient.type_id == 2):
+						ingredient.quantity -= items_used[ key ]['original']
+						to_update.append( ingredient )
+					elif items_used[ key ]['used'] > 0:
+						if items_used[ key ]['used'] > ingredient.quantity :
+							items_used[ key ]['used'] -= ingredient.quantity
+							ingredient.quantity = 0
+							ingredient.active = False
+						else :
+							aux = ingredient.quantity
+							ingredient.quantity -= items_used[ key ]['used']
+							items_used[ key ]['used'] -= aux
+							print(aux,ingredient.quantity,items_used[ key ]['used'])
+						to_update.append( ingredient )
+					print(ingredient)
+					# del items_used[ key ]
+			Inventory.objects.bulk_update(to_update, ['quantity','active'] )
 			# print("resultado: ", evaluation)
 			return JsonResponse( data = {'error': False, 'evaluation':evaluation})
 		except Exception as e:
@@ -897,35 +967,396 @@ class RecipeEvaluationView(APIView):
 			return JsonResponse(data={"error": True,  "message":"internal_server_error"})
 
 class RecommendationView(APIView):
+
+	def get_by_stock(self,data,recipe_info):
+		try:
+			to_add = []
+			recipe_list = []
+			ingredients_ids = []
+			for key in data['ingredients'] :
+				ingredients_ids.append( key )
+			to_obtain = RecipeIngredient.objects.filter(Q(active= True, is_optional= False, ingredient_id__in=ingredients_ids) 
+				& ~Q(recipe_id__in=data['not_include']) ).order_by('recipe_id').distinct('recipe_id').values_list('recipe_id', flat=True)
+			if to_obtain :
+				user_cal = UserRecipe.objects.filter(user_id = data['user_id'], recipe_id = OuterRef('pk'))
+				recipes = list(Recipe.objects.filter(active = True, id__in=to_obtain).annotate(cal=Subquery(user_cal.values("last_evaluation")[:1]) ).values() )#faltan los ingredientes necesarios
+				ingredients = list(RecipeIngredient.objects.filter(active=True, recipe_id__in=to_obtain, is_optional= False).order_by('recipe_id').values())
+				previous_id = ingredients[0]['recipe_id']
+				current_recipe = {}
+				ingredients_data = {} 
+				#se necesita guardar la suma de los porcentajes de cada ingrediente
+				#y su calificación
+				total = 0
+				#obteniendo los ingredientes juntos por receta y su porcentaje con respecto al stock actual
+				for ingredient in ingredients:
+					# print(ingredient)
+					key = str(ingredient['ingredient_id'])
+					if previous_id != ingredient['recipe_id']:
+						total = round(total / len(current_recipe))
+						ingredients_data[ previous_id ] = {'percentage':total,'ingredients':current_recipe}
+						current_recipe = {}
+						# print("total: ",total)
+						total = 0
+						previous_id = ingredient['recipe_id']
+
+					current_recipe[ ingredient['ingredient_id'] ] = ingredient
+					if key in data['ingredients'] :
+						# key_ingr = ingredient['ingredient_id']
+						if data['ingredients'][ key ] >= ingredient['quantity'] :
+							total += 100
+						else:
+							total += (data['ingredients'][ key ] * 100) / ingredient['quantity']
+				total = round( total / len(current_recipe) )
+				# print("total: ",total)
+				ingredients_data[ previous_id ] = {'percentage':total,'ingredients':current_recipe}
+				for recipe in recipes:
+					if recipe['cal'] == None:
+						recipe['cal'] = 0.0
+					else:
+						recipe['cal'] = float( recipe['cal'])
+					recipe_list.append({'recipe_id':recipe['id'],
+										'ingredient_percentage':ingredients_data[recipe['id']]['percentage'],
+										'user_evaluation': recipe['cal'] })
+					recipe['ingredient_list'] =  ingredients_data[ recipe['id'] ]['ingredients']
+					ingredients_data[ recipe['id'] ] = recipe
+				has_more = False
+
+				if len(recipe_list) - data['limit'] > 0:
+					has_more = True
+				recipe_list = sorted(recipe_list, key = lambda k: (-k["ingredient_percentage"], -k["user_evaluation"]))[: data['limit']]
+				ids = []
+				for ele in recipe_list :
+					key = ele['recipe_id']
+					if not key in recipe_info:
+						recipe_info[ key ] = 1
+						to_add.append( ingredients_data[ key ] )
+					ids.append(key)
+
+				return to_add, {'recipe':recipe_list,'has_more':has_more, 'not_include':ids}
+			else:
+				return [],{'recipe':[], 'has_more':False,'not_include':[]}
+
+		except Exception as e:
+			print("aqui")
+			print(e)
+			return [],{'recipe':[], 'has_more':False,'not_include':[]}
+	def get_by_recommendation(self,data,recipe_info):
+		try:
+			to_add = []
+			recipe_list = []
+			ids = []
+			key_ingr = ''
+			recipes = list(UserRecipe.objects.filter( Q(user_id=data['user_id']) & ~Q(recipe_id__in=data['not_include'])).annotate(name=F("recipe__name"),
+				description=F('recipe__description'),image_url=F('recipe__image_url'), sodium=F("recipe__sodium"), carbohydrates=F("recipe__carbohydrates"),
+				cholesterol=F("recipe__cholesterol"), total_time=F("recipe__total_time"), portions=F("recipe__portions")).order_by('last_evaluation','count').values())
+			if len(recipes):
+				has_more = (len(recipes) - data['limit']) > 0
+				recipes = recipes[: data['limit']]
+				for recipe in recipes :
+					ingredients = list(RecipeIngredient.objects.filter(recipe_id = recipe['recipe_id'], is_optional= False, active= True ).values())
+					total = 0
+					ingredient_dict = {}
+					# print("entrando")
+					for ingredient in ingredients:
+						# print(ingredient)
+						key_ingr = str(ingredient['ingredient_id'])
+						if key_ingr in data['ingredients']:
+							if data['ingredients'][ key_ingr ] >= ingredient['quantity']:
+								total += 100
+							else:
+								total += (data['ingredients'][ key_ingr ] * 100) / ingredient['quantity']
+						ingredient_dict[ ingredient['ingredient_id'] ] = ingredient
+					total = round( total / len(ingredient) )
+					if recipe['last_evaluation'] == None:
+			 			recipe['last_evaluation'] = 0.0
+					else:
+			 			recipe['last_evaluation'] = float( recipe['last_evaluation'])
+					recipe_list.append({'recipe_id':recipe['recipe_id'],
+				 		'ingredient_percentage': total,
+				 		'user_evaluation': recipe['last_evaluation'],
+				 		'count': recipe['count'] })
+					if not recipe['recipe_id'] in recipe_info:
+				 		recipe['ingredient_list'] = ingredient_dict
+				 		aux = {
+				 			'id': recipe['recipe_id'],
+				 			'name': recipe['name'],
+				 			'description': recipe['description'],
+				 			'image_url': recipe['image_url'],
+				 			'sodium': recipe['sodium'],
+				 			'carbohydrates': recipe['carbohydrates'],
+				 			'cholesterol': recipe['cholesterol'],
+				 			'total_time': recipe['total_time'],
+				 			'portions': recipe['portions'],
+				 			'ingredient_list' : ingredient_dict,
+				 		}
+				 		to_add.append(aux)
+				 		recipe_info[ recipe['recipe_id'] ] = 1
+					ids.append( recipe['recipe_id'])
+				recipe_list = sorted(recipe_list, key = lambda k: (-k["user_evaluation"], -k['count'],-k["ingredient_percentage"]))[: data['limit']]
+				return to_add, {'recipe':recipe_list,'has_more':has_more, 'not_include':ids}
+			else:
+				return [],{'recipe':[], 'has_more':False,'not_include':[]}
+
+		except Exception as e:
+			# print("hubo un error")
+			print(e)
+			return [],{'recipe':[], 'has_more':False,'not_include':[]}
+
+	def get_by_count(self,data,recipe_info):
+		try:
+			to_ignore = UserRecipe.objects.filter( Q(user_id = data['user_id']) & ~Q(recipe_id__in=data['not_include']) ).order_by('-count')
+			id_to_ignore = []
+			recipe_list = []
+			to_add = []
+			has_more = False
+			ids = []
+			for recipe in to_ignore:
+				id_to_ignore.append(recipe.recipe_id)
+			id_to_ignore += data['not_include']
+			# print("a ignorar")
+			# print(id_to_ignore)
+			to_check = Recipe.objects.filter( Q(active= True) & ~Q(id__in=id_to_ignore) )
+			ingredients = list(RecipeIngredient.objects.filter( active= True, recipe_id__in=to_check, is_optional= False).order_by('recipe_id').values())
+
+			ingredients_dict = {}
+			ingredients_data = {}
+			total = 0
+			if len(ingredients):
+				previous_id = ingredients[0]['recipe_id']
+				for ingredient in ingredients:
+					key = ingredient['ingredient_id']
+					ingredients_dict[ key ] = ingredient
+					if previous_id != ingredient['recipe_id']:
+						total = round(total / len(ingredients_dict))
+						ingredients_data[ previous_id ] = {'percentage':total,'ingredients':ingredients_dict}
+						ingredients_dict = {}
+						total = 0
+						previous_id = ingredient['recipe_id']
+					if ingredient['ingredient_id'] in data['ingredients']:
+			 			if data['ingredients'][ key ] >= ingredient['quantity']:
+			 				total += 100
+			 			else:
+			 				total += (data['ingredients'][ key ] * 100) / ingredient['quantity']
+				total = round( total / len(ingredients_dict) )
+				ingredients_data[ previous_id ] = {'percentage':total,'ingredients':ingredients_dict}
+				for recipe in list(to_check.values()):
+					recipe_list.append({'recipe_id': recipe['id'], 'ingredient_percentage': ingredients_data[ recipe['id'] ]['percentage'], 'count': 0 })
+					recipe['ingredient_list'] = ingredients_data[ recipe['id'] ]['ingredients']
+					ingredients_data[ recipe['id'] ] = recipe
+			# recipe_list = recipe_list[:1]
+			if len(recipe_list) - data['limit'] > 0:
+				# print("tiene todos")
+				# print(recipe_list)
+				has_more = True
+				recipe_list = sorted(recipe_list, key = lambda k: (-k["ingredient_percentage"]))[: data['limit']]
+			else:
+				# print("no tiene")
+				recipe_list = sorted(recipe_list, key = lambda k: (-k["ingredient_percentage"]))[: data['limit']]
+				# print("revisando new")
+				new = list(to_ignore.values()) #from 1 to 3
+				# print(new)
+				if len(new) - (data['limit'] -len(recipe_list)) > 0:
+					has_more = True
+				# print(len(recipe_list))
+				# print(data['limit'])
+				new = new[: data['limit'] - len(recipe_list) ]
+				# print(new)
+				#falta la información de las recetas, sus ingredientes y cuanto tiene de la receta en ingredientes
+				recipe_ids = []
+				count_info = {}
+				# print("revisando recetas")
+				for ele in new :
+					recipe_ids.append( ele['recipe_id'])
+					count_info[ ele['recipe_id'] ] = ele['count']
+				# print("sale de revisar")
+				# print(recipe_ids)
+				to_check = Recipe.objects.filter( Q(active= True) & Q(id__in=recipe_ids) )
+				ingredients = list(RecipeIngredient.objects.filter( active= True, recipe_id__in=to_check, is_optional= False).order_by('recipe_id').values())
+				ingredients_dict = {}
+				# ingredients_data = {}
+				total = 0
+				if len(ingredients):
+					last = ingredients[0]['recipe_id']
+					# print("revisando ingredientes")
+					for ingredient in ingredients:
+						key = str(ingredient['ingredient_id'])
+						ingredients_dict[ ingredient['ingredient_id'] ] = ingredient
+						if last != ingredient['recipe_id']:
+							total = round( total / len(ingredients_dict) )
+							ingredients_data[ last ] = {'percentage':total,'ingredients':ingredients_dict}
+							ingredients_dict = {}
+							total = 0
+							last = ingredient['recipe_id']
+						if key in data['ingredients']:
+				 			if data['ingredients'][ key ] >= ingredient['quantity']:
+				 				total += 100
+				 			else:
+				 				total += (data['ingredients'][ key ] * 100) / ingredient['quantity']
+					aux = []
+					total = round( total / len(ingredients_dict) )
+					ingredients_data[ last ] = {'percentage':total,'ingredients':ingredients_dict}
+					# print("revisando recetas")
+					# print(ingredients_data)
+					# print(to_check)
+					for recipe in list(to_check.values()):
+				 		aux.append({'recipe_id': recipe['id'], 'ingredient_percentage': ingredients_data[ recipe['id'] ]['percentage'], 'count': count_info[ recipe['id'] ] })
+				 		recipe['ingredient_list'] = ingredients_data[ recipe['id'] ]['ingredients']
+				 		ingredients_data[ recipe['id'] ] = recipe
+					# print("ultimos toques")
+					aux = sorted(aux, key = lambda k: (k["count"],-k["ingredient_percentage"]))
+					# print(aux)
+					recipe_list += aux
+			for ele in recipe_list :
+				key = ele['recipe_id']
+				# print(key)
+				if not key in recipe_info:
+					recipe_info[ key ] = 1
+					to_add.append( ingredients_data[ key ] )
+				ids.append(key)
+			# print("regresando")
+			return to_add,{'recipe':recipe_list, 'has_more':has_more,'not_include':ids}
+		except Exception as e:
+			print("hay un error")
+			print(e)
+			traceback.print_exc()
+			return [],{'recipe':[], 'has_more':False,'not_include':[]}
+
+	def get_by_type(self,data,recipe_info,type_id):
+		try:
+			recipe_list = []
+			to_add = []
+			start = data['offset']
+			end = data['offset'] + data['limit']
+			print("revisando")
+			print(start,end)
+			has_more = False
+			recipes = list(Recipe.objects.filter(active = True, type_id=type_id).order_by('name').values())
+			if len(recipes[start:]) > data['limit']:
+				has_more = True
+			recipes = recipes[start:end]
+			if len(recipes):
+				recipe_data = {}
+				recipes_ids = []
+				for recipe in recipes:
+					recipe['count'] = 0
+					recipe['user_evaluation'] = 0.00
+					recipe_data[ recipe['id'] ] = recipe
+					recipes_ids.append( recipe['id'] )
+				count_info = list(UserRecipe.objects.filter(user_id=data['user_id'],recipe_id__in=recipes_ids).values('recipe_id','count','last_evaluation'))
+				for recipe in count_info:
+					recipe_data[ recipe['recipe_id'] ]['count'] =  recipe['count']
+					recipe_data[ recipe['recipe_id'] ]['user_evaluation'] =  float(recipe['last_evaluation'])
+				ingredients = list(RecipeIngredient.objects.filter(recipe_id__in=recipes_ids, active = True, is_optional= False).order_by('recipe_id').values())
+				ingredients_dict = {}
+				# ingredients_data = {}
+				total = 0
+				previous_id = ingredients[0]['recipe_id']
+				for ingredient in ingredients:
+					key = str(ingredient['ingredient_id'])
+					ingredients_dict[ ingredient['ingredient_id'] ] = ingredient
+					if previous_id != ingredient['recipe_id']:
+						total =  round( total / len(ingredients_dict) )
+						recipe_data[ previous_id ]['ingredient_list'] = ingredients_dict
+						# print("tratando")
+						recipe_list.append({'recipe_id':previous_id,'count': recipe_data[ previous_id ]['count'],
+						'user_evaluation':recipe_data[ previous_id ]['user_evaluation'], 'ingredient_percentage': total })
+						if not previous_id in recipe_info:
+							recipe_info[ previous_id ] = 1
+							to_add.append( recipe_data[ previous_id ] )
+						ingredients_dict = {}
+						total = 0
+						previous_id = ingredient['recipe_id']
+					if key in data['ingredients']:
+			 			if data['ingredients'][ key ] >= ingredient['quantity']:
+			 				total += 100
+			 			else:
+			 				total += (data['ingredients'][ key ] * 100) / ingredient['quantity']
+				total = round( total / len(ingredients_dict) )
+				recipe_data[ previous_id ]['ingredient_list'] = ingredients_dict
+				recipe_list.append({'recipe_id':previous_id,'count': recipe_data[ previous_id ]['count'],
+						'user_evaluation':recipe_data[ previous_id ]['user_evaluation'], 'ingredient_percentage': total })
+				if not previous_id in recipe_info:
+					recipe_info[ previous_id ] = 1
+					to_add.append( recipe_data[ previous_id ] )
+				return to_add,{'recipe':recipe_list, 'has_more':has_more,'offset': end}
+
+			else:
+				return [],{'recipe':[], 'has_more':False,'offset':0}
+			#ingredients = list(RecipeIngredient.objects.filter(recipe_id__in=recipes))
+		except Exception as e:
+			# print("hay un error")
+			print(e)
+			return [],{'recipe':[], 'has_more':False,'offset':[]}
+
 	def get(self, request, *args, **kwargs):
 		try:
-			# Recipe
 			are_all =  request.GET.get('all','False')  == 'True'
 			user_id =  int( request.GET.get('user_id', '0') )
 			ingredients = literal_eval(request.GET.get('ingredients', "[]"))
+			offset = int( request.GET.get('offset', '0') )
+			not_include = literal_eval(request.GET.get('not_include', "[]"))
+			type_id = int( request.GET.get('type_id', '-1') )
+			limit = int( request.GET.get('limit', '0') )
 
-			# print("!!!!!!!!!",user_id)
-
-			if user_id <= 0:
+			recipe_info = {}
+			if user_id <= 0 and not (type_id or are_all) and len(ingredients) <= 0 and limit <=0:
 				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
 			if are_all:
-				# print("!!!!!!!!! eran todos")
-				recipes = list( Recipe.objects.filter(active = True).order_by('id').values() )#faltan los ingredientes necesarios
-				recipes_len = len(recipes)
 				to_return = []
-				recipe_info = {}
-				recipe_container = []
-				for i in range(7) :
-					has_more = (recipes_len - 3) > 0
-					aux = []
-					for i in range(3):
-						aux.append({'recipe_id':recipes[i]['id'], 'ingredient_percentage':0})
-						if(recipes[i]['id'] not in recipe_info):
-							recipe_info[ recipes[i]['id'] ] = 1
-							recipe_container.append( recipes[i])
-					to_return.append({'recipe':aux,'has_more':has_more, 'offset':3})
-				return JsonResponse(data={"error": False,  "recommendations":to_return, 'recipes': recipe_container})
-			return JsonResponse(data={"error": False,  "recommendations":[]})
+				recipes = []
+				data = {
+					'user_id': user_id,
+					'limit' : limit,
+					'offset' : 0,
+					'ingredients' : ingredients,
+					'not_include' : []
+					# 'ids' : ingredients_ids
+				} #mandar data y recipe_info
+				# print(ingredients)
+				aux1, aux2 = self.get_by_stock(data,recipe_info)
+				to_return.append(aux2)
+				recipes += aux1
+				aux1, aux2 = self.get_by_recommendation(data,recipe_info)
+				to_return.append(aux2)
+				recipes += aux1
+				aux1, aux2 = self.get_by_count(data,recipe_info)
+				# print(aux1,aux2)
+				to_return.append(aux2)
+				recipes += aux1
+				aux1, aux2 = self.get_by_type(data,recipe_info,2)
+				to_return.append(aux2)
+				recipes += aux1
+				aux1, aux2 = self.get_by_type(data,recipe_info,3)
+				to_return.append(aux2)
+				recipes += aux1
+				aux1, aux2 = self.get_by_type(data,recipe_info,4)
+				to_return.append(aux2)
+				recipes += aux1
+				return JsonResponse(data={"error": False,  "recommendations":to_return, 'recipes': recipes})
+
+			data = {
+					'user_id': user_id,
+					'limit' : limit,
+					'offset' : offset,
+					'ingredients' : ingredients,
+					'not_include' : not_include
+					# 'ids' : ingredients_ids
+			}
+			if type_id == 0:
+				res = self.get_by_stock(data,recipe_info)
+			elif type_id == 1:
+				res = self.get_by_recommendation(data,recipe_info)
+			elif type_id == 2:
+				res = self.get_by_count(data,recipe_info)
+			elif type_id == 3:
+				res = self.get_by_type(data,recipe_info,2)
+			elif type_id == 4:
+				res = self.get_by_type(data,recipe_info,3)
+			elif type_id == 5:
+				res = self.get_by_type(data,recipe_info,4)
+			else:
+				return JsonResponse(data={"error": True,  "message":"recommendation_type_not_exists"})
+			return JsonResponse(data={'error':False, 'recommendation':res[1], 'recipes':res[0]})
 
 		except Exception as e:
 			print(e)

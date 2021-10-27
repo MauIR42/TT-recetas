@@ -16,14 +16,18 @@ export class WeekInfoModalComponent implements OnInit {
 
   @Input() set to_show(val: any){
     if(val){
+      let has_inventory = false;
       // console.log(val)
 
       for(let key in val){
         if(!val[key]){
           this.steps.push(key)
+          if( key == 'inventory')
+            has_inventory = true;
         }
       }
-
+      if( has_inventory )
+        this.reload_stock('');
       // console.log(this.steps);
 
       if(this.steps.length > 0){
@@ -97,7 +101,6 @@ export class WeekInfoModalComponent implements OnInit {
   ngOnInit(): void {
     this.user_id = this.ls.getItem("TT_id");
     let that = this;
-    this.reload_stock('');
   }
 
   close_modal(){
@@ -126,18 +129,18 @@ export class WeekInfoModalComponent implements OnInit {
       services.push(this.ss.delete_stock({'user_id': this.user_id, 'to_delete':JSON.stringify(to_delete)}))
     }
 
-    this.spinner.show("loader");
+    this.spinner.show("loader_info");
     forkJoin(services).subscribe( (data: any)=>{
       console.log(data);
       for(let i=0; i<data.length; i++){
         if(data[i]['error']){
-          this.spinner.hide("loader");
+          this.spinner.hide("loader_info");
           this.server_error = SERVER_MESSAGES[data[0]['message']];
           return;
         }
       }
 
-      this.spinner.hide("loader");
+      this.spinner.hide("loader_info");
       this.update_completed.emit(this.steps.includes("inventory"));
       this.close_modal();
     });
@@ -200,14 +203,32 @@ export class WeekInfoModalComponent implements OnInit {
     $('#stock').DataTable().destroy();
     this.stock_items  = [ ];
     this.delete_index  = -1;
-    this.spinner.show("loader");
+    this.spinner.show("loader_info");
     this.ss.get_stock({'user_id': this.user_id}).subscribe( (stock_data : any) =>{
       if(stock_data['error']){
         this.error_server = SERVER_MESSAGES[stock_data['message']];
-        this.spinner.hide("loader");
+        this.spinner.hide("loader_info");
         return;
       }
-      // console.log( stock_data);
+      let index = this.steps.indexOf('inventory');
+      if( stock_data['subidos'].length == 0 && index != -1 ){
+        console.log("entra")
+        this.ss.delete_stock({'user_id': this.user_id, 'to_delete':JSON.stringify([])}).subscribe( (data: any) =>{
+          console.log(data)
+          if(data['error']){
+            this.error_server = SERVER_MESSAGES[data['message']];
+            this.spinner.hide("loader_info");
+            return;
+          }
+          this.spinner.hide("loader_info");
+          
+          this.steps.splice(index, 1);
+          if(this.steps.length == 0)
+            this.close_modal();
+          return;
+        });
+      }
+
       this.stock_items = stock_data['subidos'];
       // this.pending_items = stock_data['pendientes'];
       let that = this;
@@ -218,7 +239,7 @@ export class WeekInfoModalComponent implements OnInit {
           // $('#example2').DataTable();
         // }, 2000);
       });
-      this.spinner.hide("loader");
+      this.spinner.hide("loader_info");
       this.success_message = success_message;
 
     });

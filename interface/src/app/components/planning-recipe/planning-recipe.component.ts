@@ -20,77 +20,6 @@ export class PlanningRecipeComponent implements OnInit {
 
   user_id : number = -1;
 
-  fake_menu : any = {
-    'Planeación': {
-      'start': moment().startOf('week').add(8 ,'d'),
-      'end'  : moment().endOf('week').add(8 ,'d'),
-      'next' : 'Preparación',
-      'date_string' : '',
-      'total': 2,
-      'week_done' : [0,0,0,0,0,0,0],
-      'recipe': [
-        [ 
-        {'status_id': 4, 'active':true, 'recipe_id':1, 'id':46, 'ingredient_percentage':100},
-          {'status_id': 4, 'active':true, 'recipe_id':2, 'id':47, 'ingredient_percentage':90},
-        ],
-        [],
-        [],
-        [],
-        [],
-        [],
-        [],
-      ]
-    },
-    'Preparación': {
-      'start': moment().startOf('week').add(1 ,'d'),
-      'end'  : moment().endOf('week').add(1 ,'d'),
-      'next' : 'Planeación',
-      'date_string': '',
-      'total': 1,
-      'week_done' : [0,0,0,0,0,0,0],
-      'recipe' : [
-        [
-          {'status_id': 3,  'active':false, 'recipe_id':1, 'id':15, 'ingredient_percentage':100, 'quantity': 1},
-          {'status_id': 1, 'active':true, 'recipe_id':2, 'id':16, 'ingredient_percentage':90, 'quantity': 1},
-          {'status_id': 1, 'active':true, 'recipe_id':3, 'id':17, 'ingredient_percentage':80, 'quantity': 1},
-          {'status_id': 2, 'active':true, 'recipe_id':4, 'id':18, 'ingredient_percentage':70, 'quantity': 1},
-          {'status_id': 3, 'active':false, 'recipe_id':5, 'id':19, 'ingredient_percentage':60, 'quantity': 1},
-        ],[
-          {'status_id': 3, 'active':false, 'recipe_id':6, 'id':20, 'ingredient_percentage':50, 'quantity': 1},
-          {'status_id': 1, 'active':true, 'recipe_id':7, 'id':21, 'ingredient_percentage':40, 'quantity': 1},
-          {'status_id': 1, 'active':true, 'recipe_id':8, 'id':22, 'ingredient_percentage':30, 'quantity': 1},
-          {'status_id': 2, 'active':true, 'recipe_id':9, 'id':23, 'ingredient_percentage':20, 'quantity': 1},
-          {'status_id': 3, 'active':false, 'recipe_id':10, 'id':24, 'ingredient_percentage':10, 'quantity': 1},
-        ],[
-          {'status_id': 3, 'active':false, 'recipe_id':1, 'id':25, 'ingredient_percentage':100, 'quantity': 1},
-          {'status_id': 1, 'active':true, 'recipe_id':2, 'id':26, 'ingredient_percentage':90, 'quantity': 1},
-          {'status_id': 1, 'active':true, 'recipe_id':3, 'id':27, 'ingredient_percentage':80, 'quantity': 1},
-          {'status_id': 2, 'active':true, 'recipe_id':4, 'id':28, 'ingredient_percentage':70, 'quantity': 1},
-          {'status_id': 3, 'active':false, 'recipe_id':5, 'id':29, 'ingredient_percentage':60, 'quantity': 1},
-        ],[
-          {'status_id': 3, 'active':false, 'recipe_id':6, 'id':30, 'ingredient_percentage':50, 'quantity': 1},
-          {'status_id': 1, 'active':true, 'recipe_id':7, 'id':31, 'ingredient_percentage':40, 'quantity': 1},
-          {'status_id': 1, 'active':true, 'recipe_id':8, 'id':32, 'ingredient_percentage':30, 'quantity': 1},
-          {'status_id': 2, 'active':true, 'recipe_id':9, 'id':33, 'ingredient_percentage':20, 'quantity': 1},
-          {'status_id': 3, 'active':false, 'recipe_id':10, 'id':34, 'ingredient_percentage':10, 'quantity': 1},
-        ],[
-          {'status_id': 3, 'active':false, 'recipe_id':1, 'id':35, 'ingredient_percentage':100, 'quantity': 1},
-          {'status_id': 1, 'active':true, 'recipe_id':2, 'id':36, 'ingredient_percentage':90, 'quantity': 1},
-          {'status_id': 1, 'active':true, 'recipe_id':3, 'id':37, 'ingredient_percentage':80, 'quantity': 1},
-          {'status_id': 2, 'active':true, 'recipe_id':4, 'id':38, 'ingredient_percentage':70, 'quantity': 1},
-          {'status_id': 3, 'active':false, 'recipe_id':5, 'id':39, 'ingredient_percentage':60, 'quantity': 1},
-        ],[
-          {'status_id': 3, 'active':false, 'recipe_id':6, 'id':41, 'ingredient_percentage':50, 'quantity': 1},
-          {'status_id': 1, 'active':true, 'recipe_id':7, 'id':42, 'ingredient_percentage':40, 'quantity': 1},
-          {'status_id': 1, 'active':true, 'recipe_id':8, 'id':43, 'ingredient_percentage':30, 'quantity': 1},
-          {'status_id': 2, 'active':true, 'recipe_id':9, 'id':44, 'ingredient_percentage':20, 'quantity': 1},
-          {'status_id': 3, 'active':false, 'recipe_id':10, 'id':45, 'ingredient_percentage':10, 'quantity': 1},
-        ],[
-        ],
-      ]
-    }
-  }
-
   menu : any = {
     'Planeación': {
       'start': moment().startOf('week').add(8 ,'d'),
@@ -122,57 +51,6 @@ export class PlanningRecipeComponent implements OnInit {
 
   recomendation_sections : any = ["Aprovecha tus ingredientes", "Lo que te ha gustado", "Lo que no has probado", "Los desayunos", "Las comidas", "Las cenas"];
 
-  fake_recommendations : any = [
-    {
-      recipe: [
-        {'recipe_id':10, 'ingredient_percentage':10},
-        {'recipe_id':9, 'ingredient_percentage':10},
-        {'recipe_id':8, 'ingredient_percentage':10},
-      ],
-      has_more : true,
-      offset : 0
-    },{
-      recipe: [
-        {'recipe_id':10, 'ingredient_percentage':10},
-        {'recipe_id':9, 'ingredient_percentage':10},
-        {'recipe_id':8, 'ingredient_percentage':10},
-      ],
-      has_more : true,
-      offset : 0
-    },{
-      recipe: [
-        {'recipe_id':10, 'ingredient_percentage':10},
-        {'recipe_id':9, 'ingredient_percentage':10},
-        {'recipe_id':8, 'ingredient_percentage':10},
-      ],
-      has_more : true,
-      offset : 0
-    },{
-      recipe: [
-        {'recipe_id':10, 'ingredient_percentage':10},
-        {'recipe_id':9, 'ingredient_percentage':10},
-        {'recipe_id':8, 'ingredient_percentage':10},
-      ],
-      has_more : true,
-      offset : 0
-    },{
-      recipe: [
-        {'recipe_id':10, 'ingredient_percentage':10},
-        {'recipe_id':9, 'ingredient_percentage':10},
-        {'recipe_id':8, 'ingredient_percentage':10},
-      ],
-      has_more : true,
-      offset : 0
-    },{
-      recipe: [
-        {'recipe_id':10, 'ingredient_percentage':10},
-        {'recipe_id':9, 'ingredient_percentage':10},
-        {'recipe_id':8, 'ingredient_percentage':10},
-      ],
-      has_more : true,
-      offset : 0
-    }
-  ];
 
   recommendations : any = [
     {recipe:[], has_more: false, offset:0},
@@ -183,19 +61,6 @@ export class PlanningRecipeComponent implements OnInit {
     {recipe:[], has_more: false, offset:0},
   ];
 
-
-  fake_recipes_info : any = {
-    1 : {'name':'receta 1', 'total_time':20, 'cooked':5, 'image_url':"assets/images/test1.jpg", 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que habíadsuiwEVBWEUBVUEOWVBWVBDBDSBVODSBBhhrpvfibnvifbnibnsdvvwebvebnhml.,mhnbgfvdc"},
-    2 : {'name':'receta 2', 'total_time':20, 'cooked':5, 'image_url':"assets/images/test1.jpg", 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-    3 : {'name':'receta 3', 'total_time':20, 'cooked':5, 'image_url':"assets/images/test1.jpg", 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-    4 : {'name':'receta 4', 'total_time':20, 'cooked':5, 'image_url':"assets/images/test1.jpg", 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-    5 : {'name':'receta 5', 'total_time':20, 'cooked':5, 'image_url':"assets/images/test1.jpg", 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-    6 : {'name':'receta 6', 'total_time':20, 'cooked':5, 'image_url':"assets/images/test1.jpg", 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-    7 : {'name':'receta 7', 'total_time':20, 'cooked':5, 'image_url':"assets/images/test1.jpg", 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-    8 : {'name':'receta 8', 'total_time':20, 'cooked':5, 'image_url':"assets/images/test1.jpg", 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-    9 : {'name':'receta 9', 'total_time':20, 'cooked':5, 'image_url':"assets/images/test1.jpg", 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-    10 : {'name':'receta 10', 'total_time':20, 'cooked':5, 'image_url':"assets/images/test1.jpg", 'description': "Esta es una breve descripción de la receta para que el usuario recuerde que había."},
-  }
 
   example_image = 'assets/images/test1.jpg';
 
@@ -236,11 +101,10 @@ export class PlanningRecipeComponent implements OnInit {
     4 : 'planeada',
   }
 
-  debug : boolean = false;
-
   to_show : any = null; //booleans to check with the update week info modal
 
   to_delete : any = {};
+  to_add : any = {};
 
   current_recipe : any;
 
@@ -249,50 +113,56 @@ export class PlanningRecipeComponent implements OnInit {
     'in_stock' : {}
   }
 
+  limit : number = 3;
 
-  constructor(private router: Router, private spinner: NgxSpinnerService, private ls : LocalStorageService, private ps : PlanningService, private ss: StockService) { }
+
+  constructor(private router: Router, private spinner: NgxSpinnerService, private ls : LocalStorageService, private ps : PlanningService, private ss: StockService) {}
 
   ngOnInit(): void {
-
-    this.menu['Planeación']['date_string'] = 'del ' + this.menu[ 'Planeación' ]['start'].format("DD") + ' al ' +this.menu[ 'Planeación' ]['end'].locale('es') .format("DD [de] MMMM  [del] YYYY");
-
-    this.menu['Preparación']['date_string'] = 'del ' + this.menu[ 'Preparación' ]['start'].format("DD") + ' al ' +this.menu[ 'Preparación' ]['end'].locale('es') .format("DD [de] MMMM  [del] YYYY");
-
-    this.range_string = this.menu[this.current]['date_string'];
 
     this.user_id = this.ls.getItem("TT_id");
     if(! this.user_id)
       this.router.navigate([""]);
 
+    if( moment().isSame( moment().startOf('week'), 'day' ) ){
+      this.menu['Planeación']['start'] =   moment().startOf('week').add(1 ,'d') 
+      this.menu['Planeación']['end'] = moment().endOf('week').add(1 ,'d') 
+      this.menu['Preparación']['start'] = (moment().startOf('week')).subtract(6 ,'d') 
+      this.menu['Preparación']['end'] = moment()
+    }
+
+    this.menu['Planeación']['date_string'] = 'del ' + this.menu[ 'Planeación' ]['start'].format("DD") + ' al ' +this.menu[ 'Planeación' ]['end'].locale('es') .format("DD [de] MMMM  [del] YYYY");
+    this.menu['Preparación']['date_string'] = 'del ' + this.menu[ 'Preparación' ]['start'].format("DD") + ' al ' +this.menu[ 'Preparación' ]['end'].locale('es') .format("DD [de] MMMM  [del] YYYY");
+    this.range_string = this.menu[this.current]['date_string'];
     this.load_schedule();
 
   }
 
-  load_schedule(){
+  load_schedule(reload = false){
     let services = [
-      this.ps.get_planning_info({'user_id': this.user_id, 'week_start': moment().startOf('week').add(1 ,'d').format('YYYY-MM-DD'), 'current_week':1  }),
-      this.ps.get_planning_info({'user_id': this.user_id, 'week_start': moment().startOf('week').add(8 ,'d').format('YYYY-MM-DD'), 'create': "True"  }),
+      this.ps.get_planning_info({'user_id': this.user_id, 'week_start': this.menu['Preparación']['start'].format('YYYY-MM-DD'), 'current_week':1  }),
+      this.ps.get_planning_info({'user_id': this.user_id, 'week_start': this.menu['Planeación']['start'].format('YYYY-MM-DD')}),
     ];
+
+    this.spinner.show('loader_planning');
     forkJoin(services).subscribe( (data : any)=>{ 
 
-      console.log(data);
+      // console.log(data);
       this.check_schedule('Preparación', data[0]);
-      if('recipes' in data[1])
-        this.check_schedule('Planeación', data[1]);
-      if(this.debug){
-        this.menu = this.fake_menu;
-        this.recommendations = this.fake_recommendations;
-        this.recipes_info = this.fake_recipes_info;
-      }
+      this.check_schedule('Planeación', data[1]);
       this.cooked = data[0]['week_info']['total_done'];
       // console.log(this.menu);
-      this.to_show = {
-        'charts' : data[0]['week_info']['has_stats'],
-        'inventory' : data[0]['week_info']['inventory_updated']
-      }
+      // if(! reload){
+        this.to_show = {
+          'charts' : data[0]['week_info']['has_stats'],
+          'inventory' : data[0]['week_info']['inventory_updated']
+        }
+      // }
 
-      if( this.to_show['inventory'] )
+      if( this.to_show['inventory'] ){
         this.load_inventory()
+      }else
+        this.spinner.hide('loader_planning');
 
       // console.log(this.to_show);
     });
@@ -304,12 +174,14 @@ export class PlanningRecipeComponent implements OnInit {
         // this.error_server = SERVER_MESSAGES[data['message']];
         // this.spinner.hide("loader");
         return;
-    }
+    } 
+    // console.log(data)
     this.menu[menu]['recipe'] =  data['week_recipes'];
     this.menu[menu]['id'] = data['week_info']['id'];
     this.menu[menu]['total'] = data['week_info']['total'];
     this.menu[menu]['week_done'] = data['week_info']['week_done'];
-    this.add_recipe_info(data['recipes']);
+    if('recipes' in data)
+      this.add_recipe_info(data['recipes']);
 
   }
 
@@ -335,16 +207,16 @@ export class PlanningRecipeComponent implements OnInit {
       for(let i= main_list.length -1; i>= 0; i--){
         for(let j= main_list[i].length -1; j>= 0; j--){
           // console.log(main_list[i][j])
-          if(main_list[i][j]['status_id'] != 3){
+          main_list[i][j]['pending'] = {}
+          if( main_list[i][j]['status_id'] != 2 && main_list[i][j]['status_id'] != 3 ){
             let recipe_ingredients = this.recipes_info[ main_list[i][j]['recipe_id'] ];
             let total_ingredients = Object.keys(recipe_ingredients['ingredient_list']).length;
             let all_ingredients = total_ingredients;
             let percentage_recipe = 100 / total_ingredients ;
             let current_percentage = 0;
-            main_list[i][j]['pending'] = {}
-            console.log(recipe_ingredients['ingredient_list']) 
+            // console.log(recipe_ingredients['ingredient_list']) 
             for(let key in this.ingredients['pending']){
-              console.log(key)
+              // console.log(key)
               if(key in recipe_ingredients['ingredient_list'] ){
                 let difference = this.ingredients['pending'][key] - recipe_ingredients['ingredient_list'][key]['quantity'];
                 if( difference > 0){ //no obtuvo nada y quedan pendientes
@@ -373,7 +245,12 @@ export class PlanningRecipeComponent implements OnInit {
         }
       }
     }
-    console.log(this.menu);
+    // console.log(this.menu);
+    if(this.show['recipe'] && !this.is_recommended){
+      this.current_recipe['pending'] = this.menu[ this.current ]['recipe'][this.selected_index][this.recipe_index]['pending'];
+    }
+
+    this.spinner.hide('loader_planning');
   }
 
 
@@ -395,15 +272,14 @@ export class PlanningRecipeComponent implements OnInit {
       pending = this.menu[ this.current ]['recipe'][ day ][ index ]['pending'];
     }
     this.recipe_index = index;
+    this.spinner.show("loader_recipe");
     this.ps.get_recipe_info({'recipe_id': recipe_id}).subscribe( (data:any)=>{
         // console.log(data);
         if(data['error']){
           // this.error_server = SERVER_MESSAGES[data['message']];
-          // this.spinner.hide("loader");
+          this.spinner.hide("loader_recipe");
           return;
         }
-        console.log( data['ingredients'] )
-        console.log(pending)
         this.current_recipe = {
           'id' : recipe_id,
           'steps': data['steps'],
@@ -412,6 +288,7 @@ export class PlanningRecipeComponent implements OnInit {
 
         }
 
+        this.spinner.hide("loader_recipe");
         this.change_view('recipe');
         // console.log(this.current_recipe);
     });
@@ -435,7 +312,7 @@ export class PlanningRecipeComponent implements OnInit {
 
   delete_recipe(day:number,index : number){
     let recipe = this.menu[this.current]['recipe'][day][index];
-    console.log(recipe);
+    // console.log(recipe);
     let text = '¿Estás seguro que deseas eliminar la receta ' + this.recipes_info[ recipe['recipe_id'] ]['name'] + '?';
     // console.log(day, index);
     this.actual_modal = {
@@ -454,13 +331,14 @@ export class PlanningRecipeComponent implements OnInit {
         if('id' in recipe){
           recipe['active'] = false;
           this.to_delete[ recipe['recipe_id'] + '_' + event['info']['day'] ] = recipe;
-        }
+        }else if ( (recipe['recipe_id'] + '_' + event['info']['day']) in this.to_add)
+          delete this.to_add[ recipe['recipe_id'] + '_' + event['info']['day'] ];
 
         this.menu[this.current]['total'] -= 1;
         this.recipe_index = -1;
         this.change_view('user_recipes');
       }else if( event['action'] == 'delete_prepare_recipe'){
-        // console.log("agregar función de desactivar");
+        this.spinner.show("loader_planning");
         let form = new FormData();
         if(this.menu[this.current]['recipe'][this.selected_index][ this.recipe_index ]['quantity'] == 1)
           this.menu[this.current]['recipe'][this.selected_index][ this.recipe_index ]['status_id'] = 3
@@ -473,13 +351,22 @@ export class PlanningRecipeComponent implements OnInit {
           // console.log(data);
           if(data['error']){
             // this.error_server = SERVER_MESSAGES[scale_data['message']];
-            // this.spinner.hide("loader");
+            this.spinner.hide("loader_planning");
             return;
           }
           this.menu[this.current]['recipe'][this.selected_index][ this.recipe_index ]['active'] = false;
           this.menu[this.current]['recipe'][this.selected_index][ this.recipe_index ]['status_id'] = 3;
           this.load_inventory();
+          this.spinner.hide("loader_planning");
         });
+      } else if( event['action'] == 'confirm_rate'){
+        // console.log(event['value']);
+        if(event['value'])
+          this.open_rate_modal();
+        else
+          this.complete_recipe({'no_evaluation': 0});
+        
+
       }
     }
   }
@@ -518,21 +405,61 @@ export class PlanningRecipeComponent implements OnInit {
     form.append('user_recipe',this.menu[this.current]['recipe'][this.selected_index][ this.recipe_index ]['id'].toString());
     form.append('quantity', this.menu[this.current]['recipe'][this.selected_index][ this.recipe_index ]['quantity'].toString());
     form.append('status_id', this.menu[this.current]['recipe'][this.selected_index][ this.recipe_index ]['status_id'].toString());
+    this.spinner.show("loader_planning");
     this.ps.put_recipe(form).subscribe((data:any)=>{
       // console.log(data);
       if(data['error']){
         // this.error_server = SERVER_MESSAGES[scale_data['message']];
-        // this.spinner.hide("loader");
+        this.spinner.hide("loader_planning");
         return;
       }
       this.menu[this.current]['recipe'][this.selected_index][ this.recipe_index ]['active'] = true;
       this.menu[this.current]['recipe'][this.selected_index][ this.recipe_index ]['status_id'] = 1;
       this.load_inventory();
+
+      this.spinner.hide("loader_planning");
     });
   }
 
-  load_more_recommendations(name : string){
-    console.log("cargar más recomendaciones de : ", name);
+  load_more_recommendations(index : number){
+    console.log("cargar más recomendaciones de : ", this.recomendation_sections[index]);
+    let data_dict : any = {
+      'user_id': this.user_id,
+      'ingredients':JSON.stringify(this.ingredients['in_stock']),
+      'type_id' : index,
+      'limit': this.limit
+    }
+
+    if( 'offset' in this.recommendations[index])
+      data_dict['offset'] = this.recommendations[index]['offset']
+    else
+      data_dict['not_include'] = JSON.stringify(this.recommendations[index]['not_include'])
+    console.log(data_dict)
+    this.spinner.show("loader_recommendation");
+    this.ps.get_recommendations(data_dict).subscribe( (data:any)=>{ //cantidad de ingredientes
+      console.log(data);
+      if(data['error']){
+        // this.error_server = SERVER_MESSAGES[scale_data['message']];
+        this.spinner.hide("loader_recommendation");
+        return;
+      }
+      this.add_recipe_info(data['recipes']);
+      this.recommendations[index]['has_more'] = data['recommendation']['has_more'];
+      if( 'not_include' in data['recommendation']){
+        // this.recommendations[index]['not_include'] += data['recommendation']['not_include'];
+        this.recommendations[index]['not_include'].push(... data['recommendation']['not_include']);
+        console.log("entra")
+      }
+      else
+        this.recommendations[index]['offset'] = data['recommendation']['offset'];
+      // this.recommendations[index]['recipe'] = data['recommendation']['recipe'];
+      this.recommendations[index]['recipe'].push(... data['recommendation']['recipe'])
+      console.log(this.recommendations[index])
+      // this.has_recommendations = true;
+      this.spinner.hide("loader_recommendation");
+
+    });
+
   }
 
   add_recipe(){
@@ -549,7 +476,7 @@ export class PlanningRecipeComponent implements OnInit {
           found = true;
         }
       }
-      if(!found){
+      if(!found){ //nuevo, no es porción extra
         let key = recipe['recipe_id'] + '_' + this.current_day;
         if(key in this.to_delete){
           let reactivate_recipe = this.to_delete[key]
@@ -563,8 +490,9 @@ export class PlanningRecipeComponent implements OnInit {
                           'recipe_id': recipe['recipe_id'], 
                           'ingredient_percentage': recipe['ingredient_percentage'],
                           'quantity' : 1,
-                          'week_id' : this.menu[ this.current ]['id']
+                          'pending' : {}
                         });
+          this.to_add[ key ] = 1;
         }
         this.menu[ this.current ]['total'] += 1;
       }
@@ -592,23 +520,61 @@ export class PlanningRecipeComponent implements OnInit {
     }
   }
 
+  check_complete_recipe(){
+    if( Object.keys(this.current_recipe['pending']).length ){
+      this.actual_modal = {
+        'type' : 'confirm_rate',
+        'text' : "No tiene todos los ingredientes para realizar esta receta, si quiere completarla con lo que tiene, ¿quiere evaluarla para siguientes recomendaciones?",
+        'extra' : {
+          'buttons': [{'text':'Calificar', 'value':1}, {'text':'Completar sin calificar','value':0}]
+        }
+      };
+      $('#conf_modal').modal("show");
+    }
+    else
+      this.open_rate_modal();
+  }
+
   open_rate_modal(){
-    $("#rate_modal").modal('show')
+    $("#rate_modal").modal('show');
   }
 
   complete_recipe(to_evaluate : any){
     let form = new FormData();
-    form.append('time',to_evaluate['time'].toString());
-    form.append('taste',to_evaluate['taste'].toString());
-    form.append('difficulty',to_evaluate['difficulty'].toString());
+    if( 'no_evaluation' in to_evaluate)
+      form.append('no_evaluation', '1');
+    else{
+      form.append('time',to_evaluate['time'].toString());
+      form.append('taste',to_evaluate['taste'].toString());
+      form.append('difficulty',to_evaluate['difficulty'].toString());
+    }
     form.append('user_recipe',this.menu[ this.current ]['recipe'][this.selected_index][ this.recipe_index ]['id']);
+    form.append('recipe_id', this.menu[ this.current ]['recipe'][this.selected_index][ this.recipe_index ]['recipe_id']);
+    form.append('user_id', this.user_id.toString());
+    let recipe = this.menu[ this.current ]['recipe'][this.selected_index][ this.recipe_index ];
+    let updated : any = {};
+    if( Object.keys(this.current_recipe['pending']).length ){
+
+      for(let key in this.recipes_info[ recipe['recipe_id']]['ingredient_list']){
+        let quantity = this.recipes_info[ recipe['recipe_id'] ]['ingredient_list'][ key ]['quantity']
+        updated[ key ] = {'original':quantity, 'used':quantity}
+        if( key in this.current_recipe['pending'])
+          updated[ key ]['used'] -= this.current_recipe['pending'][ key ];
+
+      }
+    }else
+      updated = this.recipes_info[ recipe['recipe_id']]['ingredient_list'];
+    // return; 
+    form.append('items_used', JSON.stringify(updated));
+    this.spinner.show("loader_planning");
     this.ps.post_recipe_evaluation(form).subscribe( (data:any)=>{
       if(data['error']){
         // this.error_server = SERVER_MESSAGES[scale_data['message']];
-        // this.spinner.hide("loader");
+        this.spinner.hide("loader_planning");
         return;
       }
       // console.log("evaluación hecha");
+      this.spinner.hide("loader_planning");
     });
     this.menu[ this.current ]['recipe'][this.selected_index][ this.recipe_index ]['status_id'] = 2;
     this.menu[this.current]['week_done'][this.current_day] ++;
@@ -616,7 +582,6 @@ export class PlanningRecipeComponent implements OnInit {
   }
 
   add_recipe_info(recipes : any){
-    console.log(recipes);
     for( let i = 0; i<recipes.length; i++){
       // console.log(recipes[i]);
       if( ! (recipes[i]['id'] in this.recipes_info ) )
@@ -626,21 +591,25 @@ export class PlanningRecipeComponent implements OnInit {
   }
 
   get_recommendations(){
+    console.log(this.ingredients);
     let to_send: any = {
       'all' : 'True',
       'user_id': this.user_id,
-      'ingredients' : JSON.stringify([])
+      'ingredients' : JSON.stringify(this.ingredients['in_stock']),
+      'limit' : this.limit
     }
+    this.spinner.show("loader_recommendation");
     this.ps.get_recommendations(to_send).subscribe( (data:any)=>{ //cantidad de ingredientes
-      // console.log(data);
+      console.log(data);
       if(data['error']){
         // this.error_server = SERVER_MESSAGES[scale_data['message']];
-        // this.spinner.hide("loader");
+        this.spinner.hide("loader_recommendation");
         return;
       }
       this.add_recipe_info(data['recipes']);
       this.recommendations = data['recommendations'];
       this.has_recommendations = true;
+      this.spinner.hide("loader_recommendation");
 
     }); 
   }
@@ -649,6 +618,9 @@ export class PlanningRecipeComponent implements OnInit {
     let to_create : any = [];
     let to_delete : any = [];
     let start_week = this.menu['Planeación']['start'];
+
+    let new_pending : any = {};
+
     for(let i = 0; i<this.menu['Planeación']['recipe'].length; i++){
       // console.log(start_week)
       let current_day : any = moment(start_week).add(i ,'d').format("YYYY-MM-DD")
@@ -658,26 +630,57 @@ export class PlanningRecipeComponent implements OnInit {
         if(! ('id' in week_recipes[j]) ){
           week_recipes[j]['preparation_date'] = current_day;
           to_create.push(week_recipes[j])
+
+          if(! (week_recipes[j]['recipe_id'] in new_pending) )
+            new_pending[ week_recipes[j]['recipe_id'] ] = 1;
+          else
+            new_pending[ week_recipes[j]['recipe_id'] ] += week_recipes[j]['quantity']
         }
       }
     }
+
     for( let key in this.to_delete){
+      let recipe = this.to_delete[key];
+
+      if(! (recipe['recipe_id'] in new_pending) )
+        new_pending[ recipe['recipe_id'] ] = -1;
+      else
+        new_pending[ recipe['recipe_id'] ] -= recipe['quantity'];
+
       to_delete.push(this.to_delete[key]);
+    }
+
+    let final_update : any = {}
+    for( let key in new_pending){
+      for( let ingredient in this.recipes_info[ key ][ 'ingredient_list' ] ){
+        let quantity = this.recipes_info[ key ][ 'ingredient_list' ][ ingredient ]['quantity'];
+        if( ! ( ingredient in final_update )  ){
+          final_update[ ingredient ] = quantity * new_pending[ key ];
+        }else
+          final_update[ ingredient ] += quantity * new_pending[ key ];
+      }
     }
     let form = new FormData();
     form.append('to_add', JSON.stringify(to_create));
     form.append('to_delete', JSON.stringify(to_delete));
+    form.append('quantity', JSON.stringify(final_update) );
+    form.append('user_id', this.user_id.toString());
+    form.append('week_id', this.menu[ 'Planeación' ]['id'].toString())
     // console.log(to_create);
     // console.log(to_delete);
+    this.spinner.show("loader_planning");
     this.ps.post_recipe_planning(form).subscribe( (data:any) =>{
+      // console.log(data);
       if(data['error']){
         // this.error_server = SERVER_MESSAGES[scale_data['message']];
-        // this.spinner.hide("loader");
+        this.spinner.hide("loader_planning");
         return;
       }
 
       this.to_delete = {};
-      this.load_schedule();
+
+      this.spinner.hide("loader_planning");
+      this.load_schedule(true);
 
     });
   }

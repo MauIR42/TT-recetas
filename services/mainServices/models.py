@@ -132,7 +132,7 @@ class Inventory(models.Model):
 	ingredient = models.ForeignKey(Ingredient, on_delete=models.PROTECT, null = False)
 	active = models.BooleanField(default = True)
 	created_at = models.DateTimeField(default=timezone.now, verbose_name='created at')
-
+	week = models.ForeignKey(UserWeek, on_delete=models.PROTECT, null = True)
 	class Meta:
 		db_table = 'inventory'
 
@@ -204,8 +204,21 @@ class WeekRecipe(models.Model):
 	recipe = models.ForeignKey(Recipe, on_delete=models.PROTECT, null = False)
 	preparation_date = models.DateField(auto_now=False, null=True)
 	quantity = models.IntegerField(null = False)
-	user_evaluation = models.DecimalField(max_digits= 5, decimal_places= 2, default = 0.00)
+	#user_evaluation = models.DecimalField(max_digits= 5, decimal_places= 2, default = 0.00)
 	active = models.BooleanField(default = True)
 	status = models.ForeignKey(WeekRecipeType, on_delete=models.PROTECT, null = False)
+
 	class Meta:
 		db_table = 'week_recipe'
+
+class UserRecipe(models.Model):
+	id = models.AutoField(auto_created=True, primary_key=True, serialize=False)
+	user = models.ForeignKey(User, on_delete=models.PROTECT, null = False)
+	recipe = models.ForeignKey(Recipe, on_delete=models.PROTECT, null = False)
+	count = models.IntegerField(null = False, default = 0)
+	last_evaluation = models.DecimalField(max_digits= 5, decimal_places= 2, default = 0.00)
+	created_at = models.DateTimeField(default=timezone.now, verbose_name='created at')
+	updated_at = models.DateTimeField(default=timezone.now, verbose_name='updated at')
+
+	class Meta:
+		db_table = 'user_recipe'
