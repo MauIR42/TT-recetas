@@ -46,7 +46,7 @@
 				</div>
 				<!-- revisar por user_id_recipe? -->
 				<ul class="list-group list-group-flush "> 
-					<li class="list-group-item" *ngFor="let recipe of menu[current]['recipe'][current_day]; let i = index" [ngClass]="(selected_index != -1 && recipe_index != -1 && is_recommended == false && current_day == selected_index && menu[current]['recipe'][current_day][recipe_index]['id'] == recipe['id'])? 'orange-back' : status_type[recipe['status_id']]"><a href="#" class="mr-3" (click)="get_recipe(current_day,i,$event)"  [class.stretched-link]="current == 'Preparación'">{{recipes_info[recipe['recipe_id']]['name']}}<ng-container *ngIf="recipe['status_id'] != 1 && recipe['status_id'] != 4"> - {{status_type[recipe['status_id']]}}</ng-container></a> <button class="btn" (click)="delete_recipe(current_day,i)" [class.d-none]="current == 'Preparación'"><img [src]="'assets/images/' + delete_img" class="img-fluid arrow"></button></li>
+					<li class="list-group-item" *ngFor="let recipe of menu[current]['recipe'][current_day]; let i = index" [ngClass]="(selected_index != -1 && recipe_index != -1 && is_recommended == false && current_day == selected_index && menu[current]['recipe'][current_day][recipe_index]['recipe_id'] == recipe['recipe_id'])? 'orange-back' : status_type[recipe['status_id']]" [class.d-none]="recipe['status_id'] == 4 && !recipe['active']"><a href="#" class="mr-3" (click)="get_recipe(current_day,i,$event)"  [class.stretched-link]="current == 'Preparación'">{{recipes_info[recipe['recipe_id']]['name']}}<ng-container *ngIf="recipe['status_id'] != 1 && recipe['status_id'] != 4"> - {{status_type[recipe['status_id']]}}</ng-container></a> <button class="btn" (click)="delete_recipe(current_day,i)" [class.d-none]="current == 'Preparación'"><img [src]="'assets/images/' + delete_img" class="img-fluid arrow"></button></li>
 				</ul>
 			</div>
 		</div>
@@ -62,8 +62,7 @@
 								<h3>{{current}}</h3>
 							</div>
 							<div class="col-12">
-								<p>Encuentra en esta sección las recetas que elegiste para este día, da click sobre una para ver su contenido y realizarla o eliminarla.</p>
-								<p>También puedes ver las recetas de otros días y realizarlas cambiando el día en la barra lateral izquierda.</p>
+								<p>{{menu[current]['message']}}</p>
 							</div>
 						</div>
 						<ng-container *ngIf="menu[current]['total'] > 0">
@@ -71,34 +70,41 @@
 								<div class="col-12">
 									<h4>{{day}}</h4>
 								</div>
-								<div class="col-12" *ngIf="menu[current]['recipe'][i].length == 0">
+								<div class="col-12" *ngIf=" (menu[current]['recipe'][i].length == 0 && current=='Preparación') || (menu[current]['week_done'][i] == 0 && current == 'Planeación')">
 									<h5 class="strong_blue_clor text-center py-2">No hay recetas planeadas para este día.</h5>
 								</div>
-								<div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-2 " *ngFor="let recipe of menu[current]['recipe'][i]; let j = index">
-									<div class="card h-100" style="width: 18rem;" >
-									 <img [src]="recipes_info[recipe['recipe_id']]['image_url']" class="card-img-top" alt="..." *ngIf="recipes_info[recipe['recipe_id']]['image_url'] != null">
-									  <img [src]="example_image" class="card-img-top" alt="..." *ngIf="recipes_info[recipe['recipe_id']]['image_url'] == null">
-									  <div class="card-header text-center">
-									    <p >{{recipes_info[recipe['recipe_id']]['name']}}</p> 
-									    <br>
-									    <img src="assets/images/percent-blue.svg" class="img-fluid mr-2">
-									    <p class="strong_blue_clor mr-5" style="color:red;" *ngIf="recipe.ingredient_percentage <= 39">{{recipe.ingredient_percentage}} ingr.</p>
-									    <p class="strong_blue_clor mr-5" style="color:orange;" *ngIf="recipe.ingredient_percentage >= 40 &&recipe.ingredient_percentage <= 59 ">{{recipe.ingredient_percentage}} ingr.</p>
-									    <p class="strong_blue_clor mr-5" style="color:brown;" *ngIf="recipe.ingredient_percentage >= 60 &&recipe.ingredient_percentage <= 79 ">{{recipe.ingredient_percentage}} ingr.</p>
-									    <p class="strong_blue_clor mr-5" style="color:green;" *ngIf="recipe.ingredient_percentage >= 80 &&recipe.ingredient_percentage <= 100 ">{{recipe.ingredient_percentage}} ingr.</p>
-									    <img src="assets/images/clock-blue.svg" class="img-fluid mr-2">
-									    <p class="strong_blue_clor">{{recipes_info[recipe['recipe_id']]['total_time']}} min.</p>
-									    <br>
-									    <p>realizados el último mes: 0 <strong class="strong_blue_clor">{{recipes_info[recipe['recipe_id']]['cooked']}}</strong></p>
-									    <br>
-									    <p *ngIf="recipe['status_id'] == 3">Receta desactivada</p>
-									  </div>
-									  <div class="card-body">
-									    <p class="card-text text-justify">{{recipes_info[recipe['recipe_id']]['description']}}</p>
-									    <a href="#" class="btn btn-normal-blue stretched-link text-center w-100" (click)="get_recipe(i,j,$event)">Ver Receta</a>
-									  </div>
+								<ng-container *ngFor="let recipe of menu[current]['recipe'][i]; let j = index">
+									<div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-2 " *ngIf="! (recipe['status_id'] == 4 && !recipe['active'])">
+										<div class="card h-100" style="width: 18rem;" >
+										 <img [src]="root + recipes_info[recipe['recipe_id']]['image_url']" class="card-img-top" alt="..." *ngIf="recipes_info[recipe['recipe_id']]['image_url'] != null">
+										  <img [src]="example_image" class="card-img-top" alt="..." *ngIf="recipes_info[recipe['recipe_id']]['image_url'] == null">
+										  <div class="card-header text-center">
+										    <p >{{recipes_info[recipe['recipe_id']]['name']}}</p> 
+										    <br>
+										    <ng-container *ngIf="recipe['status_id'] != 2">
+										    	<img src="assets/images/percent-blue.svg" class="img-fluid mr-2">
+											    <p class="strong_blue_clor mr-5" style="color:red;" *ngIf="recipe.ingredient_percentage <= 39">{{recipe.ingredient_percentage}} ingr.</p>
+											    <p class="strong_blue_clor mr-5" style="color:orange;" *ngIf="recipe.ingredient_percentage >= 40 &&recipe.ingredient_percentage <= 59 ">{{recipe.ingredient_percentage}} ingr.</p>
+											    <p class="strong_blue_clor mr-5" style="color:brown;" *ngIf="recipe.ingredient_percentage >= 60 &&recipe.ingredient_percentage <= 79 ">{{recipe.ingredient_percentage}} ingr.</p>
+											    <p class="strong_blue_clor mr-5" style="color:green;" *ngIf="recipe.ingredient_percentage >= 80 &&recipe.ingredient_percentage <= 100 ">{{recipe.ingredient_percentage}} ingr.</p>
+											 </ng-container>
+											 <ng-container *ngIf="recipe['status_id'] == 2">
+											 	<p class="strong_blue_clor mr-5">Realizada</p>
+											 </ng-container>
+										    <img src="assets/images/clock-blue.svg" class="img-fluid mr-2">
+										    <p class="strong_blue_clor">{{recipes_info[recipe['recipe_id']]['total_time']}} min.</p>
+										    <br>
+										    <p>realizados el último mes: 0 <strong class="strong_blue_clor">{{recipes_info[recipe['recipe_id']]['cooked']}}</strong></p>
+										    <br>
+										    <p *ngIf="recipe['status_id'] == 3">Receta desactivada</p>
+										  </div>
+										  <div class="card-body">
+										    <p class="card-text text-justify">{{recipes_info[recipe['recipe_id']]['description']}}</p>
+										    <a href="#" class="btn btn-normal-blue stretched-link text-center w-100" (click)="get_recipe(i,j,$event)">Ver Receta</a>
+										  </div>
+										</div>
 									</div>
-								</div>
+								</ng-container>
 							</div>	
 						</ng-container>
 						<div class="row text-center" *ngIf="menu[current]['total'] == 0">
@@ -124,9 +130,13 @@
 								<img src="assets/images/clock-blue.svg" class="img-fluid mr-2">
 								<p style="display:inline;" class="mb-2">Tiempo aproximado: {{recipes_info[ current_recipe['id'] ]['total_time'] }} min.</p>
 								<p class="text-justify">Descripción: {{recipes_info[ current_recipe['id'] ]['description'] }}</p>
+								<p class="text-justify">Colesterol por porción: {{recipes_info[ current_recipe['id'] ]['cholesterol'] }} mg.</p>
+								<p class="text-justify">Carbohidratos por porción: {{recipes_info[ current_recipe['id'] ]['carbohydrates'] }} g.</p>
+								<p class="text-justify">Sodio por porción: {{recipes_info[ current_recipe['id'] ]['sodium'] }} mg.</p>
 							</div>
 							<div class="col-12 col-lg-4">
-								<img src="assets/images/test1.jpg" class="card-img-top" alt="...">
+								<img [src]="root + recipes_info[current_recipe['id']]['image_url']" class="card-img-top" alt="..." *ngIf="recipes_info[current_recipe['id']]['image_url'] != null">
+								<img [src]="example_image" class="card-img-top" alt="..." *ngIf="recipes_info[current_recipe['id']]['image_url'] == null">
 							</div>
 							<div class="col-12 pr-5">
 								<p><strong> Ingredientes:</strong></p>
@@ -149,12 +159,31 @@
 									  		<p>
 									  		 o {{ingredient['comment']}}
 									  		</p>
-									  	</ng-container> 
-									  	<ng-container *ngIf="current_recipe['pending'][ ingredient['ingredient_id'] ]">
-									  		<p class="warning">
-									  		 (faltan {{ current_recipe['pending'][ ingredient['ingredient_id'] ]}} {{ingredient['unit']}} )
-									  		</p>
-									  	</ng-container> 
+									  	</ng-container>
+									  	<ng-container *ngIf="!is_recommended">
+										  	<ng-container *ngIf="current_recipe['has'][ ingredient['ingredient_id'] ] < ingredient['quantity']">
+										  		<p class="warning">
+										  		 (faltan {{ ingredient['quantity'] - current_recipe['has'][ ingredient['ingredient_id'] ]}} {{ingredient['unit']}} )
+										  		</p>
+										  	</ng-container> 
+										  	<ng-container *ngIf="!current_recipe['has'][ ingredient['ingredient_id'] ] && menu[current]['recipe'][selected_index][recipe_index]['status_id'] != 3">
+										  		<p class="warning">
+										  		 (faltan {{ ingredient['quantity'] }} {{ingredient['unit']}} )
+										  		</p>
+										  	</ng-container> 
+										 </ng-container>
+										 <ng-container *ngIf="is_recommended">
+										 	<ng-container *ngIf="stock[ ingredient['ingredient_id'] ] < ingredient['quantity']">
+										  		<p class="warning">
+										  		 (faltan {{ ingredient['quantity'] - stock[ ingredient['ingredient_id'] ]}} {{ingredient['unit']}} )
+										  		</p>
+										  	</ng-container> 
+										  	<ng-container *ngIf="!stock[ ingredient['ingredient_id'] ]">
+										  		<p class="warning">
+										  		 (faltan {{ ingredient['quantity'] }} {{ingredient['unit']}} )
+										  		</p>
+										  	</ng-container> 
+										 </ng-container>
 								  </li>
 								</ul>
 							</div>
@@ -211,7 +240,7 @@
 								</div>
 								<div class="col-12 col-md-6 col-lg-4 mb-2 " *ngFor="let recipe of recommendations[i]['recipe']; let j = index">
 									<div class="card h-100" style="width: 18rem;" >
-									  <img [src]="recipes_info[recipe['recipe_id']]['image_url']" class="card-img-top" alt="..." *ngIf="recipes_info[recipe['recipe_id']]['image_url'] != null">
+									  <img [src]="root + recipes_info[recipe['recipe_id']]['image_url']" class="card-img-top" alt="..." *ngIf="recipes_info[recipe['recipe_id']]['image_url'] != null">
 									  <img [src]="example_image" class="card-img-top" alt="..." *ngIf="recipes_info[recipe['recipe_id']]['image_url'] == null">
 									  <div class="card-header text-center">
 									    <p >{{recipes_info[recipe['recipe_id']]['name']}}</p> 

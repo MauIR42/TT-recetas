@@ -393,12 +393,18 @@ class StockView(APIView):
 		try:
 			user_id = request.GET.get('user_id','')
 			is_planning = int(request.GET.get('planning','0'))
-			user_stock = Inventory.objects.filter(user_id = user_id, active= True, quantity__gt=0).annotate(unit = Case(
+			user_stock = Inventory.objects.filter(user_id = user_id, active= True, quantity__gt=0)
+			if is_planning:
+				print("entra")
+				user_stock = user_stock.filter(type_id = 1)
+			else:
+				user_stock = user_stock.annotate(unit = Case(
 					When(ingredient__type_id = 1, then=Value('pzs')),
 					When(ingredient__type_id = 3, then=Value('ml')),
 					When(ingredient__type_id = 2, then=Value('gr')),
-					), ingredient_name=F('ingredient__name')).order_by('type_id','created_at').values()
-			user_stock = list(user_stock)
+					), ingredient_name=F('ingredient__name'))
+			user_stock = list(user_stock.order_by('type_id','created_at').values())
+			print(user_stock)
 			subidos = []
 			pendientes = []
 			units = {
@@ -427,26 +433,13 @@ class StockView(APIView):
 							current_items[ element['ingredient_id'] ] = current_items[ element['ingredient_id'] ] - element['quantity']
 						else :
 							element['quantity'] -= aux	
-							del current_items[ element['ingredient_id'] ]	
-							if not is_planning:					
-								pendientes.append(element)
-							else:
-								if not element['ingredient_id'] in pending_items:
-									pending_items[ element['ingredient_id'] ] = element['quantity']
-								else:
-									pending_items[ element['ingredient_id'] ] += element['quantity']
-					else: 
-						if not is_planning:
+							del current_items[ element['ingredient_id'] ]			
 							pendientes.append(element)
-						else:
-							if not element['ingredient_id'] in pending_items:
-								pending_items[ element['ingredient_id'] ] = element['quantity']
-							else:
-								pending_items[ element['ingredient_id'] ] += element['quantity']
+					else: 
+						pendientes.append(element)
 			if is_planning :
 				print(current_items)
-				print(pending_items)
-				return JsonResponse(data={'error': False, 'subidos' : current_items, 'pendientes': pending_items }, safe=False)
+				return JsonResponse(data={'error': False, 'subidos' : current_items }, safe=False)
 			for element in user_stock:
 				if element['quantity'] >= 1000 and element['unit'] in units:
 					element['quantity'] = element['quantity'] / 1000
@@ -800,6 +793,8 @@ class PlanningView(APIView):
 			if recipe['status_id'] == 2:
 				total_done += 1
 				done[ week_date ] += 1
+			elif not is_current_week:
+				done[week_date ] += 1
 		# recipe_ingredient = RecipeIngredient.objects.filter(recipe_id = OuterRef('pk'))
 		recipes_data =  Recipe.objects.filter(active = True, id__in=recipes_to_collect)
 		# recipes_data =  Recipe.objects.filter(active = True, id__in=recipes_to_collect).annotate(ingredients_list = Subquery(recipe_ingredient.values()[:1] ) )
@@ -837,13 +832,13 @@ class PlanningView(APIView):
 			bulk_update = []
 			
 			for add in to_add :
-				new = WeekRecipe(recipe_id = add['recipe_id'], week_id = data['week_id'], status_id=add['status_id'], quantity = add['quantity'], preparation_date = add['preparation_date'] )
+				new = WeekRecipe(recipe_id = add['recipe_id'], week_id = data['week_id'], status_id=4, quantity = add['quantity'], preparation_date = add['preparation_date'] )
 				bulk_create.append(new)
 			WeekRecipe.objects.bulk_create(bulk_create)
 			if len(to_delete) > 0: #checar algun dia la eficencia de buscar todos y luego solo actualizar los necesarios o buscar uno por uno
 				with transaction.atomic():
 					for delete in to_delete:
-						WeekRecipe.objects.filter(id =delete['id']).update(status_id=delete['status_id'], quantity = delete['quantity'], preparation_date = delete['preparation_date'], active=delete['active'])
+						WeekRecipe.objects.filter(id =delete['id']).update(quantity = delete['quantity'], preparation_date = delete['preparation_date'], active=delete['active'])
 			item_update = []
 			item_create = []
 			if len(quantity) > 0:
@@ -945,16 +940,19 @@ class RecipeEvaluationView(APIView):
 					if(ingredient.type_id == 2):
 						ingredient.quantity -= items_used[ key ]['original']
 						to_update.append( ingredient )
-					elif items_used[ key ]['used'] > 0:
+					elif 'used' in items_used[ key ]:
 						if items_used[ key ]['used'] > ingredient.quantity :
 							items_used[ key ]['used'] -= ingredient.quantity
 							ingredient.quantity = 0
 							ingredient.active = False
-						else :
+						else : #<=
 							aux = ingredient.quantity
 							ingredient.quantity -= items_used[ key ]['used']
 							items_used[ key ]['used'] -= aux
 							print(aux,ingredient.quantity,items_used[ key ]['used'])
+							del items_used[ key ]['used']
+							if ingredient.quantity == 0:
+								ingredient.active = 0
 						to_update.append( ingredient )
 					print(ingredient)
 					# del items_used[ key ]
@@ -962,7 +960,7 @@ class RecipeEvaluationView(APIView):
 			# print("resultado: ", evaluation)
 			return JsonResponse( data = {'error': False, 'evaluation':evaluation})
 		except Exception as e:
-
+			traceback.print_exc()
 			print(e)
 			return JsonResponse(data={"error": True,  "message":"internal_server_error"})
 
@@ -1227,8 +1225,8 @@ class RecommendationView(APIView):
 			to_add = []
 			start = data['offset']
 			end = data['offset'] + data['limit']
-			print("revisando")
-			print(start,end)
+			# print("revisando")
+			# print(start,end)
 			has_more = False
 			recipes = list(Recipe.objects.filter(active = True, type_id=type_id).order_by('name').values())
 			if len(recipes[start:]) > data['limit']:
