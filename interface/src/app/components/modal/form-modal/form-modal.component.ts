@@ -2,7 +2,7 @@ import { Component, OnInit, Input,  EventEmitter, Output } from '@angular/core';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { UserService } from '../../../services/user.service';
 import { SERVER_MESSAGES } from '../../../messages/messages';
-declare const $: any;
+declare var $: any;
 @Component({
   selector: 'app-form-modal',
   templateUrl: './form-modal.component.html',
@@ -12,9 +12,9 @@ export class FormModalComponent implements OnInit {
 
   @Input() set info(val: any){
     if(val){
-      console.log(val)
+      // console.log(val)
       this.user_info = Object.assign(this.user_info, val);
-      console.log(this.user_info)
+      // console.log(this.user_info)
     }
   }
 

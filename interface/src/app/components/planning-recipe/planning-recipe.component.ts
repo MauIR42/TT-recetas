@@ -119,6 +119,8 @@ export class PlanningRecipeComponent implements OnInit {
 
   original_stock : any = {};
 
+  error_server : string = '';
+
 
   constructor(private router: Router, private spinner: NgxSpinnerService, private ls : LocalStorageService, private ps : PlanningService, private ss: StockService) {}
 
@@ -152,8 +154,10 @@ export class PlanningRecipeComponent implements OnInit {
     forkJoin(services).subscribe( (data : any)=>{ 
 
       // console.log(data);
-      this.check_schedule('Preparación', data[0]);
-      this.check_schedule('Planeación', data[1]);
+      let has_error = this.check_schedule('Preparación', data[0]);
+      has_error = has_error || this.check_schedule('Planeación', data[1]);
+      if(has_error)
+        return;
       this.cooked = data[0]['week_info']['total_done'];
       // console.log(this.menu);
       if(! reload){
@@ -175,9 +179,9 @@ export class PlanningRecipeComponent implements OnInit {
   check_schedule(menu:string,data:any){
 
     if(data['error']){
-        // this.error_server = SERVER_MESSAGES[data['message']];
-        // this.spinner.hide("loader");
-        return;
+        this.error_server = SERVER_MESSAGES[data['message']];
+        this.spinner.hide("loader_planning");
+        return true;
     } 
     // console.log(data)
     this.menu[menu]['recipe'] =  data['week_recipes'];
@@ -186,14 +190,15 @@ export class PlanningRecipeComponent implements OnInit {
     this.menu[menu]['week_done'] = data['week_info']['week_done'];
     if('recipes' in data)
       this.add_recipe_info(data['recipes']);
-
+    // this.spinner.hide("loader_planning");
+    return false;
   }
 
   load_inventory(){
     this.ss.get_stock({'user_id': this.user_id, 'planning':1}).subscribe( (data : any) =>{
       if(data['error']){
-        // this.error_server = SERVER_MESSAGES[data['message']];
-        // this.spinner.hide("loader");
+        this.error_server = SERVER_MESSAGES[data['message']];
+        this.spinner.hide("loader_planning");
         return;
       }
       console.log(data);
@@ -215,7 +220,10 @@ export class PlanningRecipeComponent implements OnInit {
           main_list[i][j]['has'] = {}
           if( main_list[i][j]['status_id'] != 2 && main_list[i][j]['status_id'] != 3 && main_list[i][j]['active'] ){
             let recipe_ingredients = this.recipes_info[ main_list[i][j]['recipe_id'] ]['ingredient_list'];
-            let total_ingredients = Object.keys(recipe_ingredients).length;
+            let total_ingredients = 0;
+            for(let key in recipe_ingredients)
+              if(!recipe_ingredients[key]['is_optional'])
+                total_ingredients ++;
             let all_ingredients = total_ingredients;
             let percentage_recipe = 100 / total_ingredients ;
             let current_percentage = 0;
@@ -284,7 +292,7 @@ export class PlanningRecipeComponent implements OnInit {
     this.ps.get_recipe_info({'recipe_id': recipe_id}).subscribe( (data:any)=>{
         // console.log(data);
         if(data['error']){
-          // this.error_server = SERVER_MESSAGES[data['message']];
+          this.error_server = SERVER_MESSAGES[data['message']];
           this.spinner.hide("loader_recipe");
           return;
         }
@@ -365,8 +373,15 @@ export class PlanningRecipeComponent implements OnInit {
         this.ps.put_recipe(form).subscribe((data:any)=>{
           // console.log(data);
           if(data['error']){
-            // this.error_server = SERVER_MESSAGES[scale_data['message']];
+            this.error_server = SERVER_MESSAGES[data['message']];
             this.spinner.hide("loader_planning");
+            $(document).ready(function() { 
+              $(window).scrollTop($('#error_message').offset().top)
+              // $('body').animate({scrollTop:$('#error_message').offset().top},500)
+            });
+            // $('html, body').animate({
+            //  scrollTop: $("#error_message").offset().top
+            //  }, 2000);
             return;
           }
           this.menu[this.current]['recipe'][this.selected_index][ this.recipe_index ]['active'] = false;
@@ -425,7 +440,7 @@ export class PlanningRecipeComponent implements OnInit {
     this.ps.put_recipe(form).subscribe((data:any)=>{
       // console.log(data);
       if(data['error']){
-        // this.error_server = SERVER_MESSAGES[scale_data['message']];
+        this.error_server = SERVER_MESSAGES[data['message']];
         this.spinner.hide("loader_planning");
         return;
       }
@@ -456,7 +471,7 @@ export class PlanningRecipeComponent implements OnInit {
     this.ps.get_recommendations(data_dict).subscribe( (data:any)=>{ //cantidad de ingredientes
       console.log(data);
       if(data['error']){
-        // this.error_server = SERVER_MESSAGES[scale_data['message']];
+        this.error_server = SERVER_MESSAGES[data['message']];
         this.spinner.hide("loader_recommendation");
         return;
       }
@@ -597,7 +612,7 @@ export class PlanningRecipeComponent implements OnInit {
     this.spinner.show("loader_planning");
     this.ps.post_recipe_evaluation(form).subscribe( (data:any)=>{
       if(data['error']){
-        // this.error_server = SERVER_MESSAGES[scale_data['message']];
+        this.error_server = SERVER_MESSAGES[data['message']];
         this.spinner.hide("loader_planning");
         return;
       }
@@ -636,7 +651,7 @@ export class PlanningRecipeComponent implements OnInit {
     this.ps.get_recommendations(to_send).subscribe( (data:any)=>{ //cantidad de ingredientes
       console.log(data);
       if(data['error']){
-        // this.error_server = SERVER_MESSAGES[scale_data['message']];
+        this.error_server = SERVER_MESSAGES[data['message']];
         this.spinner.hide("loader_recommendation");
         return;
       }
@@ -713,7 +728,7 @@ export class PlanningRecipeComponent implements OnInit {
     this.ps.post_recipe_planning(form).subscribe( (data:any) =>{
       console.log(data);
       if(data['error']){
-        // this.error_server = SERVER_MESSAGES[scale_data['message']];
+        this.error_server = SERVER_MESSAGES[data['message']];
         this.spinner.hide("loader_planning");
         return;
       }

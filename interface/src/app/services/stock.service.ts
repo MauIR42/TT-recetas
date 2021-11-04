@@ -11,6 +11,7 @@ export class StockService {
   url_scale : string = 'scale';
   url_ingredients : string = 'ingredient';
   url_stock : string = 'stock';
+  url_pending : string = 'stock/pending';
 
   constructor(private http: HttpClient) {
     this.url = environment.server_direction;
@@ -59,5 +60,11 @@ export class StockService {
 
   delete_stock(form : any){
      return this.http.delete(this.url + this.url_stock, {params:form});
+  }
+
+  get_shopping_list(data:any){
+    let header = new HttpHeaders();
+    header.set('Content-Type', 'application/json');
+    return this.http.get(this.url + this.url_pending, { headers: header, params: data} );
   }
 }

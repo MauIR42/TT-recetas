@@ -1,0 +1,8 @@
+Pesar,0
+lista.txt
+Hacer tara,2
+Cambiar usuario,0
+users.txt
+Configurar,0
+configuracion.txt
+apagar,9

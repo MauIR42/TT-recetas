@@ -55,6 +55,12 @@
 		</div>
 		<div class="w-100">
 			<div id="content">
+				<div class="alert alert-danger col-12 text-center alert-dismissible fade show" role="alert" *ngIf="error_server.length > 0" id="error_message">
+						{{error_server}}
+						<button type="button" class="close" (click)="error_server = ''">
+					    <span aria-hidden="true">&times;</span>
+					  </button>
+				</div>
 				<section *ngIf="show['user_recipes']">
 					<div class="container-fluid mt-5">
 						<div class="row">
@@ -133,6 +139,7 @@
 								<p class="text-justify">Colesterol por porción: {{recipes_info[ current_recipe['id'] ]['cholesterol'] }} mg.</p>
 								<p class="text-justify">Carbohidratos por porción: {{recipes_info[ current_recipe['id'] ]['carbohydrates'] }} g.</p>
 								<p class="text-justify">Sodio por porción: {{recipes_info[ current_recipe['id'] ]['sodium'] }} mg.</p>
+								<p class="text-justify">Porciones: {{recipes_info[ current_recipe['id'] ]['portions'] }}</p>
 							</div>
 							<div class="col-12 col-lg-4">
 								<img [src]="root + recipes_info[current_recipe['id']]['image_url']" class="card-img-top" alt="..." *ngIf="recipes_info[current_recipe['id']]['image_url'] != null">

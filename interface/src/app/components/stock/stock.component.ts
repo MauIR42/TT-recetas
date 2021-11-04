@@ -6,7 +6,12 @@ import { StockService } from '../../services/stock.service';
 import { forkJoin  } from 'rxjs';
 import { SERVER_MESSAGES } from '../../messages/messages';
 
-declare const $ : any;
+
+// import * as jspdf from 'jspdf';
+import jspdf from 'jspdf';
+import html2canvas from 'html2canvas';
+
+declare var $ : any;
 
 @Component({
   selector: 'app-stock',
@@ -90,6 +95,8 @@ export class StockComponent implements OnInit {
         "sortDescending": ": activar para ordenar en descenso"
     }
   }
+
+  pdf_info : any = {};
 
   constructor(private router: Router, private ls : LocalStorageService, private ss: StockService, private spinner: NgxSpinnerService) {
     this.menu = this.router.url.replace(/\//g, '');
@@ -392,6 +399,60 @@ export class StockComponent implements OnInit {
       this.spinner.hide("loader");
       this.success_message = success_message;
 
+    });
+  }
+
+  show_pdf(event: any){
+    if(event){
+      event.preventDefault();
+    }
+    let data = {
+      'user_id' : this.user_id,
+    };
+    this.spinner.show("loader");
+    this.ss.get_shopping_list(data).subscribe( (data:any)=>{
+      console.log(data);
+      if(data['error']){
+        this.error_server = SERVER_MESSAGES[data['message']];
+        this.spinner.hide("loader");
+        return;
+      }
+      this.pdf_info = { 
+        'order' : data['order'],
+        'info' : data['info']
+      }
+      let that = this;
+      $('#pdf_text').removeClass("d-none");
+      $( document ).ready(function() {
+        let to_pdf = $("#pdf_text")[0];
+
+        html2canvas(to_pdf).then(canvas => {
+          const image = canvas.toDataURL('image/png')  
+          const doc = new jspdf('p', 'px', 'a4');
+          const pageWidth = doc.internal.pageSize.getWidth();
+          const pageHeight = doc.internal.pageSize.getHeight();
+
+          const widthRatio = pageWidth / canvas.width;
+          const heightRatio = pageHeight / canvas.height;
+          const ratio = widthRatio > heightRatio ? heightRatio : widthRatio;
+
+          const canvasWidth = canvas.width * ratio;
+          const canvasHeight = canvas.height * ratio;
+
+          const marginX = (pageWidth - canvasWidth) / 2;
+          const marginY = (pageHeight - canvasHeight) / 2;
+
+          doc.addImage(image, 'JPEG', marginX +15, 10, canvasWidth, canvasHeight);
+          // let pdf = new jspdf('l', 'cm', 'a4'); //Generates PDF in landscape mode
+          // let pdf = new jspdf('p', 'cm', 'a4'); Generates PDF in portrait mode
+          // pdf.addImage(contentDataURL, 'PNG', 0, 0, 20, 20);  
+          doc.save('Recettario Lista de compra ' + that.pdf_info['order'][0] + '.pdf');  
+          that.spinner.hide("loader");
+        });
+      });
+      $( document ).ready(function() {
+        $('#pdf_text').addClass("d-none");
+       });
     });
   }
 

@@ -141,7 +141,7 @@
 			<h3>Inventario</h3>
 		</div>
 		<div class="col-6 col-md-4 pt-2 text-center">
-			<a  href="#"><img src="assets/images/card-list-blue.svg" class="img-fluid d-inline pr-2 icon-button" ><p class="strong_blue_clor d-inline h">Ver ingredientes pendientes</p></a>
+			<a  href="#" (click)="show_pdf($event)"><img src="assets/images/card-list-blue.svg" class="img-fluid d-inline pr-2 icon-button" ><p class="strong_blue_clor d-inline h">Ver ingredientes pendientes</p></a>
 		</div>
 		<div class="col-6 col-md-4 pt-2 text-center">
 			<a  href="#" (click)="open_ingredient_modal($event)"><img src="assets/images/plus-circle-fill-blue.svg" class="img-fluid d-inline pr-2 icon-button" ><p class="strong_blue_clor d-inline h">Agregar ingredientes</p></a>
@@ -212,8 +212,30 @@
 		<div class="col-12 text-center pt-5 pt-lg-5" *ngIf="pending_items.length == 0">
 			<h5>¡Hurra! no tienes ingredientes pendientes espera, ¿Agregaste recetas para esta semana?</h5>
 		</div>
+	</div>
+	<div class=" mx-2 strong_blue_clor d-none" id="pdf_text">
+		<!-- <div class="col-auto"> -->
+		<div class="text-center">
+			<img src="assets/images//ReceTTario_logo.png" class="img-fluid">
+		</div>
+		<div class=" col-12 strong_blue_clor text-center">
+			<h3>Lista de compra</h3>
+		</div>
+		<div *ngFor="let recipe of pdf_info['order'];">
+			<h4 class="strong_blue_clor text-center" >Lista del {{recipe}} al {{pdf_info['info'][recipe]['end']}}</h4>
+			<h5 class="strong_blue_clor">Recetas</h5>
+			<ul>
+			  <li *ngFor="let re of pdf_info['info'][recipe]['recipe']">{{re['recipe_name']}} para el {{re['preparation_date']}}</li>
+			  <!-- <li>test</li> -->
+			</ul>  
+			<h5 class="strong_blue_clor">Ingredientes faltantes</h5>
+			<ul>
+			  <li *ngFor="let in of pdf_info['info'][recipe]['ingredients']">{{in['ingredient_name']}} {{in['quantity']}} {{in['unit']}}</li>
+			  <!-- <li>test</li> -->
+			</ul>  
+		</div>
 
-
+		<!-- </div> -->
 	</div>
 </div>
 

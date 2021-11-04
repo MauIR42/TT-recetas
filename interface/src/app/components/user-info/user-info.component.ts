@@ -9,7 +9,7 @@ import { NgxSpinnerService } from 'ngx-spinner';
 import { Router } from '@angular/router';
 import { SERVER_MESSAGES } from '../../messages/messages';
 import { forkJoin  } from 'rxjs';
-declare const $ : any;
+declare var $ : any;
 
 @Component({
   selector: 'app-user-info',
@@ -33,7 +33,8 @@ export class UserInfoComponent implements OnInit {
 
   show_success : boolean = false;
 
-  graphs: any = [{'id':'peso'},{'id':'abdomen'},{'id':'IMC'}];
+  // graphs: any = [{'id':'peso'},{'id':'abdomen'},{'id':'IMC'}];
+  graphs : any = [];
   graphs_empty: boolean = false;
 
   health_type : any = {};
@@ -76,57 +77,61 @@ export class UserInfoComponent implements OnInit {
         this.graphs_empty = true;
       }
       else{
-        for(let key in health_info['data'])
-          console.log(health_info['data'][key])
+        let blue = true;
+        for(let key in health_info['data']['info']){
+          let color = (blue) ? '#0AAFC6' : '#FDC216';
+          blue = !blue;
+          this.create_stat(health_info['data']['info'][key],color);
+        }
       }
 
     });
     $(document).ready(function() {
-      let ctx = $("#IMC");
-      const labels = ["Semana 1", "Semana 2", "Semana 3", "Semana 4", "Semana 5", "Semana 6", "Semana 7"]
-      const data = {
-        labels: labels,
-        datasets: [{
-          label: 'Indice de masa corporal',
-          data: [40, 39, 35, 34, 30, 29, 25],
-          fill: false,
-          borderColor: '#0AAFC6',
-          tension: 0.1
-        }],
-      };
-      let IMC = new Chart(ctx, {type: 'line',
-          data: data
-        });
+      // let ctx = $("#IMC");
+      // const labels = ["Semana 1", "Semana 2", "Semana 3", "Semana 4", "Semana 5", "Semana 6", "Semana 7"]
+      // const data = {
+      //   labels: labels,
+      //   datasets: [{
+      //     label: 'Indice de masa corporal',
+      //     data: [40, 39, 35, 34, 30, 29, 25],
+      //     fill: false,
+      //     borderColor: '#0AAFC6',
+      //     tension: 0.1
+      //   }],
+      // };
+      // let IMC = new Chart(ctx, {type: 'line',
+      //     data: data
+      //   });
 
-      let ctx_peso = $("#peso");
-      const data_peso = {
-        labels: labels,
-        datasets: [{
-          label: 'Pesos registrados',
-          data: [40, 39, 80, 81, 56, 55, 40],
-          fill: false,
-          borderColor: '#0AAFC6',
-          tension: 0.1
-        }],
-      };
-      let peso = new Chart(ctx_peso, {type: 'line',
-          data: data_peso
-        });
+      // let ctx_peso = $("#peso");
+      // const data_peso = {
+      //   labels: labels,
+      //   datasets: [{
+      //     label: 'Pesos registrados',
+      //     data: [40, 39, 80, 81, 56, 55, 40],
+      //     fill: false,
+      //     borderColor: '#0AAFC6',
+      //     tension: 0.1
+      //   }],
+      // };
+      // let peso = new Chart(ctx_peso, {type: 'line',
+      //     data: data_peso
+      //   });
 
-      let ctx_abdomen = $("#abdomen");
-      const data_abdomen = {
-        labels: labels,
-        datasets: [{
-          label: 'Diametro de la cintura',
-          data: [40, 39, 80, 81, 56, 55, 40],
-          fill: false,
-          borderColor: '#FDC216',
-          tension: 0.1
-        }],
-      };
-      let abdomen = new Chart(ctx_abdomen, {type: 'line',
-          data: data_abdomen
-      });
+      // let ctx_abdomen = $("#abdomen");
+      // const data_abdomen = {
+      //   labels: labels,
+      //   datasets: [{
+      //     label: 'Diametro de la cintura',
+      //     data: [40, 39, 80, 81, 56, 55, 40],
+      //     fill: false,
+      //     borderColor: '#FDC216',
+      //     tension: 0.1
+      //   }],
+      // };
+      // let abdomen = new Chart(ctx_abdomen, {type: 'line',
+      //     data: data_abdomen
+      // });
     });
 }
 
@@ -141,6 +146,40 @@ export class UserInfoComponent implements OnInit {
     console.log(data);
     this.user_info = data['data'];
     this.show_success = true;
+  }
+
+  create_stat(info : any, color: string){
+    console.log(info)
+    this.graphs.push({'id':info['stat']});
+    $(document).ready(function() {
+    let ctx = $("#" + info['stat']);
+    const chart_info = {
+        labels: info['labels'],
+        datasets: [{
+          label: info['stat'],
+          data: info['value'],
+          fill: false,
+          borderColor: color,
+          tension: 0.1
+        }],
+      };
+      // let that = this;
+      let aux = new Chart(ctx, {type: 'line',
+          data: chart_info,
+          options: {
+              scales: {
+                  y: {
+                      ticks: {
+                          callback: function(value, index, values) {
+                              return value + ' ' + ( (info['unit'] != null) ? info['unit'] : '');
+                          }
+                      }
+                  }
+              }
+          }
+      });
+    });
+
   }
 
 }
