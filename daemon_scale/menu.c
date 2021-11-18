@@ -73,21 +73,23 @@ struct node*  read_menu(char * file, struct node *file_father){
 
 	char *aux_name;
 	char file_path[60];
-
-	if( access(file,F_OK) != 0){
-		// sprintf(file_path,"/home/pi/Documents/scale_info/%s/%s", current_user, file);
-		sprintf(file_path,"%s/%s", current_user, file);
+	sprintf(file_path,"/home/pi/Documents/TT/repository/%s",file);
+	// printf("%s\n", file_path );
+	if( access(file_path,F_OK) != 0){
+		memset(file_path,0,sizeof(file_path));
+		sprintf(file_path,"/home/pi/Documents/TT/repository/%s/%s", current_user, file);
+		// printf("%s\n", file_path );
 		if(access(file_path,F_OK) != 0)
 			return NULL;
 	}
-	else{
+	// else{
 		// sprintf(file_path,"/home/pi/Documents/scale_info/%s",file);
-		sprintf(file_path,"%s",file);
-	}
+		// sprintf(file_path,"%s",file);
+	// }
 
 	fp = fopen(file_path, "r");
 	if(fp == NULL){
-		perror("Error opening file");
+		// perror("Error opening file");
 		return NULL;
 	}
 

@@ -23,7 +23,7 @@ export class RegisterComponent implements OnInit {
     'email_check' : '',
     'password' : '',
     'check_password' : '',
-    'check_1': false,
+    // 'check_1': false,
     'check_2' : false,
 
   }
@@ -43,7 +43,7 @@ export class RegisterComponent implements OnInit {
     'email_check' : {'equal':'email', 'requiered': true},
     'password' : {'regex': 'password'},
     'check_password' : {'equal':'password', 'requiered': true},
-    'check_1': {'requiered': true},
+    // 'check_1': {'requiered': true},
     'check_2' : {'requiered': true},
     'height' : {'requiered': true}
   }
@@ -63,7 +63,7 @@ export class RegisterComponent implements OnInit {
     'email_check' : {'show': false, 'message': ''},
     'password' : {'show': false, 'message': ''},
     'check_password' : {'show': false, 'message': ''},
-    'check_1': {'show': false, 'message': ''},
+    // 'check_1': {'show': false, 'message': ''},
     'check_2' : {'show': false, 'message': ''},
     'height' : {'show': false, 'message': ''},
   }
@@ -89,7 +89,7 @@ export class RegisterComponent implements OnInit {
         let value : any = this.validations[key];
         if('requiered' in value && (this.user_info[key].length == 0 || !this.user_info[key] ) ){
           this.errors[key]['show'] = true;
-          this.errors[key]['message'] = "Este campo no debe llenarse.";
+          this.errors[key]['message'] = "Este campo debe llenarse.";
           confirm = false;
           continue;
         }

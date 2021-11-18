@@ -6,8 +6,8 @@
 #include "communication.h"
 
 int offset = 0;
-int reference_unit = 188;
-
+//int reference_unit = 188;
+int reference_unit = 83;
 void power_up(){
 	set_value(SCK_pin, "0");
 	sleep(0.0001);

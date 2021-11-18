@@ -30,22 +30,22 @@ void setup_pin(int pin, char * direction){
 	{
 		fd = open(gpio_export, O_WRONLY);
 		if(fd == -1) {
-			perror("No se pudo abrir");
+			// perror("No se pudo abrir");
 			exit(1);
 		}
 		if(write(fd, str_pin, 2) != 2) {
-			perror("No se pudo exportar el pin %d");
+			// perror("No se pudo exportar el pin %d");
 			exit(1);
 		}
 		close(fd);
 	}
 	fd = open(gpio_direction, O_WRONLY);
 	if(fd == -1){
-		perror("No se pudo abrir la direccion del  gpio %d");
+		// perror("No se pudo abrir la direccion del  gpio %d");
 		exit(1);
 	}
 	if(write(fd, direction, strlen(direction)) != strlen(direction)){
-		perror("No se pudo establecer como 'out' el gpio %d");
+		// perror("No se pudo establecer como 'out' el gpio %d");
 		exit(1);
 	}
 	sleep(0.1);
@@ -59,11 +59,11 @@ void unexport_pin(int pin){
 	sprintf(str_pin, "%d",pin);
 	fd = open(gpio_unexport, O_WRONLY);
 	if(fd == -1) {
-		perror("No se pudo abrir");
+		// perror("No se pudo abrir");
 		exit(1);
 	}
 	if(write(fd, str_pin, 2) != 2) {
-		perror("No se pudo exportar el pin %d");
+		// perror("No se pudo exportar el pin %d");
 		exit(1);
 	}
 	sleep(0.1);
@@ -77,7 +77,7 @@ int get_file_descriptor(int pin){
 	sprintf(directory,"/sys/class/gpio/gpio%d/value", pin);
 	fd = open(directory, O_WRONLY);
 	if(fd == -1){
-		perror("No se pudo abrir el valor del  gpio %d");
+		// perror("No se pudo abrir el valor del  gpio %d");
 		exit(1);
 	}
 	return fd;
@@ -88,12 +88,12 @@ void  set_value(int gpio_number, char * value){
 	sprintf(directory,"/sys/class/gpio/gpio%d/value", gpio_number);
 	int fd = open(directory, O_WRONLY);
 	if(fd == -1){
-		perror("No se pudo abrir el valor del  gpio %d");
+		// perror("No se pudo abrir el valor del  gpio %d");
 		exit(1);
 	}
 	if(write(fd, value, 1) != 1){ 
 		// printf("gpio: %d\n", gpio_number);
-		perror("No se pudo establecer como 1 la salida  gpio %d");
+		// perror("No se pudo establecer como 1 la salida  gpio %d");
 		exit(1);
 	}
 	close(fd);
@@ -105,11 +105,11 @@ int get_value(int gpio){
 	int fd = open(directory , O_RDONLY);
 	if(fd == -1){
 		// printf("%d\n", gpio);
-		perror("\nNo se pudo abrir el valor del  gpio\n");
+		// perror("\nNo se pudo abrir el valor del  gpio\n");
 		exit(1);
 	}
 	if(read(fd, value,3) == -1){
-		perror("\nNo se pudo obtener el valor del pin\n");
+		// perror("\nNo se pudo obtener el valor del pin\n");
 		exit(1);
 	}
 	close(fd);

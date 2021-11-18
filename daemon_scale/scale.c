@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ftw.h>
+#include <syslog.h>
 
 #include "communication.h"
 #include "defs.h"
@@ -44,14 +45,18 @@ const char vacio[1] = "\0";
 
 int main(){
 
+	/* daemon*/
+	ini_daemon();
+	openlog( "scale", LOG_NDELAY | LOG_PID, LOG_LOCAL0 );
+
 	/* LCD section*/
 
 	ini_LCD();
 
 	/*user*/
-	current_user = get_first("last.txt");
+	current_user = get_first("/home/pi/Documents/TT/repository/last.txt");
 	user_id = get_user_id(current_user);
-	access_code = get_first("scale.txt");
+	access_code = get_first("/home/pi/Documents/TT/repository/scale.txt");
 	if(strcmp(current_user,vacio) != 0){
 		// printf("Ultimo usuario: %s\n", current_user);
 		writeWord("Bienvenido");
@@ -74,10 +79,10 @@ int main(){
 	ini_senales();
 
 	// printf("agregando DT\n");
-	setup_pin(DT_pin, "in");
+	 setup_pin(DT_pin, "in");
 
 	// printf("agregando SCK\n");
-	setup_pin(SCK_pin, "out");
+	 setup_pin(SCK_pin, "out");
 	sleep(1);
 
 	// printf("Reiniciando Hx711\n");
@@ -108,7 +113,7 @@ void start_menu(pthread_t thread_id){
 	test->mes = 0x1;
 	test->anio = 0x1;
 	test->temperatura = 0x1;
-	weight = 180;
+	//weight = 180;
 	//test end
 
 	struct node * menu = NULL;
@@ -179,13 +184,13 @@ void start_menu(pthread_t thread_id){
 			}
 			else if(menu->type == 1){
 				clear_display();
-				printf("Pesando!\n");
+				// printf("Pesando!\n");
 				writeWord("Pesando: ");
 				change_display_line(1);
 				writeWord(menu -> name);
 				sleep(5);
-				// weight =get_weight(20);
-				// test = obtener_info(thread_id);
+				weight =get_weight(20);
+				test = obtener_info(thread_id);
 				// printf("La hora es : %x:%x:%x\n", test->horas,test->minutos,test->segundos );
 				// printf("La fecha es : %x/%x/%x\n", test->dia,test->mes,test->anio);
 				// printf("%d\n", weight);
@@ -206,9 +211,9 @@ void start_menu(pthread_t thread_id){
 			}
 			else if(menu->type == 2){
 				clear_display();
-				printf("Calcular offset!\n");
+				// printf("Calcular offset!\n");
 				writeWord("Calculando \ntara...");
-				// tare_scale();
+				tare_scale();
 				sleep(3);
 				menu = restart_menu(head);
 			}
@@ -224,7 +229,7 @@ void start_menu(pthread_t thread_id){
 			else if(menu->type == 4){
 				clear_display();
 				writeWord("Cambiando\nusuario...");
-				printf("user_id: %d", menu->id);
+				// printf("user_id: %d", menu->id);
 				set_last(menu->name);
 				sleep(2);
 				free(current_user);
@@ -243,11 +248,11 @@ void start_menu(pthread_t thread_id){
 				writeWord("Espere por favor");
 				send_get();
 				sleep(2);
-				current_user = get_until_delimiter("users.txt",',');
+				current_user = get_until_delimiter("/home/pi/Documents/TT/repository/users.txt",',');
 				user_id = get_user_id(current_user);
 				set_last(current_user);
 				if(strcmp(current_user,vacio) != 0){
-					printf("Ultimo usuario: %s\n", current_user);
+					// printf("Ultimo usuario: %s\n", current_user);
 					clear_display();
 					writeWord("Bienvenido");
 					change_display_line(1);
@@ -284,7 +289,7 @@ void start_menu(pthread_t thread_id){
 			}
 			else{
 				clear_display();
-				printf("terminando ejecución!\n");
+				// printf("terminando ejecución!\n");
 				writeWord("A dormir...");
 				break;
 			}
@@ -295,7 +300,7 @@ void start_menu(pthread_t thread_id){
 			if(menu->father != NULL){
 				clear_display();
 				menu = menu -> father;
-				printf("name: %s\n", menu -> name);
+				// printf("name: %s\n", menu -> name);
 				if( menu-> father == NULL)
 					writeWord("Elija una opcion");
 				else{

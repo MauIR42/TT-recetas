@@ -74,17 +74,17 @@ int main(){
 	ini_senales();
 
 	printf("agregando DT\n");
-	// setup_pin(DT_pin, "in");
+	 setup_pin(DT_pin, "in");
 
 	printf("agregando SCK\n");
-	// setup_pin(SCK_pin, "out");
+	 setup_pin(SCK_pin, "out");
 	sleep(1);
 
 	printf("Reiniciando Hx711\n");
-	// reset_hx711();
+	reset_hx711();
 
 	printf("Obteniendo el offset\n");
-	// tare_scale();
+	tare_scale();
 
 	printf("Mostrando menu: \n");
 
@@ -108,7 +108,7 @@ void start_menu(pthread_t thread_id){
 	test->mes = 0x1;
 	test->anio = 0x1;
 	test->temperatura = 0x1;
-	weight = 180;
+	//weight = 180;
 	//test end
 
 	struct node * menu = NULL;
@@ -184,7 +184,7 @@ void start_menu(pthread_t thread_id){
 				change_display_line(1);
 				writeWord(menu -> name);
 				sleep(5);
-				// weight =get_weight(20);
+				weight =get_weight(20);
 				// test = obtener_info(thread_id);
 				// printf("La hora es : %x:%x:%x\n", test->horas,test->minutos,test->segundos );
 				// printf("La fecha es : %x/%x/%x\n", test->dia,test->mes,test->anio);

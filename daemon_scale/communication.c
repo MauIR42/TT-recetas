@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <pthread.h>
+#include <syslog.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include "defs.h"
 #include "communication.h"
@@ -88,3 +91,53 @@ void crearTuberia(int pipefd[]){
 // 	reference_unit = value;
 
 // }
+
+void ini_daemon(){
+    FILE *apArch;
+
+    pid_t pid = 0;
+    pid_t sid = 0;
+
+    pid = fork();
+    if( pid == -1 )
+    {
+        syslog(LOG_INFO, "Error al crear el primer proceso hijo\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if( pid )
+    {
+        syslog(LOG_INFO, "Se termina proceso padre, PID del proceso hijo %d \n", pid);
+        exit(0);
+    }
+
+    umask(0);
+
+    sid = setsid();
+    if( sid < 0 )
+    {
+        syslog(LOG_INFO, "Error al iniciar sesion");
+        exit(EXIT_FAILURE);
+    }
+
+    pid = fork( );
+    if( pid == -1 )
+    {
+        syslog(LOG_INFO, "Error al crear el segundo proceso hijo\n");
+        exit(EXIT_FAILURE);
+    }
+    if( pid )
+    {
+        syslog(LOG_INFO, "PID del segundo proceso hijo %d \n", pid);
+        apArch = fopen("/home/pi/scale.pid", "w");
+        fprintf( apArch, "%d", pid);
+        fclose(apArch);
+
+        exit(0);
+    }
+
+    chdir("/");
+    close( STDIN_FILENO  );
+    close( STDOUT_FILENO );
+    close( STDERR_FILENO );
+}

@@ -18,7 +18,7 @@
 extern char * current_user;
 extern int user_id;
 extern char * access_code;
-char * ip= "192.168.100.44";
+char * ip= "192.168.100.49";
 int puerto = 8000;
 
 int connect_to_server(char * ip, int puerto){
@@ -29,21 +29,21 @@ int connect_to_server(char * ip, int puerto){
 	direccion_servidor.sin_port = htons(puerto);
 	if( inet_pton(AF_INET, ip, &direccion_servidor.sin_addr) <= 0 )
 	{
-		perror("Ocurrio un error al momento de asignar la direccion IP");
+		// perror("Ocurrio un error al momento de asignar la direccion IP");
 		exit(1);
 	}
 
 	// printf("Creando Socket ....\n");
 	if( (sockfd = socket (AF_INET, SOCK_STREAM, 0)) < 0 )
 	{
-		perror("Ocurrio un problema en la creacion del socket");
+		// perror("Ocurrio un problema en la creacion del socket");
 		exit(1);
 	}
 
 	// printf ("Estableciendo conexion ...\n");
 	if( connect(sockfd, (struct sockaddr *)&direccion_servidor, sizeof(direccion_servidor) ) < 0) 
 	{
-		perror ("Ocurrio un problema al establecer la conexion");
+		// perror ("Ocurrio un problema al establecer la conexion");
 		if(errno == ENETUNREACH)
 			return -1;
 		else if(errno == ECONNREFUSED){
@@ -64,7 +64,7 @@ int send_petition(int sockfd, char * petition){
 	// printf ("Enviando mensaje al servidor ...\n");
 	if( write(sockfd, petition, sizeof(char)*strlen(petition)) < 0 )
 	{
-		perror("Ocurrio un problema en el envio de un mensaje al cliente");
+		// perror("Ocurrio un problema en el envio de un mensaje al cliente");
 		return 0;
 	}else
 	// printf("Termina bien\n");
@@ -85,7 +85,7 @@ void send_post(struct datos * time, int weight, int id, char* ingredient, int ch
 			// printf("response: %s\n", response);
 			delete_pending = check_response( response );
 			if(delete_pending == 1 && check){
-				sprintf(path,"%s/pendientes.txt",current_user);
+				sprintf(path,"/home/pi/Documents/TT/repository/%s/pendientes.txt",current_user);
 				// printf("a eliminar el pendiente %s, %s", path, ingredient);
 				copy_except(path,ingredient);
 			}

@@ -13,7 +13,8 @@ int read_averange(int read_count);
 struct datos* obtener_info(pthread_t thread_id);
 void crearTuberia(int pipefd[]);
 
-
+//daemon
+void ini_daemon();
 // void get_reference_unit(); // to_check
 
 #endif

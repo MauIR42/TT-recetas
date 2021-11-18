@@ -153,7 +153,7 @@ export class PlanningRecipeComponent implements OnInit {
     this.spinner.show('loader_planning');
     forkJoin(services).subscribe( (data : any)=>{ 
 
-      // console.log(data);
+      console.log(data);
       let has_error = this.check_schedule('Preparación', data[0]);
       has_error = has_error || this.check_schedule('Planeación', data[1]);
       if(has_error)
@@ -166,7 +166,7 @@ export class PlanningRecipeComponent implements OnInit {
           'inventory' : data[0]['week_info']['inventory_updated']
         }
       }
-
+      console.log(this.to_show['inventory'])
       if( this.to_show['inventory'] ){
         this.load_inventory();
       }else
@@ -183,11 +183,12 @@ export class PlanningRecipeComponent implements OnInit {
         this.spinner.hide("loader_planning");
         return true;
     } 
-    // console.log(data)
+    console.log(data)
     this.menu[menu]['recipe'] =  data['week_recipes'];
     this.menu[menu]['id'] = data['week_info']['id'];
     this.menu[menu]['total'] = data['week_info']['total'];
     this.menu[menu]['week_done'] = data['week_info']['week_done'];
+    console.log(this.menu)
     if('recipes' in data)
       this.add_recipe_info(data['recipes']);
     // this.spinner.hide("loader_planning");

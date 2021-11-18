@@ -18,7 +18,7 @@
 extern char * current_user;
 extern int user_id;
 extern char * access_code;
-char * ip= "192.168.100.44";
+char * ip= "192.168.100.49";
 int puerto = 8000;
 
 int connect_to_server(char * ip, int puerto){

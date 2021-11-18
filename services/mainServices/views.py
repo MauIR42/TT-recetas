@@ -123,6 +123,7 @@ class UserView(APIView):
 	def put(self, request, *args, **kwargs):
 		try:
 			data = request.POST.dict()
+			print(data)
 			if  not ('first_name' in data and 'last_name' in data and 'birthday' in data  and 'gender' in data and 'user_id' in data and 'height' in data):
 				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
 			user = User.objects.filter(id= data['user_id']).first()
@@ -136,10 +137,10 @@ class UserView(APIView):
 			if 'password' in data:	
 				user.password = make_password(data['password'])
 			if 'username' in data:
-				check_email = User.objects.filter(username=data['email']).all()
+				check_email = User.objects.filter(Q(username=data['username']) & ~Q(id= data['user_id']) ).all()
 				if check_email:
 					return JsonResponse(data={'error': True, 'message':'email_already_registered'}, safe=False)
-				user.username = data['email']
+				user.username = data['username']
 			user.save()
 			return JsonResponse(data={'error': False}, safe=False)
 		except Exception as e:
@@ -617,7 +618,10 @@ class EmbebbedScaleView(APIView):
 				return JsonResponse(data={"error": True,  "message":"scale_not_exists"})
 			others_created = Inventory.objects.filter(ingredient_id = data['ingredient_id'], active = True, type_id= 1).aggregate(Sum('quantity'))
 			upload = Inventory.objects.create(quantity=int(data['quantity']), ingredient_id=data['ingredient_id'], type_id=1, user_id = data['user_id'])
-			total = int(data['quantity']) + others_created['quantity__sum']
+			if others_created :
+				total = int(data['quantity']) + others_created['quantity__sum']
+			else:
+				total = int(data['quantity'])
 			all_pending = Inventory.objects.filter(ingredient_id = data['ingredient_id'], active= True, type_id= 2, user_id = data['user_id']).aggregate(Sum('quantity'))
 			# print(all_pending)
 			if all_pending['quantity__sum'] and all_pending['quantity__sum'] > total :
@@ -781,7 +785,8 @@ class PlanningView(APIView):
 					"inventory_updated": current_week.inventory_updated,
 					"week_number": current_week.week_number,
 					'total' : 0,
-					'id': current_week.id
+					'id': current_week.id,
+					'week_done' : [0,0,0,0,0,0,0]
 				}
 				return JsonResponse( data = {'error': False, 'week_info': to_return, 'week_recipes' : recipes})
 				# else :
@@ -1428,21 +1433,37 @@ class PendingView(APIView):
 		try:
 			user_id =  int( request.GET.get('user_id', '0') )
 			recipes = list(WeekRecipe.objects.filter(active = True, week_id__user_id=user_id, status_id__in=[1,4]).annotate(recipe_name=F('recipe__name'), start=F('week__week_start')).order_by('start','recipe_name').values('preparation_date','recipe_name','start'))
+			inventory = list(Inventory.objects.filter(active=True, user_id= user_id, type_id=1, quantity__gt=0).values())
 			pending_ingredients = list(Inventory.objects.filter(active=True, user_id=user_id, type_id=2, quantity__gt=0).annotate(ingredient_name=F('ingredient__name'), unit=Case(
 					When(ingredient__type_id = 1, then=Value('pzs')),
 					When(ingredient__type_id = 3, then=Value('ml')),
-					When(ingredient__type_id = 2, then=Value('gr'))), start=F('week__week_start')).order_by('start','type_id','ingredient_name').values('ingredient_name','quantity','unit','start'))
+					When(ingredient__type_id = 2, then=Value('gr'))), start=F('week__week_start')).order_by('start','type_id','ingredient_name').values('ingredient_name','quantity','unit','start', 'ingredient_id'))
 			units = {
 				'gr' : 'Kg',
 				'ml' : 'L',
 			}
-
+			current_inventory = {}
+			for ingredient in inventory:
+				if not ingredient['ingredient_id'] in current_inventory:
+					current_inventory[ ingredient['ingredient_id'] ] = ingredient['quantity']
+				else :
+					current_inventory[ ingredient['ingredient_id'] ] += ingredient['quantity']
 			ingredients_dict = {}
 			recipe_dict = {}
 			order = []
 			for element in pending_ingredients :
-				print(element)
 				aux = element['start'].strftime("%d-%m-%Y")
+				if element['ingredient_id'] in current_inventory:
+					aux = current_inventory[ element['ingredient_id'] ] - element['quantity']
+					if aux > 0: #más en el inventario
+						current_inventory[ element['ingredient_id'] ] = aux
+						continue
+					elif aux < 0:
+						element['quantity'] = aux * -1
+						del current_inventory[ element['ingredient_id'] ]
+					else:
+						del current_inventory[ element['ingredient_id'] ]
+						continue
 				if element['quantity'] >= 1000 and element['unit'] in units:
 					element['quantity'] = element['quantity'] / 1000
 					element['unit'] = units[ element['unit'] ]		

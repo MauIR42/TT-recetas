@@ -6,7 +6,7 @@ import { SERVER_MESSAGES } from '../../../messages/messages';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { forkJoin  } from 'rxjs';
 
-declare const $: any;
+declare var $: any;
 @Component({
   selector: 'app-week-info-modal',
   templateUrl: './week-info-modal.component.html',
@@ -17,7 +17,7 @@ export class WeekInfoModalComponent implements OnInit {
   @Input() set to_show(val: any){
     if(val){
       let has_inventory = false;
-      // console.log(val)
+      console.log(val)
 
       for(let key in val){
         if(!val[key]){
@@ -205,6 +205,7 @@ export class WeekInfoModalComponent implements OnInit {
     this.delete_index  = -1;
     this.spinner.show("loader_info");
     this.ss.get_stock({'user_id': this.user_id}).subscribe( (stock_data : any) =>{
+      console.log(stock_data)
       if(stock_data['error']){
         this.error_server = SERVER_MESSAGES[stock_data['message']];
         this.spinner.hide("loader_info");

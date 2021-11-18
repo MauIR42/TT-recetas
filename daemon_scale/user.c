@@ -11,7 +11,7 @@
 #include "user.h"
 
 int get_user_id(char * current_user){
-	FILE * fd = fopen("users.txt", "r");
+	FILE * fd = fopen("/home/pi/Documents/TT/repository/users.txt", "r");
 	char id[30];
 	int aux, commas = 0, ignore = 0, index = 0, finish = 0;;
 
@@ -52,14 +52,14 @@ char * get_first(char * file){
 	char text[16], *to_return;
 	fd = fopen(file, "r");
 	fgets(text,16,fd);
-	printf("%s\n", text);
+	// printf("%s\n", text);
 	to_return = strdup(text);
 	fclose(fd);
 	return to_return;
 }
 
 char * get_until_delimiter(char * file, char delimiter){
-	printf("entra a la funcion\n");
+	// printf("entra a la funcion\n");
 	FILE * fd;
 	char * result = (char*)malloc(20 * sizeof(char));
 	int aux;
@@ -73,32 +73,32 @@ char * get_until_delimiter(char * file, char delimiter){
 	}
 	result[index] = '\0';
 	fclose(fd);
-	printf("sale de la funcion\n");
+	// printf("sale de la funcion\n");
 	return result;
 
 }
 
 void set_last( char * new_last){
-	FILE *fd = fopen("last.txt", "w");
+	FILE *fd = fopen("/home/pi/Documents/TT/repository/last.txt", "w");
 	fputs(new_last,fd);
 	fclose(fd);
 }
 
 void update_user_pending(char * user, char * pending){
-	char path[30];
+	char path[90];
 	int index = 0, total = strlen(pending), check_next = 0;
-	sprintf(path,"%s/pendientes.txt", user);
+	sprintf(path,"/home/pi/Documents/TT/repository/%s/pendientes.txt", user);
 	FILE *fd = fopen(path,"w");
-	printf("Agregando datos al usuario: %s\n", user);
+	// printf("Agregando datos al usuario: %s\n", user);
 	while( index != total ){
 
 		if( check_next ){
 			check_next = 0;
 			fputc('\n', fd);
-			printf("\n");
+			// printf("\n");
 		}
 		if( pending[ index ] != '#' ){
-			printf("%c", pending[ index]);
+			// printf("%c", pending[ index]);
 			fputc(pending[ index ], fd);
 		}else{
 			check_next = 1;
@@ -106,17 +106,17 @@ void update_user_pending(char * user, char * pending){
 
 		index++;
 	}
-	printf("\n");
+	// printf("\n");
 	fclose(fd);
 
 }
 
 void add_user(char * user_path){
-	printf("agregando usuario: %s\n", user_path);
-	char new_path[30];
+	// printf("agregando usuario: %s\n", user_path);
+	char new_path[90];
 	int i,index = 0;
-	printf("agregando a users.txt\n");
-	add_at_end("users.txt",user_path);
+	// printf("agregando a users.txt\n");
+	add_at_end("/home/pi/Documents/TT/repository/users.txt",user_path);
 	for(i = 0; i< strlen(user_path); i++){
 		if(user_path[index] == ','){
 			new_path[ index ] = '\0';
@@ -125,14 +125,14 @@ void add_user(char * user_path){
 		new_path[ index ] = user_path[ index ];
 		index++;
 	}
-	printf("creando carpeta\n");
+	// printf("creando carpeta\n");
 	create_path(new_path);
 
-	char file[] = "%s/lista.txt";
-	char path_complete[30];
+	char file[] = "/home/pi/Documents/TT/repository/%s/lista.txt";
+	char path_complete[90];
 	sprintf(path_complete,file,new_path);
-	printf("copiando lista\n");
-	copy_file("lista.txt",path_complete);
+	// printf("copiando lista\n");
+	copy_file("/home/pi/Documents/TT/repository/lista.txt",path_complete);
 
 }
 
@@ -152,36 +152,38 @@ void add_at_end(char * file, char * user_path){
 }
 
 void create_path(char * path){
-	printf("La carpeta a crear es: %s\n", path);
+	// printf("La carpeta a crear es: %s\n", path);
+	char correct_path[90];
+	sprintf(correct_path,"/home/pi/Documents/TT/repository/%s",path);
 	struct stat st = {0};
-	if (stat(path, &st) == -1) {
-    	if( 0 != mkdir(path, 0777)){
-    		perror("mkdir");
+	if (stat(correct_path, &st) == -1) {
+    	if( 0 != mkdir(correct_path, 0777)){
+    		// perror("mkdir");
     		exit(1);
     	}
 	}
 }
 
 int copy_file(char* original, char * copy){
-	printf("Original: %s\n", original);
-	printf("copia: %s\n", copy);
+	// printf("Original: %s\n", original);
+	// printf("copia: %s\n", copy);
 	int aux;
 	FILE *fo, *fc;
 	fo = fopen(original, "r");
 	if( fo == NULL){
-		printf("Error al abrir el archivo: %s\n", original);
+		// printf("Error al abrir el archivo: %s\n", original);
 		return -1;
 	}
 
 	fc = fopen(copy, "w");
 	if( fc == NULL){
-		printf("Error al abrir el archivo: %s\n", copy);
+		// printf("Error al abrir el archivo: %s\n", copy);
 		return -1;
 	}
 
 	aux = fgetc(fo);
 	while(aux != EOF){
-		printf("%c", aux);
+		// printf("%c", aux);
 		fputc(aux,fc);
 		aux = fgetc(fo);
 	}
@@ -193,9 +195,11 @@ int copy_file(char* original, char * copy){
 
 
 void delete_user(char * user_path){
-	nftw(user_path, delete_file, 12, FTW_DEPTH | FTW_PHYS);
+	char real_path[90];
+	sprintf(real_path,"/home/pi/Documents/TT/repository/%s",user_path);
+	nftw(real_path, delete_file, 12, FTW_DEPTH | FTW_PHYS);
 	// printf("El resultado de eliminar fue %d\n", result );
-	copy_except("users.txt",user_path);
+	copy_except("/home/pi/Documents/TT/repository/users.txt",user_path);
 
 }
 
@@ -203,36 +207,37 @@ void delete_user(char * user_path){
 int delete_file(const char *f_path, const struct stat *sb, int typeflag, struct FTW *ftwbuf){
 	int rf = remove(f_path); //file_path
 	if(rf){
-		perror("Error al intentar borrar el archivo");
-		perror(f_path);
+		exit(1);
+		// perror("Error al intentar borrar el archivo");
+		// perror(f_path);
 	}
 	return rf;
 }
 
 void restart_scale(){
-	FILE *fd = fopen("users.txt","r");
+	FILE *fd = fopen("/home/pi/Documents/TT/repository/users.txt","r");
 	char user[21];
 	char * username;
 	int res;
 	while( fgets(user,21,fd) != NULL){
-		printf("El usuario completo: %s\n", user);
+		// printf("El usuario completo: %s\n", user);
 		 username = strtok(user, ",");
-		 printf("El nombre es: %s\n", username);
+		 // printf("El nombre es: %s\n", username);
 		 res = nftw(username, delete_file, 12, FTW_DEPTH | FTW_PHYS);
-		 printf("respuesta: %d\n", res);
+		 // printf("respuesta: %d\n", res);
 	}
 	fclose(fd);
-	printf("Eliminando archivo users.txt");
-	fd = fopen("users.txt","w");
+	// printf("Eliminando archivo users.txt");
+	fd = fopen("/home/pi/Documents/TT/repository/users.txt","w");
 	fclose(fd);
-	printf("Eliminando archivo last.txt");
-	fd = fopen("last.txt","w");
+	// printf("Eliminando archivo last.txt");
+	fd = fopen("/home/pi/Documents/TT/repository/last.txt","w");
 	fclose(fd);
 }
 
 
 void copy_except(char * file,char * except){
-	printf("A eliminar: %s\n", except);
+	// printf("A eliminar: %s\n", except);
 	FILE * fd, * fd_aux;
 	int keep = 1, cont_indx = 0, copy = 0, first = 1, added = 0, check_comma = 1;
 	int aux;
@@ -241,15 +246,15 @@ void copy_except(char * file,char * except){
 	while( keep ){
 		aux = fgetc(fd);
 		if(aux == EOF){
-			printf("final de archivo\n");
+			// printf("final de archivo\n");
 			break;
 		}
-		printf("%c\n", aux);
+		// printf("%c\n", aux);
 		if( aux == ','){
 			if( check_comma ){
 				check_comma = 0;
 				container[ cont_indx ] = '\0';
-				printf("a comparar: %s\n", container);
+				// printf("a comparar: %s\n", container);
 				if(strcmp(except,container) != 0){
 					copy = 1;
 					container[cont_indx++] = aux;
@@ -267,7 +272,7 @@ void copy_except(char * file,char * except){
 			if(copy){
 				copy = 0;
 				added= 1;
-				fd_aux = fopen("aux.txt", "a");
+				fd_aux = fopen("/home/pi/Documents/TT/repository/aux.txt", "a");
 				aux = fgetc(fd);
 				if(aux != EOF){
 					if(first)
@@ -277,7 +282,7 @@ void copy_except(char * file,char * except){
 				}
 
 				container[ cont_indx ] = '\0';
-				printf("Escribiendo %s\n", container);
+				// printf("Escribiendo %s\n", container);
 				fputs(container,fd_aux);
 				fclose(fd_aux);
 				cont_indx = 0;
@@ -289,26 +294,26 @@ void copy_except(char * file,char * except){
 		}
 	}
 	if(copy){
-		printf("otro copy \n");
+		// printf("otro copy \n");
 		added= 1;
 		container[ cont_indx] = '\0';
-		printf("Escribiendo: %s\n", container);
-		fd_aux = fopen("aux.txt", "a");
+		// printf("Escribiendo: %s\n", container);
+		fd_aux = fopen("/home/pi/Documents/TT/repository/aux.txt", "a");
 		if(!first)
 			fputs("\n",fd_aux);
 		fputs(container,fd_aux);
 		fclose(fd_aux);
 	}
 
-	printf("Sale!\n");
+	// printf("Sale!\n");
 	fclose(fd);
 	if(added){
 		remove(file);
-		printf("Elimina!\n");
-		rename("aux.txt",file);
-		printf("Renombra!\n");
+		// printf("Elimina!\n");
+		rename("/home/pi/Documents/TT/repository/aux.txt",file);
+		// printf("Renombra!\n");
 	}else{
-		printf("eliminar datos del archivo\n");
+		// printf("eliminar datos del archivo\n");
 		fd_aux = fopen(file, "w");
 		fclose(fd);
 
