@@ -23,6 +23,8 @@ import { DatetimeOnePipe } from './pipes/datetime-one.pipe';
 import { PlanningRecipeComponent } from './components/planning-recipe/planning-recipe.component';
 import { WeekInfoModalComponent } from './components/modal/week-info-modal/week-info-modal.component';
 import { ModalRateRecipeComponent } from './components/modal/modal-rate-recipe/modal-rate-recipe.component';
+import { ObtainedImagesComponent } from './components/info/obtained-images/obtained-images.component';
+import { TermsComponent } from './components/info/terms/terms.component';
 
 @NgModule({
   declarations: [
@@ -42,6 +44,8 @@ import { ModalRateRecipeComponent } from './components/modal/modal-rate-recipe/m
     PlanningRecipeComponent,
     WeekInfoModalComponent,
     ModalRateRecipeComponent,
+    ObtainedImagesComponent,
+    TermsComponent,
   ],
   imports: [
     BrowserModule,

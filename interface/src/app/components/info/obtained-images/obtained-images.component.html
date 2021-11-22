@@ -1,0 +1,36 @@
+<ngx-spinner name="loader" [fullScreen]="false" type="ball-spin-clockwise-fade" size="medium" color = "#0AAFC6">
+	<p class="loading">Cargando datos...</p>
+</ngx-spinner>
+
+<app-header></app-header>
+
+
+<div class="container pt-3 ">
+	<div class="row">
+		<h4>Creditos a imagenes obtenidas</h4>
+		<p class="text-justify">Para la realización de este proyecto se utilizaron imágenes de otros sitios web, con el objetivo de tener una representación visual al resultado final de una receta. Al tener poco tiempo para realizar cada receta en el sistema se hizo una recopilación de las imágenes y se muestra a continuación el crédito correspondiente a cada imagen. </p>
+		<p class="text-justify">Adicional a las imágenes usadas, las recetas utilizadas para este proyecto provienen de un recetario llamado “Delicias keto” por Camila kost. Puedes obtener más recetas de este libro <a href="https://go.ketolicias.com/delicias-keto-oferta?gclid=Cj0KCQiA-eeMBhCpARIsAAZfxZA5LfEMsuF4VKx5Fr69QDEnZkLRxXuhJCrG9V6PeEm87HsA4PwJX7MaAuX6EALw_wcB" target="blank">siguiendo este link</a></p>
+	</div>
+	<div class="row">
+		<div class="alert alert-danger col-12 text-center alert-dismissible fade show" role="alert" *ngIf="error_server.length > 0" id="error_message">
+			{{error_server}}
+			<button type="button" class="close" (click)="error_server = ''">
+		    <span aria-hidden="true">&times;</span>
+		  </button>
+		</div>
+		<ng-container *ngFor="let recipe of recipes">
+			<div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-2 ">
+				<div class="card " >
+					 <img [src]="root + recipe['image_url']" class="card-img-top" alt="...">
+					  <div class="card-header text-center">
+					    <p >{{recipe['name']}}</p> 
+					    <br>
+					  </div>
+					  <div class="card-body">
+					    <a [href]="recipe['original_url']" class="btn btn-normal-blue stretched-link text-center w-100" >Ir al sitio</a>
+					  </div>
+				</div>
+			</div>
+		</ng-container>
+	</div>
+</div>

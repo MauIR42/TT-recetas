@@ -153,26 +153,23 @@ export class PlanningRecipeComponent implements OnInit {
     this.spinner.show('loader_planning');
     forkJoin(services).subscribe( (data : any)=>{ 
 
-      console.log(data);
+      // console.log(data);
       let has_error = this.check_schedule('Preparación', data[0]);
       has_error = has_error || this.check_schedule('Planeación', data[1]);
       if(has_error)
         return;
       this.cooked = data[0]['week_info']['total_done'];
-      // console.log(this.menu);
       if(! reload){
         this.to_show = {
           'charts' : data[0]['week_info']['has_stats'],
           'inventory' : data[0]['week_info']['inventory_updated']
         }
       }
-      console.log(this.to_show['inventory'])
       if( this.to_show['inventory'] ){
         this.load_inventory();
       }else
         this.spinner.hide('loader_planning');
 
-      // console.log(this.to_show);
     });
   }
 
@@ -188,7 +185,6 @@ export class PlanningRecipeComponent implements OnInit {
     this.menu[menu]['id'] = data['week_info']['id'];
     this.menu[menu]['total'] = data['week_info']['total'];
     this.menu[menu]['week_done'] = data['week_info']['week_done'];
-    console.log(this.menu)
     if('recipes' in data)
       this.add_recipe_info(data['recipes']);
     // this.spinner.hide("loader_planning");
@@ -202,10 +198,9 @@ export class PlanningRecipeComponent implements OnInit {
         this.spinner.hide("loader_planning");
         return;
       }
-      console.log(data);
+      // console.log(data);
       // this.ingredients['pending'] = data['pendientes'];
       this.original_stock = data['subidos'];
-      // console.log(this.recipes_info)
       this.get_percentages();
     });
   }
@@ -213,11 +208,9 @@ export class PlanningRecipeComponent implements OnInit {
   get_percentages(){
     Object.assign(this.stock, this.original_stock);
     for( let key in this.menu){ //por cada menu
-      console.log(key)
       let main_list = this.menu[key]['recipe'];
       for(let i= 0; i< main_list.length; i++){ //de cada dia
         for(let j= 0; j< main_list[i].length; j++){ //de cada receta
-          // console.log(main_list[i][j])
           main_list[i][j]['has'] = {}
           if( main_list[i][j]['status_id'] != 2 && main_list[i][j]['status_id'] != 3 && main_list[i][j]['active'] ){
             let recipe_ingredients = this.recipes_info[ main_list[i][j]['recipe_id'] ]['ingredient_list'];
@@ -241,7 +234,6 @@ export class PlanningRecipeComponent implements OnInit {
                   if( difference < 0){ //se acabó el stock y faltó más para la receta
                     main_list[i][j]['has'][ key ] = this.stock[key];
                     current_percentage += (this.stock[key] * percentage_recipe) / recipe_ingredients[key]['quantity'];
-                    console.log(current_percentage)
                   }
                   else{
                     main_list[i][j]['has'][ key ] = recipe_ingredients[key]['quantity'];
@@ -253,14 +245,12 @@ export class PlanningRecipeComponent implements OnInit {
             }
             
             // current_percentage += all_ingredients * percentage_recipe;
-            console.log(current_percentage)
             main_list[i][j]['ingredient_percentage'] = Math.round( current_percentage )
           }else
             main_list[i][j]['ingredient_percentage'] = 0
         }
       }
     }
-    // console.log(this.menu);
     if(this.show['recipe'] && !this.is_recommended){
       this.current_recipe['has'] = this.menu[ this.current ]['recipe'][this.selected_index][this.recipe_index]['has'];
     }
@@ -272,7 +262,6 @@ export class PlanningRecipeComponent implements OnInit {
 
 
   get_recipe(day: number, index: number,event: any, is_recommended: boolean = false){
-    console.log(this.menu);
     event.preventDefault();
     let recipe_id = -1;
     let has = {};
@@ -307,7 +296,6 @@ export class PlanningRecipeComponent implements OnInit {
 
         this.spinner.hide("loader_recipe");
         this.change_view('recipe');
-        console.log(this.current_recipe);
     });
     
   }
@@ -329,9 +317,7 @@ export class PlanningRecipeComponent implements OnInit {
 
   delete_recipe(day:number,index : number){
     let recipe = this.menu[this.current]['recipe'][day][index];
-    // console.log(recipe);
     let text = '¿Estás seguro que deseas eliminar la receta ' + this.recipes_info[ recipe['recipe_id'] ]['name'] + '?';
-    // console.log(day, index);
     this.actual_modal = {
       'type' : 'delete_planned_recipe',
       'text' : text,
@@ -347,8 +333,6 @@ export class PlanningRecipeComponent implements OnInit {
         let recipe : any = this.menu[this.current]['recipe'][event['info']['day']][event['info']['index']];
         // recipe['quantity'] -= 1
 
-        console.log(recipe);
-        console.log(recipe['recipe_id'] + '_' + event['info']['day'])
         if('id' in recipe){
           recipe['active'] = false;
           this.to_delete[ recipe['recipe_id'] + '_' + event['info']['day'] ] = {'id':recipe['id'], 'quantity':recipe['quantity']};
@@ -372,7 +356,6 @@ export class PlanningRecipeComponent implements OnInit {
         form.append('quantity', this.menu[this.current]['recipe'][this.selected_index][ this.recipe_index ]['quantity'].toString());
         form.append('status_id', this.menu[this.current]['recipe'][this.selected_index][ this.recipe_index ]['status_id'].toString());
         this.ps.put_recipe(form).subscribe((data:any)=>{
-          // console.log(data);
           if(data['error']){
             this.error_server = SERVER_MESSAGES[data['message']];
             this.spinner.hide("loader_planning");
@@ -392,7 +375,6 @@ export class PlanningRecipeComponent implements OnInit {
           this.spinner.hide("loader_planning");
         });
       } else if( event['action'] == 'confirm_rate'){
-        // console.log(event['value']);
         if(event['value'])
           this.open_rate_modal();
         else
@@ -417,11 +399,8 @@ export class PlanningRecipeComponent implements OnInit {
   }
 
   deactivate_recipe(){
-    // console.log( this.selected_index, this.recipe_index)
     let recipe = this.menu[ this.current ]['recipe'][ this.selected_index ][ this.recipe_index ];
-    // console.log("a eliminar", recipe);
     let text = '¿Estás seguro que deseas desactivar la receta ' + this.recipes_info[ recipe['recipe_id'] ]['name'] + '?\n Puedes reactivarlo en otro momento si cambias de parecer';
-    // console.log(text)
     this.actual_modal = {
       'type' : 'delete_prepare_recipe',
       'text' : text,
@@ -439,7 +418,6 @@ export class PlanningRecipeComponent implements OnInit {
     form.append('status_id', this.menu[this.current]['recipe'][this.selected_index][ this.recipe_index ]['status_id'].toString());
     this.spinner.show("loader_planning");
     this.ps.put_recipe(form).subscribe((data:any)=>{
-      // console.log(data);
       if(data['error']){
         this.error_server = SERVER_MESSAGES[data['message']];
         this.spinner.hide("loader_planning");
@@ -455,7 +433,6 @@ export class PlanningRecipeComponent implements OnInit {
   }
 
   load_more_recommendations(index : number){
-    console.log("cargar más recomendaciones de : ", this.recomendation_sections[index]);
     let data_dict : any = {
       'user_id': this.user_id,
       'ingredients':JSON.stringify(this.stock),
@@ -467,7 +444,6 @@ export class PlanningRecipeComponent implements OnInit {
       data_dict['offset'] = this.recommendations[index]['offset']
     else
       data_dict['not_include'] = JSON.stringify(this.recommendations[index]['not_include'])
-    console.log(data_dict)
     this.spinner.show("loader_recommendation");
     this.ps.get_recommendations(data_dict).subscribe( (data:any)=>{ //cantidad de ingredientes
       console.log(data);
@@ -481,13 +457,11 @@ export class PlanningRecipeComponent implements OnInit {
       if( 'not_include' in data['recommendation']){
         // this.recommendations[index]['not_include'] += data['recommendation']['not_include'];
         this.recommendations[index]['not_include'].push(... data['recommendation']['not_include']);
-        console.log("entra")
       }
       else
         this.recommendations[index]['offset'] = data['recommendation']['offset'];
       // this.recommendations[index]['recipe'] = data['recommendation']['recipe'];
       this.recommendations[index]['recipe'].push(... data['recommendation']['recipe'])
-      console.log(this.recommendations[index])
       // this.has_recommendations = true;
       this.spinner.hide("loader_recommendation");
 
@@ -496,16 +470,13 @@ export class PlanningRecipeComponent implements OnInit {
   }
 
   add_recipe(){
-    // console.log("agregar receta");
     let recipe : any;
-    // console.log("lista de recomendación: ", this.recommendation_list);
     if(this.recommendation_list != -1){
       recipe = this.recommendations[this.recommendation_list]['recipe'][this.recipe_index];
       let week_view = this.menu[this.current]['recipe'][this.current_day];
       let found = false;
       for(let i = 0; i < week_view.length; i++){
         if(week_view[i]['recipe_id'] == recipe['recipe_id']){
-          // console.log("se agrega una nueva porción");
           found = true;
           if(!week_view[i]['active']){
             week_view[i]['active'] = true;
@@ -536,7 +507,6 @@ export class PlanningRecipeComponent implements OnInit {
                         });
           this.to_add[ key ] = 1; //15_6
           this.menu[this.current]['week_done'][this.current_day]++;
-          console.log(this.to_add);
         // }
         this.menu[ this.current ]['total'] += 1;
       }
@@ -545,11 +515,9 @@ export class PlanningRecipeComponent implements OnInit {
     // else{
     //   recipe = this.menu[ this.current ]['recipe'][this.selected_index][ this.recipe_index ];
     // }
-    // console.log(recipe);
   }
 
   change_view(element : string){
-    // console.log("entra a change");
     if(element != 'recipe'){
       this.is_recommended = false;
       this.recommendation_list = -1;
@@ -607,7 +575,6 @@ export class PlanningRecipeComponent implements OnInit {
     }
     // }else
     // updated = this.current_recipe['has'];
-    console.log(updated);
     // return; 
     form.append('items_used', JSON.stringify(updated));
     this.spinner.show("loader_planning");
@@ -617,10 +584,8 @@ export class PlanningRecipeComponent implements OnInit {
         this.spinner.hide("loader_planning");
         return;
       }
-      // console.log("evaluación hecha");
       this.spinner.hide("loader_planning");
       for( let key in this.current_recipe['has'] ){
-        console.log(key);
         this.original_stock[ key ] -= this.current_recipe['has'][ key ];
         if( this.original_stock[ key ] == 0)
           delete this.original_stock[ key ];
@@ -633,15 +598,13 @@ export class PlanningRecipeComponent implements OnInit {
 
   add_recipe_info(recipes : any){
     for( let i = 0; i<recipes.length; i++){
-      // console.log(recipes[i]);
       if( ! (recipes[i]['id'] in this.recipes_info ) )
         this.recipes_info[ recipes[i]['id'] ] = recipes[i];
     }
-    console.log(this.recipes_info);
+    console.log(this.recipes_info)
   }
 
   get_recommendations(){
-    console.log(this.stock);
     let to_send: any = {
       'all' : 'True',
       'user_id': this.user_id,
@@ -723,11 +686,9 @@ export class PlanningRecipeComponent implements OnInit {
     form.append('quantity', JSON.stringify(final_update) );
     form.append('user_id', this.user_id.toString());
     form.append('week_id', this.menu[ 'Planeación' ]['id'].toString())
-    // console.log(to_create);
-    // console.log(to_delete);
     this.spinner.show("loader_planning");
     this.ps.post_recipe_planning(form).subscribe( (data:any) =>{
-      console.log(data);
+      // console.log(data);
       if(data['error']){
         this.error_server = SERVER_MESSAGES[data['message']];
         this.spinner.hide("loader_planning");

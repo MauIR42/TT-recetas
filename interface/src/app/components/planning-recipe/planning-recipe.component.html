@@ -99,8 +99,19 @@
 											 </ng-container>
 										    <img src="assets/images/clock-blue.svg" class="img-fluid mr-2">
 										    <p class="strong_blue_clor">{{recipes_info[recipe['recipe_id']]['total_time']}} min.</p>
-										    <br>
-										    <p>realizados el último mes: 0 <strong class="strong_blue_clor">{{recipes_info[recipe['recipe_id']]['cooked']}}</strong></p>
+										    <ng-container *ngIf="recipes_info[recipe['recipe_id']]['user_data']['count']">
+										    	<br>
+										    	<p>Veces realizada:  <strong class="strong_blue_clor">{{recipes_info[recipe['recipe_id']]['user_data']['count']}}</strong></p>
+											</ng-container>
+										    <ng-container *ngIf="recipes_info[recipe['recipe_id']]['user_data']['count']">
+										    	<br>
+											    <img src="assets/images/percent-blue.svg" class="img-fluid mr-2">
+											    <p>de recomendación:  <strong class="strong_blue_clor">{{recipes_info[recipe['recipe_id']]['user_data']['last_evaluation']}}</strong></p>
+											</ng-container>
+											<ng-container *ngIf="! recipes_info[recipe['recipe_id']]['user_data']['count']">
+												<br>
+												<p>No has realizado esta receta.</p>
+											</ng-container>
 										    <br>
 										    <p *ngIf="recipe['status_id'] == 3">Receta desactivada</p>
 										  </div>
@@ -259,8 +270,19 @@
 									    <p class="strong_blue_clor mr-5" style="color:green;" *ngIf="recipe.ingredient_percentage >= 80 &&recipe.ingredient_percentage <= 100 ">{{recipe.ingredient_percentage}} ingr.</p>
 									    <img src="assets/images/clock-blue.svg" class="img-fluid mr-2">
 									    <p class="strong_blue_clor">{{recipes_info[recipe['recipe_id']]['total_time']}} min.</p>
-									    <br>
-									    <p>realizados el último mes: <strong class="strong_blue_clor">{{recipes_info[recipe['recipe_id']]['cooked']}}</strong></p>
+									    <ng-container *ngIf="recipes_info[recipe['recipe_id']]['user_data']['count']">
+									    	<br>
+									    	<p>Veces realizada:  <strong class="strong_blue_clor">{{recipes_info[recipe['recipe_id']]['user_data']['count']}}</strong></p>
+										</ng-container>
+									    <ng-container *ngIf="recipes_info[recipe['recipe_id']]['user_data']['count']">
+									    	<br>
+										    <img src="assets/images/percent-blue.svg" class="img-fluid mr-2">
+										    <p>de recomendación:  <strong class="strong_blue_clor">{{recipes_info[recipe['recipe_id']]['user_data']['last_evaluation']}}</strong></p>
+										</ng-container>
+										<ng-container *ngIf="! recipes_info[recipe['recipe_id']]['user_data']['count']">
+											<br>
+											<p>No has realizado esta receta.</p>
+										</ng-container>
 									  </div>
 									  <div class="card-body">
 									    <p class="card-text text-justify">{{recipes_info[recipe['recipe_id']]['description']}}</p>

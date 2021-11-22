@@ -817,6 +817,10 @@ class PlanningView(APIView):
 					done[week_date ] += 1
 			# recipe_ingredient = RecipeIngredient.objects.filter(recipe_id = OuterRef('pk'))
 			recipes_data =  Recipe.objects.filter(active = True, id__in=recipes_to_collect)
+			rate_data = list(UserRecipe.objects.filter(recipe_id__in=recipes_to_collect, user_id=user_id).values('count','last_evaluation','recipe_id'))
+			rate_info = {}
+			for recipe in rate_data:
+				rate_info[ recipe['recipe_id'] ] = {'last_evaluation': recipe['last_evaluation'], 'count':recipe['count']}
 			# recipes_data =  Recipe.objects.filter(active = True, id__in=recipes_to_collect).annotate(ingredients_list = Subquery(recipe_ingredient.values()[:1] ) )
 			if recipes_data:
 				recipes_data = list( recipes_data.values() )
@@ -830,6 +834,10 @@ class PlanningView(APIView):
 					dict_ingredient[ ingredient['ingredient_id'] ] = ingredient
 
 				recipe_in['ingredient_list'] = dict_ingredient
+				if recipe_in['id'] in rate_info :
+					recipe_in['user_data'] = rate_info[ recipe_in['id'] ]
+				else:
+					recipe_in['user_data'] = {'last_evaluation': 0, 'count':0}
 
 			current_week['total'] = total
 			current_week['total_done'] = total_done
@@ -1011,6 +1019,10 @@ class RecommendationView(APIView):
 			if to_obtain :
 				user_cal = UserRecipe.objects.filter(user_id = data['user_id'], recipe_id = OuterRef('pk'))
 				recipes = list(Recipe.objects.filter(active = True, id__in=to_obtain).annotate(cal=Subquery(user_cal.values("last_evaluation")[:1]) ).values() )#faltan los ingredientes necesarios
+				rate_info = {}
+				rate_data = list(UserRecipe.objects.filter(recipe_id__in=to_obtain, user_id=data['user_id']).values('count','last_evaluation','recipe_id'))
+				for recipe in rate_data:
+					rate_info[ recipe['recipe_id'] ] = {'last_evaluation': recipe['last_evaluation'], 'count':recipe['count']}
 				ingredients = list(RecipeIngredient.objects.filter(active=True, recipe_id__in=to_obtain, is_optional= False).order_by('recipe_id').values())
 				previous_id = ingredients[0]['recipe_id']
 				current_recipe = {}
@@ -1049,6 +1061,10 @@ class RecommendationView(APIView):
 										'ingredient_percentage':ingredients_data[recipe['id']]['percentage'],
 										'user_evaluation': recipe['cal'] })
 					recipe['ingredient_list'] =  ingredients_data[ recipe['id'] ]['ingredients']
+					if recipe['id'] in rate_info :
+						recipe['user_data'] = rate_info[ recipe['id'] ]
+					else:
+						recipe['user_data'] = {'last_evaluation': 0, 'count':0}
 					ingredients_data[ recipe['id'] ] = recipe
 				has_more = False
 
@@ -1103,8 +1119,9 @@ class RecommendationView(APIView):
 			 			recipe['last_evaluation'] = float( recipe['last_evaluation'])
 					recipe_list.append({'recipe_id':recipe['recipe_id'],
 				 		'ingredient_percentage': total,
-				 		'user_evaluation': recipe['last_evaluation'],
-				 		'count': recipe['count'] })
+				 		'last_evaluation' : recipe['last_evaluation'],
+				 		'count': recipe['count'],
+				 		})
 					if not recipe['recipe_id'] in recipe_info:
 				 		recipe['ingredient_list'] = ingredient_dict
 				 		aux = {
@@ -1118,17 +1135,20 @@ class RecommendationView(APIView):
 				 			'total_time': recipe['total_time'],
 				 			'portions': recipe['portions'],
 				 			'ingredient_list' : ingredient_dict,
+				 			'user_data':{ 'last_evaluation' : recipe['last_evaluation'],
+				 				'count': recipe['count']} 
 				 		}
 				 		to_add.append(aux)
 				 		recipe_info[ recipe['recipe_id'] ] = 1
 					ids.append( recipe['recipe_id'])
-				recipe_list = sorted(recipe_list, key = lambda k: (-k["user_evaluation"], -k['count'],-k["ingredient_percentage"]))[: data['limit']]
+				recipe_list = sorted(recipe_list, key = lambda k: (-k["last_evaluation"], -k['count'],-k["ingredient_percentage"]))[: data['limit']]
 				return to_add, {'recipe':recipe_list,'has_more':has_more, 'not_include':ids}
 			else:
 				return [],{'recipe':[], 'has_more':False,'not_include':[]}
 
 		except Exception as e:
 			# print("hubo un error")
+			traceback.print_exc()
 			print(e)
 			return [],{'recipe':[], 'has_more':False,'not_include':[]}
 
@@ -1143,24 +1163,18 @@ class RecommendationView(APIView):
 			for recipe in to_ignore:
 				id_to_ignore.append(recipe.recipe_id)
 			id_to_ignore += data['not_include']
-			# print("a ignorar")
-			# print(id_to_ignore)
 			to_check = Recipe.objects.filter( Q(active= True) & ~Q(id__in=id_to_ignore) )
 			ingredients = list(RecipeIngredient.objects.filter( active= True, recipe_id__in=to_check, is_optional= False).order_by('recipe_id').values())
 
 			ingredients_dict = {}
 			ingredients_data = {}
 			total = 0
-			print(data['ingredients'])
 			if len(ingredients):
 				previous_id = ingredients[0]['recipe_id']
 				for ingredient in ingredients:
 					key = str(ingredient['ingredient_id'])
 					if previous_id != ingredient['recipe_id']:
 						total = round(total / len(ingredients_dict))
-						if previous_id == 52:
-							print("!!!!!!!!!!!!!!entra")
-							print(ingredients_dict)
 						ingredients_data[ previous_id ] = {'percentage':total,'ingredients':ingredients_dict}
 						ingredients_dict = {}
 						total = 0
@@ -1168,8 +1182,6 @@ class RecommendationView(APIView):
 					ingredients_dict[ key ] = ingredient
 
 					if key in data['ingredients']:
-						if previous_id == 52:
-							print("!!!",data['ingredients'][ key ])
 						if data['ingredients'][ key ] >= ingredient['quantity']:
 							total += 100
 						else:
@@ -1177,8 +1189,9 @@ class RecommendationView(APIView):
 				total = round( total / len(ingredients_dict) )
 				ingredients_data[ previous_id ] = {'percentage':total,'ingredients':ingredients_dict}
 				for recipe in list(to_check.values()):
-					recipe_list.append({'recipe_id': recipe['id'], 'ingredient_percentage': ingredients_data[ recipe['id'] ]['percentage'], 'count': 0 })
+					recipe_list.append({'recipe_id': recipe['id'], 'ingredient_percentage': ingredients_data[ recipe['id'] ]['percentage']})
 					recipe['ingredient_list'] = ingredients_data[ recipe['id'] ]['ingredients']
+					recipe['user_data'] = {'count': 0, 'last_evaluation':0}
 					ingredients_data[ recipe['id'] ] = recipe
 			# recipe_list = recipe_list[:1]
 			if len(recipe_list) - data['limit'] > 0:
@@ -1236,7 +1249,8 @@ class RecommendationView(APIView):
 					# print(ingredients_data)
 					# print(to_check)
 					for recipe in list(to_check.values()):
-				 		aux.append({'recipe_id': recipe['id'], 'ingredient_percentage': ingredients_data[ recipe['id'] ]['percentage'], 'count': count_info[ recipe['id'] ] })
+				 		aux.append({'recipe_id': recipe['id'], 'ingredient_percentage': ingredients_data[ recipe['id'] ]['percentage'], 'count': count_info[ recipe['id'] ], 
+				 			'user_data': {'last_evaluation': ele['last_evaluation'], 'count': ele['count']} })
 				 		recipe['ingredient_list'] = ingredients_data[ recipe['id'] ]['ingredients']
 				 		ingredients_data[ recipe['id'] ] = recipe
 					# print("ultimos toques")
@@ -1275,14 +1289,13 @@ class RecommendationView(APIView):
 				recipe_data = {}
 				recipes_ids = []
 				for recipe in recipes:
-					recipe['count'] = 0
-					recipe['user_evaluation'] = 0.00
+					recipe['user_data'] = {'count': 0, 'last_evaluation':0}
 					recipe_data[ recipe['id'] ] = recipe
 					recipes_ids.append( recipe['id'] )
 				count_info = list(UserRecipe.objects.filter(user_id=data['user_id'],recipe_id__in=recipes_ids).values('recipe_id','count','last_evaluation'))
 				for recipe in count_info:
-					recipe_data[ recipe['recipe_id'] ]['count'] =  recipe['count']
-					recipe_data[ recipe['recipe_id'] ]['user_evaluation'] =  float(recipe['last_evaluation'])
+					recipe_data['user_data'] = {'count': recipe['count'],
+						'last_evaluation':recipe['last_evaluation']}
 				ingredients = list(RecipeIngredient.objects.filter(recipe_id__in=recipes_ids, active = True, is_optional= False).order_by('recipe_id').values())
 				ingredients_dict = {}
 				# ingredients_data = {}
@@ -1295,8 +1308,7 @@ class RecommendationView(APIView):
 						total =  round( total / len(ingredients_dict) )
 						recipe_data[ previous_id ]['ingredient_list'] = ingredients_dict
 						# print("tratando")
-						recipe_list.append({'recipe_id':previous_id,'count': recipe_data[ previous_id ]['count'],
-						'user_evaluation':recipe_data[ previous_id ]['user_evaluation'], 'ingredient_percentage': total })
+						recipe_list.append({'recipe_id':previous_id,'ingredient_percentage': total })
 						if not previous_id in recipe_info:
 							recipe_info[ previous_id ] = 1
 							to_add.append( recipe_data[ previous_id ] )
@@ -1313,8 +1325,7 @@ class RecommendationView(APIView):
 							total += (data['ingredients'][ key ] * 100) / ingredient['quantity']			
 				total = round( total / len(ingredients_dict) )
 				recipe_data[ previous_id ]['ingredient_list'] = ingredients_dict
-				recipe_list.append({'recipe_id':previous_id,'count': recipe_data[ previous_id ]['count'],
-						'user_evaluation':recipe_data[ previous_id ]['user_evaluation'], 'ingredient_percentage': total })
+				recipe_list.append({'recipe_id':previous_id, 'ingredient_percentage': total })
 				if not previous_id in recipe_info:
 					recipe_info[ previous_id ] = 1
 					to_add.append( recipe_data[ previous_id ] )
@@ -1325,6 +1336,7 @@ class RecommendationView(APIView):
 			#ingredients = list(RecipeIngredient.objects.filter(recipe_id__in=recipes))
 		except Exception as e:
 			# print("hay un error")
+			traceback.print_exc()
 			print(e)
 			return [],{'recipe':[], 'has_more':False,'offset':[]}
 
@@ -1406,9 +1418,12 @@ class RecipeView(APIView):
 	def get(self, request, *args, **kwargs):
 		try:
 			recipe_id =  int( request.GET.get('recipe_id', '0') )
-
-			if recipe_id <= 0:
+			all_flag = int(request.GET.get('all', '0'))
+			if recipe_id <= 0 and not all_flag:
 				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
+			if all_flag:
+				recipes = list(Recipe.objects.filter(active = True).values('name','original_url','image_url'))
+				return JsonResponse(data={"error": False,  'recipes': recipes})
 			# pasos, ingredientes, (informacion basica ya esta en la receta)
 			ingredients = list(RecipeIngredient.objects.filter(recipe_id= recipe_id, active = True).annotate(unit=Case(
 					When(ingredient__type_id = 1, then=Value('pzs')),

@@ -218,12 +218,14 @@ void restart_scale(){
 	FILE *fd = fopen("/home/pi/Documents/TT/repository/users.txt","r");
 	char user[21];
 	char * username;
+	char real_path[90];
 	int res;
 	while( fgets(user,21,fd) != NULL){
 		// printf("El usuario completo: %s\n", user);
 		 username = strtok(user, ",");
 		 // printf("El nombre es: %s\n", username);
-		 res = nftw(username, delete_file, 12, FTW_DEPTH | FTW_PHYS);
+		 sprintf(real_path,"/home/pi/Documents/TT/repository/%s",username);
+		 res = nftw(real_path, delete_file, 12, FTW_DEPTH | FTW_PHYS);
 		 // printf("respuesta: %d\n", res);
 	}
 	fclose(fd);

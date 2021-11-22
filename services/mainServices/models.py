@@ -156,6 +156,7 @@ class Recipe(models.Model): #excel datos_recetas
 	portions = models.IntegerField(null = False)
 	type = models.ForeignKey(RecipeType, on_delete=models.PROTECT, null = False)
 	active = models.BooleanField(default = True)
+	original_url = models.TextField(null=True)
 
 	class Meta:
 		db_table = 'recipe'

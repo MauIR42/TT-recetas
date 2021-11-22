@@ -7,11 +7,16 @@ import { HeaderComponent } from './components/header/header.component';
 import { RegisterComponent } from './components/register/register.component';
 import { StockComponent } from './components/stock/stock.component';
 import { UserInfoComponent } from './components/user-info/user-info.component';
-import { PlanningRecipeComponent } from './components/planning-recipe/planning-recipe.component'
+import { PlanningRecipeComponent } from './components/planning-recipe/planning-recipe.component';
 
 import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
 
+import { ObtainedImagesComponent } from './components/info/obtained-images/obtained-images.component';
+import { TermsComponent } from './components/info/terms/terms.component';
+
 const routes: Routes = [
+  { path:'credito_a_imagenes', component: ObtainedImagesComponent },
+  { path:'tyc', component: TermsComponent },
   { path:'perfil', component: UserInfoComponent },
   { path:'estadisticas', component: UserInfoComponent },
   { path:'inventario', component: StockComponent },

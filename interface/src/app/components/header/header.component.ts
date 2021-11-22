@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { LocalStorageService } from '../../services/local-storage.service';
-declare const $ : any;
+declare var $ : any;
 
 @Component({
   selector: 'app-header',
@@ -15,10 +15,10 @@ export class HeaderComponent implements OnInit {
   user_id : number = -1;
 
   icons: any = {
-    'info_icon' : { 'base' : "assets/images/info-square-fill", 'options' : ['dieta_keto','sindrome_metabolico']},
+    'info_icon' : { 'base' : "assets/images/info-square-fill", 'options' : ['credito_a_imagenes','tyc']},
     'calendar_icon' : {  'base' : "assets/images/calendar3-week-fill" , 'options' : ['planeacion_semanal']},
     'archive_icon' : {  'base' : "assets/images/archive-fill" , 'options' : ['bascula','inventario']},
-    'person_icon' : {  'base' : "assets/images/person-circle" , 'options' : ['estadisticas', 'perfil']},
+    'person_icon' : {  'base' : "assets/images/person-circle" , 'options' : ['perfil']},
   }
 
   current : string = '';

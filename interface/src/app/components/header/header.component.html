@@ -7,9 +7,9 @@
 	  		<img [src]="icons['info_icon']['base']" class="img-fluid">
 	  		<a class="nav-link dropdown-toggle" data-toggle="dropdown"  data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" [ngClass]="(selected == 1)? '' : 'strong_blue_clor'">Información</a>
 	  		<div class="dropdown-menu orange-background fill-dropdown">
-		      <a class="dropdown-item" [routerLink]="['/dieta_keto']">¿Qué es una <br class="d-xl-none">dieta Keto?</a>
+		      <a class="dropdown-item" [routerLink]="['/credito_a_imagenes']">Créditos a las <br class="d-xl-none">imagenes usadas</a>
 		      <div class="dropdown-divider"></div>
-		      <a class="dropdown-item" [routerLink]="['/sindrome_metabolico']">¿Qué es el <br>síndrome metabólico?</a>
+		      <a class="dropdown-item" [routerLink]="['/tyc']">Terminos y <br> condiciones</a>
 		    </div>
 		</li>
 		<li class="nav-item" (mouseover)="selected = 2" (mouseout)="selected = 0" [ngClass]="(selected == 2)? 'shadow-lg' : ''">
@@ -29,8 +29,6 @@
 	  		<img [src]="icons['person_icon']['base']" class="img-fluid">
 	  		<a class="nav-link dropdown-toggle" data-toggle="dropdown"  data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"  href="#" [ngClass]="(selected == 4)? '' : 'strong_blue_clor'">Yo</a>
 	  		<div class="dropdown-menu orange-background fill-dropdown">
-		      <a class="dropdown-item" [routerLink]="['/estadisticas']">Mis estadisticas</a>
-		      <div class="dropdown-divider"></div>
 		      <a class="dropdown-item" [routerLink]="['/perfil']">Mi perfil</a>
 		      <div class="dropdown-divider"></div>
 		      <button class="dropdown-item" (click)="logout()">Cerrar sesión</button>
@@ -64,9 +62,9 @@
 			</button>
 		</div>
 		<div class="col-12 orange-background text-center border-bottom border-white collapse" id="info-col">
-			<a class="dropdown-item" [routerLink]="['/dieta_keto']">¿Qué es una dieta Keto?</a>
+			<a class="dropdown-item" [routerLink]="['/credito_a_imagenes']">Créditos a las imagenes usadas</a>
 			<div class="dropdown-divider"></div>
-			<a class="dropdown-item border-bottom border-white" [routerLink]="['/sindrome_metabolico']">¿Qué es el síndrome metabólico?</a>
+			<a class="dropdown-item border-bottom border-white" [routerLink]="['/tyc']">Terminos y condiciones</a>
 		</div>
 		<div class="w-100"></div>
 		<div class="col-12 navbar-blue text-center border-bottom border-white">
@@ -95,8 +93,6 @@
 			</button>
 		</div>
 		<div class="col-12 orange-background text-center border-bottom border-white collapse" id="user-col">
-			<a class="dropdown-item" [routerLink]="['/estadisticas']">Mis estadisticas</a>
-		      <div class="dropdown-divider"></div>
 		      <a class="dropdown-item" [routerLink]="['/perfil']">Mi perfil</a>
 		      <div class="dropdown-divider"></div>
 		      <a class="dropdown-item" (click)="logout()">Cerrar sesión</a>
