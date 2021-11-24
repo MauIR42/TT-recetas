@@ -1,0 +1,46 @@
+
+<div class="modal fade" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" id="table_modal">
+  <ngx-spinner name="loader_info" [fullScreen]="false" type="ball-spin-clockwise-fade" size="medium" color = "#0AAFC6">
+    <p class="loading">Cargando...</p>
+  </ngx-spinner>
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header orange-light-background">
+        <h5 class="modal-title ">Datos de la receta realizada</h5>
+      </div>
+      <div class="modal-body">
+      <div class="container">
+        <div class="row">
+          <h5 class="strong_blue_clor">Estas son los datos de la receta: {{current_recipe}}</h5>
+        </div>
+        <div class="row">
+          <div class="text-center table-responsive" >
+            <table id="recipe_data" class="display">
+              <thead>
+                <tr class="blue-main-background">
+                  <th><p>Fecha de preparación</p></th>
+                  <th><p>Resultado</p></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of data; let i = index">
+                  <td>
+                    {{item.preparation_date}}
+                  </td>
+                  <td>
+                    {{status_name[item.status_id]}}.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+        <!-- <p class="text-right">{{current_step}} de {{total_steps}}</p> -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-normal-orange" (click)="close_modal()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>

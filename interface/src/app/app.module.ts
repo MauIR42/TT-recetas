@@ -25,6 +25,7 @@ import { WeekInfoModalComponent } from './components/modal/week-info-modal/week-
 import { ModalRateRecipeComponent } from './components/modal/modal-rate-recipe/modal-rate-recipe.component';
 import { ObtainedImagesComponent } from './components/info/obtained-images/obtained-images.component';
 import { TermsComponent } from './components/info/terms/terms.component';
+import { TableModalComponent } from './components/modal/table-modal/table-modal.component';
 
 @NgModule({
   declarations: [
@@ -46,6 +47,7 @@ import { TermsComponent } from './components/info/terms/terms.component';
     ModalRateRecipeComponent,
     ObtainedImagesComponent,
     TermsComponent,
+    TableModalComponent,
   ],
   imports: [
     BrowserModule,

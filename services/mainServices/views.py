@@ -945,6 +945,24 @@ class PlanningView(APIView):
 
 
 class RecipeEvaluationView(APIView):
+	def get(self, request, *args, **kwargs):
+		try:
+			user_id =  int( request.GET.get('user_id','0') )
+			are_all =  int( request.GET.get('all','0') )
+			recipe_id =  int( request.GET.get('recipe_id','0') )
+
+			print(user_id, recipe_id)
+			if not (user_id and (are_all or recipe_id) ):
+				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
+			if are_all:
+				recipes = list(UserRecipe.objects.filter(user_id = user_id).annotate(recipe_name = F("recipe__name")).values('recipe_name', 'recipe_id','count','last_evaluation') )
+				return JsonResponse(data={"error": False, "recipes": recipes})
+			else:
+				recipes = list( WeekRecipe.objects.filter(week__user_id = user_id, recipe_id= recipe_id).values() )
+				return JsonResponse(data={"error": False, "recipes" : recipes})
+		except Exception as e:
+			print(e)
+			return JsonResponse(data={"error": True,  "message":"internal_server_error"})
 	def post(self, request, *args, **kwargs):
 		try:
 

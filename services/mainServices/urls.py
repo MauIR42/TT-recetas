@@ -18,5 +18,6 @@ urlpatterns = [
 	path('recommendation', views.RecommendationView.as_view(), name="RecommendationView"),
 	path('recipe', views.RecipeView.as_view(), name="RecipeView"),
 	path('stock/pending', views.PendingView.as_view(), name="PendingView"),
+	path('user/recipe', views.RecipeEvaluationView.as_view(), name='RecipeEvaluationView'),
 
 ]

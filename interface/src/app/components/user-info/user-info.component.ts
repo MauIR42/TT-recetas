@@ -37,7 +37,37 @@ export class UserInfoComponent implements OnInit {
   graphs : any = [];
   graphs_empty: boolean = false;
 
+  no_recipes : boolean = true;
+
   health_type : any = {};
+
+  recipes : any = [];
+
+  table : any;
+
+  detail_info : any = [];
+
+  language : any = {
+    "emptyTable":     "No hay ingredientes en la tabla",
+    "info":           "mostrando _START_ a _END_ de  _TOTAL_ ingredientes",
+    "infoEmpty":      "No hay ingredientes por mostrar",
+    "infoFiltered":   "(filtrado de un total de _MAX_ ingredientes)",
+    "lengthMenu":     "mostrar hasta _MENU_ ingredientes",
+    "search":         "Buscar:",
+    "zeroRecords":    "No se encontraron datos",
+    "paginate": {
+        "first":      "Primera",
+        "last":       "Última",
+        "next":       "Siguiente",
+        "previous":   "Anterior"
+    },
+    "aria": {
+        "sortAscending":  ": activar para ordenar en ascenso",
+        "sortDescending": ": activar para ordenar en descenso"
+    }
+  }
+
+  current_recipe : string = '';
 
   constructor(private us : UserService, private spinner: NgxSpinnerService, 
               private ls : LocalStorageService, private router: Router) { 
@@ -50,12 +80,14 @@ export class UserInfoComponent implements OnInit {
   ngOnInit(): void {
     let petitions = [
       this.us.get_user_info({'user_id':this.user_id}),
-      this.us.get_user_health_data({'user_id':this.user_id})
+      this.us.get_user_health_data({'user_id':this.user_id}),
+      this.us.get_user_recipe_data({'user_id':this.user_id, 'all':1})
     ]
     forkJoin(petitions).subscribe( (data : any)=>{
       console.log(data);
       let info_data = data[0];
       let health_info = data[1];
+      let recipe_data = data[2];
 
       if(info_data['error']){
         this.error_server = SERVER_MESSAGES[info_data['message']];
@@ -85,53 +117,28 @@ export class UserInfoComponent implements OnInit {
         }
       }
 
-    });
-    $(document).ready(function() {
-      // let ctx = $("#IMC");
-      // const labels = ["Semana 1", "Semana 2", "Semana 3", "Semana 4", "Semana 5", "Semana 6", "Semana 7"]
-      // const data = {
-      //   labels: labels,
-      //   datasets: [{
-      //     label: 'Indice de masa corporal',
-      //     data: [40, 39, 35, 34, 30, 29, 25],
-      //     fill: false,
-      //     borderColor: '#0AAFC6',
-      //     tension: 0.1
-      //   }],
-      // };
-      // let IMC = new Chart(ctx, {type: 'line',
-      //     data: data
-      //   });
+      if( recipe_data['recipes'].length > 0){
+        this.no_recipes = false;
+        this.recipes = recipe_data['recipes'];
+        let that = this;
+        $( document ).ready(function() {
+          that.table = $('#recipe_table').DataTable({ 
+            "language": that.language,
+            "columnDefs": [
+              {
+                  "targets": [ 3 ],
+                  "visible": false,
+                  "searchable": false
+            }]
+          });
+           $('#recipe_table tbody').on('click', 'tr', function ( this : any) {
+            var data = that.table.row( this ).data();
+            that.load_recipe_detail_info({'name':data[0], 'id':data[3]});
+          } );
+        });
 
-      // let ctx_peso = $("#peso");
-      // const data_peso = {
-      //   labels: labels,
-      //   datasets: [{
-      //     label: 'Pesos registrados',
-      //     data: [40, 39, 80, 81, 56, 55, 40],
-      //     fill: false,
-      //     borderColor: '#0AAFC6',
-      //     tension: 0.1
-      //   }],
-      // };
-      // let peso = new Chart(ctx_peso, {type: 'line',
-      //     data: data_peso
-      //   });
+      }
 
-      // let ctx_abdomen = $("#abdomen");
-      // const data_abdomen = {
-      //   labels: labels,
-      //   datasets: [{
-      //     label: 'Diametro de la cintura',
-      //     data: [40, 39, 80, 81, 56, 55, 40],
-      //     fill: false,
-      //     borderColor: '#FDC216',
-      //     tension: 0.1
-      //   }],
-      // };
-      // let abdomen = new Chart(ctx_abdomen, {type: 'line',
-      //     data: data_abdomen
-      // });
     });
 }
 
@@ -180,6 +187,14 @@ export class UserInfoComponent implements OnInit {
       });
     });
 
+  }
+
+  load_recipe_detail_info(data_recipe : any){
+    this.us.get_user_recipe_data({'user_id':this.user_id, 'recipe_id':data_recipe['id']}).subscribe( (data : any)=>{
+      console.log(data);
+      this.detail_info = data['recipes'];
+      this.current_recipe = data_recipe['name'];
+    });
   }
 
 }

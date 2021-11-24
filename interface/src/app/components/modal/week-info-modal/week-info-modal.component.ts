@@ -102,6 +102,7 @@ export class WeekInfoModalComponent implements OnInit {
   }
 
   close_modal(){
+    this.update_completed.emit(this.steps.includes("inventory"));
     this.form_info['diameter']['value'] = 0;
     this.form_info['weight']['value'] = 0;
     $('#planning_modal').modal('hide');
@@ -139,7 +140,7 @@ export class WeekInfoModalComponent implements OnInit {
       }
 
       this.spinner.hide("loader_info");
-      this.update_completed.emit(this.steps.includes("inventory"));
+      // this.update_completed.emit(this.steps.includes("inventory"));
       this.close_modal();
     });
     

@@ -1,5 +1,5 @@
 import { Component, OnInit, EventEmitter, Output } from '@angular/core';
-declare const $: any;
+declare var $: any;
 @Component({
   selector: 'app-modal-rate-recipe',
   templateUrl: './modal-rate-recipe.component.html',
