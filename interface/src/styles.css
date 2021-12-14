@@ -9,6 +9,7 @@
   --p-header:  #FFFFFF;
   --light-blue:  #AED6F1;
   --grey-deactivate:  #838F91;
+  --special-blue:  #1d89bb;
 }
 
 
@@ -190,6 +191,10 @@ a {
 .blue-main-background > th > p{
   color:  #ffffff;
 
+}
+
+.special-blue-background {
+  background-color: var(--special-blue);
 }
 
 /*ul.nav > li.nav-item {

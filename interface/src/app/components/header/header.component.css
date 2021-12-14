@@ -29,12 +29,12 @@ p {
 .dropdown-item : focus,
 .dropdown-item : active{
 	color:  #FFFFFF !important;
-	background-color: #FDCE46 !important;
+	background-color: var(--special-blue-background) !important;
 }
 
 .dropdown-item{
 	color:  #FFFFFF !important;
-	background-color: #FDCE46 !important;
+	background-color: var(--special-blue-background) !important;
 }
 
 

@@ -6,12 +6,11 @@
 #include "communication.h"
 
 int offset = 0;
-//int reference_unit = 188;
 int reference_unit = 83;
 void power_up(){
 	set_value(SCK_pin, "0");
 	sleep(0.0001);
-	get_data(); //maybe it doesn't have to be here
+	get_data();
 }
 
 void reset_hx711(){

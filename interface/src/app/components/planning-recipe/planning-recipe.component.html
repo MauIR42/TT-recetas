@@ -168,6 +168,7 @@
 								  	<p>
 								  		{{ingredient['ingredient_name']}} 
 								  	</p>
+								  		
 									  	<ng-container *ngIf="ingredient['quantity'] > 0">
 									  		<p>
 									  		{{ingredient['quantity']}} {{ingredient['unit']}} 
@@ -175,33 +176,35 @@
 									  	</ng-container> 
 									  	<ng-container *ngIf="ingredient['comment'].length > 0">
 									  		<p>
-									  		 o {{ingredient['comment']}}
+									  		 	<ng-container *ngIf="!ingredient['is_optional']"> o</ng-container> {{ingredient['comment']}}
 									  		</p>
 									  	</ng-container>
-									  	<ng-container *ngIf="!is_recommended">
-										  	<ng-container *ngIf="current_recipe['has'][ ingredient['ingredient_id'] ] < ingredient['quantity']">
-										  		<p class="warning">
-										  		 (faltan {{ ingredient['quantity'] - current_recipe['has'][ ingredient['ingredient_id'] ]}} {{ingredient['unit']}} )
-										  		</p>
-										  	</ng-container> 
-										  	<ng-container *ngIf="!current_recipe['has'][ ingredient['ingredient_id'] ] && menu[current]['recipe'][selected_index][recipe_index]['status_id'] != 3">
-										  		<p class="warning">
-										  		 (faltan {{ ingredient['quantity'] }} {{ingredient['unit']}} )
-										  		</p>
-										  	</ng-container> 
-										 </ng-container>
-										 <ng-container *ngIf="is_recommended">
-										 	<ng-container *ngIf="stock[ ingredient['ingredient_id'] ] < ingredient['quantity']">
-										  		<p class="warning">
-										  		 (faltan {{ ingredient['quantity'] - stock[ ingredient['ingredient_id'] ]}} {{ingredient['unit']}} )
-										  		</p>
-										  	</ng-container> 
-										  	<ng-container *ngIf="!stock[ ingredient['ingredient_id'] ]">
-										  		<p class="warning">
-										  		 (faltan {{ ingredient['quantity'] }} {{ingredient['unit']}} )
-										  		</p>
-										  	</ng-container> 
-										 </ng-container>
+									  	<ng-container *ngIf="!ingredient['is_optional']">
+										  	<ng-container *ngIf="!is_recommended">
+											  	<ng-container *ngIf="current_recipe['has'][ ingredient['ingredient_id'] ] < ingredient['quantity']">
+											  		<p class="remaining">
+											  		 (faltan {{ ingredient['quantity'] - current_recipe['has'][ ingredient['ingredient_id'] ]}} {{ingredient['unit']}} )
+											  		</p>
+											  	</ng-container> 
+											  	<ng-container *ngIf="!current_recipe['has'][ ingredient['ingredient_id'] ] && menu[current]['recipe'][selected_index][recipe_index]['status_id'] != 3">
+											  		<p class="remaining">
+											  		 (faltan {{ ingredient['quantity'] }} {{ingredient['unit']}} )
+											  		</p>
+											  	</ng-container> 
+											 </ng-container>
+											 <ng-container *ngIf="is_recommended">
+											 	<ng-container *ngIf="stock[ ingredient['ingredient_id'] ] < ingredient['quantity']">
+											  		<p class="remaining">
+											  		 (faltan {{ ingredient['quantity'] - stock[ ingredient['ingredient_id'] ]}} {{ingredient['unit']}} )
+											  		</p>
+											  	</ng-container> 
+											  	<ng-container *ngIf="!stock[ ingredient['ingredient_id'] ]">
+											  		<p class="remaining">
+											  		 (faltan {{ ingredient['quantity'] }} {{ingredient['unit']}} )
+											  		</p>
+											  	</ng-container> 
+											 </ng-container>
+										</ng-container>
 								  </li>
 								</ul>
 							</div>

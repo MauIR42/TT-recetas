@@ -694,7 +694,7 @@ export class PlanningRecipeComponent implements OnInit {
         this.spinner.hide("loader_planning");
         return;
       }
-
+      this.to_add = {};
       this.to_delete = {};
 
       this.spinner.hide("loader_planning");

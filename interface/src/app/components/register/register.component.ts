@@ -79,7 +79,6 @@ export class RegisterComponent implements OnInit {
   }
 
   check_form(event:any){
-    console.log(event)
     event.preventDefault;
     // console.log(this.user_info)  
     let form = new FormData();
@@ -87,7 +86,7 @@ export class RegisterComponent implements OnInit {
     this.error_message = '';
     for(let key in this.validations){
         let value : any = this.validations[key];
-        if('requiered' in value && (this.user_info[key].length == 0 || !this.user_info[key] ) ){
+        if('requiered' in value && (!this.user_info[key] || this.user_info[key].length == 0 ) ){
           this.errors[key]['show'] = true;
           this.errors[key]['message'] = "Este campo debe llenarse.";
           confirm = false;
@@ -110,15 +109,11 @@ export class RegisterComponent implements OnInit {
         this.errors[key]['show'] = false;
         form.append(key, this.user_info[key]);
     }
-    
     if( confirm ){
-      console.log("se envia")
       this.spinner.show("loader");
       this.us.create_user(form).subscribe( (data : any) => {
-        console.log(data);
         this.spinner.hide("loader");
         if( data['error'] ){
-          console.log(data['message'])
           this.error_message = SERVER_MESSAGES[data['message']]
         }
         else{

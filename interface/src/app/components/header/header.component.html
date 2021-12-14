@@ -6,7 +6,7 @@
 		<li class="nav-item dropdown" (mouseover)="selected = 1" (mouseout)="selected = 0" [ngClass]="(selected == 1)? 'shadow-lg' : ''" >
 	  		<img [src]="icons['info_icon']['base']" class="img-fluid">
 	  		<a class="nav-link dropdown-toggle" data-toggle="dropdown"  data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" [ngClass]="(selected == 1)? '' : 'strong_blue_clor'">Información</a>
-	  		<div class="dropdown-menu orange-background fill-dropdown">
+	  		<div class="dropdown-menu special-blue-background fill-dropdown">
 		      <a class="dropdown-item" [routerLink]="['/credito_a_imagenes']">Créditos a las <br class="d-xl-none">imagenes usadas</a>
 		      <div class="dropdown-divider"></div>
 		      <a class="dropdown-item" [routerLink]="['/tyc']">Terminos y <br> condiciones</a>
@@ -19,7 +19,7 @@
 		<li class="nav-item dropdown" (mouseover)="selected = 3" (mouseout)="selected = 0" [ngClass]="(selected == 3)? 'shadow-lg' : ''">
 	  		<img [src]="icons['archive_icon']['base']" class="img-fluid">
 	  		<a class="nav-link dropdown-toggle" data-toggle="dropdown"  data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" [ngClass]="(selected == 3)? '' : 'strong_blue_clor'">Inventario</a>
-	  		<div class="dropdown-menu orange-background fill-dropdown">
+	  		<div class="dropdown-menu special-blue-background fill-dropdown">
 		      <a class="dropdown-item" [routerLink]="['/bascula']">Mis báscula</a>
 		      <div class="dropdown-divider"></div>
 		      <a class="dropdown-item" [routerLink]="['/inventario']">Mi inventario</a>
@@ -28,7 +28,7 @@
 		<li class="nav-item dropdown" (mouseover)="selected = 4" (mouseout)="selected = 0" [ngClass]="(selected == 4)? 'shadow-lg' : ''">
 	  		<img [src]="icons['person_icon']['base']" class="img-fluid">
 	  		<a class="nav-link dropdown-toggle" data-toggle="dropdown"  data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"  href="#" [ngClass]="(selected == 4)? '' : 'strong_blue_clor'">Yo</a>
-	  		<div class="dropdown-menu orange-background fill-dropdown">
+	  		<div class="dropdown-menu special-blue-background fill-dropdown">
 		      <a class="dropdown-item" [routerLink]="['/perfil']">Mi perfil</a>
 		      <div class="dropdown-divider"></div>
 		      <button class="dropdown-item" (click)="logout()">Cerrar sesión</button>
@@ -61,7 +61,7 @@
 				<p class="white">Información</p>
 			</button>
 		</div>
-		<div class="col-12 orange-background text-center border-bottom border-white collapse" id="info-col">
+		<div class="col-12 special-blue-background text-center border-bottom border-white collapse" id="info-col">
 			<a class="dropdown-item" [routerLink]="['/credito_a_imagenes']">Créditos a las imagenes usadas</a>
 			<div class="dropdown-divider"></div>
 			<a class="dropdown-item border-bottom border-white" [routerLink]="['/tyc']">Terminos y condiciones</a>
@@ -80,7 +80,7 @@
 				<p class="white">Inventario</p>
 			</button>
 		</div>
-		<div class="col-12 orange-background text-center border-bottom border-white collapse" id="inventory-col">
+		<div class="col-12 special-blue-background text-center border-bottom border-white collapse" id="inventory-col">
 			<a class="dropdown-item" [routerLink]="['/bascula']">Mis báscula</a>
 		      <div class="dropdown-divider"></div>
 		      <a class="dropdown-item" [routerLink]="['/inventario']">Mi inventario</a>
@@ -92,7 +92,7 @@
 				<p class="white"> Yo</p>
 			</button>
 		</div>
-		<div class="col-12 orange-background text-center border-bottom border-white collapse" id="user-col">
+		<div class="col-12 special-blue-background text-center border-bottom border-white collapse" id="user-col">
 		      <a class="dropdown-item" [routerLink]="['/perfil']">Mi perfil</a>
 		      <div class="dropdown-divider"></div>
 		      <a class="dropdown-item" (click)="logout()">Cerrar sesión</a>

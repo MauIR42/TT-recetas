@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { Chart, registerables } from 'chart.js';
 Chart.register(...registerables);
+import * as moment from 'moment';
 
 import { UserService } from '../../services/user.service';
 import { LocalStorageService } from '../../services/local-storage.service';
@@ -95,6 +96,8 @@ export class UserInfoComponent implements OnInit {
         return;
       }
       info_data['user_info']['user_id'] = this.user_id;
+      info_data['user_info']['created_at'] = moment(info_data['user_info']['created_at'],"YYYY-MM-DD[T]HH:mm:ss").format("DD-MM-YYYY");
+      console.log(info_data['user_info'])
       this.user_info = info_data['user_info'];
       this.spinner.hide("loader");
 

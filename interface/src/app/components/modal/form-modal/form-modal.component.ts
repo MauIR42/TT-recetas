@@ -94,9 +94,9 @@ export class FormModalComponent implements OnInit {
           continue;
         if( ((key == 'username' || key == 'email_check') && !this.show_email) )
           continue;
-        if('requiered' in value && (this.user_info[key].length == 0 || !this.user_info[key] ) ){
+        if('requiered' in value && ( !this.user_info[key] || this.user_info[key].length == 0 ) ){
           this.errors[key]['show'] = true;
-          this.errors[key]['message'] = "Este campo no debe llenarse.";
+          this.errors[key]['message'] = "Este campo debe llenarse.";
           confirm = false;
           continue;
         }

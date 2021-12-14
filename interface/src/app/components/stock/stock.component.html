@@ -83,7 +83,7 @@
 			    <option value="-1" selected disabled>Selecciona una opción...</option>
 			    <option *ngFor="let user of current_users" [value]="user.id" >{{user.name}}</option>
 			  </select>
-			  <button type="submit" class="btn btn-normal-orange mb-2">Cambiar administrador</button>
+			  <button type="submit" class="btn btn-normal-orange mb-2" [disabled]="new_admin == -1">Cambiar administrador</button>
 			</form>
 			<form class="form-inline text-center d-block d-md-none pb-2" (submit)="change_user_type($event,3,new_admin)" *ngIf="scale_users.length > 0">
 			  <div class="form-group">
@@ -93,7 +93,7 @@
 				    <option *ngFor="let user of current_users" [value]="user.id">{{user.name}}</option>
 				</select>
 			  </div>
-			  <button type="submit" class="btn btn-normal-orange">Cambiar administrador</button>
+			  <button type="submit" class="btn btn-normal-orange" [disabled]="new_admin == -1">Cambiar administrador</button>
 			</form>
 			<p>También puedes <a href="#" class="strong_blue_clor" (click)="open_modal('restart_scale',$event)"> reiniciar la bascula </a> para eliminar a todos los usuarios de ella.</p>
 		</div>
@@ -222,17 +222,19 @@
 			<h3>Lista de compra</h3>
 		</div>
 		<div *ngFor="let recipe of pdf_info['order'];">
-			<h4 class="strong_blue_clor text-center" >Lista del {{recipe}} al {{pdf_info['info'][recipe]['end']}}</h4>
-			<h5 class="strong_blue_clor">Recetas</h5>
-			<ul>
-			  <li *ngFor="let re of pdf_info['info'][recipe]['recipe']">{{re['recipe_name']}} para el {{re['preparation_date']}}</li>
-			  <!-- <li>test</li> -->
-			</ul>  
-			<h5 class="strong_blue_clor">Ingredientes faltantes</h5>
-			<ul>
-			  <li *ngFor="let in of pdf_info['info'][recipe]['ingredients']">{{in['ingredient_name']}} {{in['quantity']}} {{in['unit']}}</li>
-			  <!-- <li>test</li> -->
-			</ul>  
+			<ng-container *ngIf="pdf_info['info'][recipe] != undefined">
+				<h4 class="strong_blue_clor text-center" >Lista del {{recipe}} al {{pdf_info['info'][recipe]['end']}}</h4>
+				<h5 class="strong_blue_clor">Recetas</h5>
+				<ul>
+				  <li *ngFor="let re of pdf_info['info'][recipe]['recipe']">{{re['recipe_name']}} para el {{re['preparation_date']}}</li>
+				  <!-- <li>test</li> -->
+				</ul>  
+				<h5 class="strong_blue_clor">Ingredientes faltantes</h5>
+				<ul>
+				  <li *ngFor="let in of pdf_info['info'][recipe]['ingredients']">{{in['ingredient_name']}} {{in['quantity']}} {{in['unit']}}</li>
+				  <!-- <li>test</li> -->
+				</ul>  
+			</ng-container>
 		</div>
 
 		<!-- </div> -->

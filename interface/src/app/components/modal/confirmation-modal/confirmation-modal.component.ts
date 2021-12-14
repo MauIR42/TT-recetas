@@ -1,6 +1,6 @@
 import { Component, OnInit, Input,  EventEmitter, Output } from '@angular/core';
 
-declare const $: any;
+declare var $: any;
 
 @Component({
   selector: 'app-confirmation-modal',
@@ -29,6 +29,9 @@ export class ConfirmationModalComponent implements OnInit {
       }
       if('extra' in val){
         this.extra = val['extra'];
+      }else
+      this.extra = {
+        'buttons' : []
       }
     }
   }

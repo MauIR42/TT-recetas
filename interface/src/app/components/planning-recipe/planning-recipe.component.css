@@ -62,6 +62,16 @@ h5 {
 	text-decoration: none;
 }
 
+.blue-high-back {
+	background-color: #092ca5;
+	color: var(--p-header);
+}
+
+.blue-high-back > a {
+	color:  var(--p-header);
+	text-decoration: none;
+}
+
 
 .pendiente, .planeada {
 	background-color: var(--main-blue);
@@ -130,6 +140,6 @@ h5 {
 	display:inline;
 }
 
-.warning {
-	color: var(--orange-light);
+.remaining {
+	color: var(--special-blue);
 }

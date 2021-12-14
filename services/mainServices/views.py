@@ -97,7 +97,7 @@ class UserView(APIView):
 				return JsonResponse(data={"error": True, "message": 'incomplete_data' })
 			user = User.objects.filter(id= user_id, active = True)
 			if user:
-				return JsonResponse(data={"error": False, "user_info":user.values('first_name','last_name','username','birthday','gender', 'height')[0]})
+				return JsonResponse(data={"error": False, "user_info":user.values('first_name','last_name','username','birthday','gender', 'height', 'created_at')[0]})
 			return JsonResponse(data={"error": True, "message": 'user_not_exists'})
 		except Exception as e:
 			print(e)
@@ -257,7 +257,8 @@ class UserStatView(APIView):
 			week_day = date.today().isocalendar()
 			current_start = date.today() - timedelta(days=(week_day[2]) - 1)
 			current_week = UserWeek.objects.filter(active = True, week_start= current_start)
-
+			print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+			print(current_week)
 			if not current_week :
 				last_week =  UserWeek.objects.filter(active = True).order_by('-week_number').first()
 				if not last_week :
@@ -272,7 +273,7 @@ class UserStatView(APIView):
 			stats.append(WeekStat(value=data['weight'], stat_type_id=3, week = current_week[0]))
 			stats.append(WeekStat(value=data['diameter'], stat_type_id=4, week = current_week[0]))
 			WeekStat.objects.bulk_create( stats )
-
+			print(stats)
 			return JsonResponse(data={"error": False})
 
 
@@ -608,7 +609,7 @@ class EmbebbedScaleView(APIView):
 		try:
 			data =  json.loads(request.body)
 			# data =  request.POST.dict()
-			is_pending = False
+			is_pending = True
 			print(data)
 			print(data['user_id'])
 			if not ( 'user_id' in data and 'access_code' in data and 'quantity' in data and 'ingredient_id' in data):
@@ -618,6 +619,9 @@ class EmbebbedScaleView(APIView):
 				return JsonResponse(data={"error": True,  "message":"scale_not_exists"})
 			others_created = Inventory.objects.filter(ingredient_id = data['ingredient_id'], active = True, type_id= 1).aggregate(Sum('quantity'))
 			upload = Inventory.objects.create(quantity=int(data['quantity']), ingredient_id=data['ingredient_id'], type_id=1, user_id = data['user_id'])
+			# if quantity <= 0:
+				# data['quantity'] = 1018
+
 			if others_created :
 				total = int(data['quantity']) + others_created['quantity__sum']
 			else:
@@ -1510,6 +1514,8 @@ class PendingView(APIView):
 			for recipe in recipes:
 				print(recipe)
 				aux = recipe['start'].strftime("%d-%m-%Y")
+				print(recipe)
+				print(aux)
 				if not aux in recipe_dict:
 					recipe_dict[ aux ] = {'recipe':[ recipe ], 'end': (recipe['start'] + timedelta(days=6)).strftime("%d-%m-%Y"), 'ingredients': ingredients_dict[ aux ] }
 				else:
